@@ -22,7 +22,12 @@
 ; The BIOS always put the OS at address 0x7C00, the first thing we need to do is give our assembler this information
 ; The ORG (directive): tells the assembler where we expect our code to be loaded.
 ; The assembler uses this information to calculate label addressses.
+; NOTE: The BIOS automatically sets up the CS (Code Segment) register to segment 0 (with 0x7C00 offset)
 org 0x7C00
+
+; To print a new line we need to print boot the line feed and the carriage return characters
+; NASM macro
+%define ENDL 0x0D, 0x0A
 
 ; Difference between Directive and Instruction
 ; Directive: 
@@ -39,11 +44,70 @@ org 0x7C00
 ; IMPORTANT: using "bits 32" won't make the processor run in 32 bit mode (just for the assembler)
 bits 16
 
+start: 
+  jmp main
+
+;
+; Prints a string to the screen
+; Params:
+;   - ds:si points to string
+;
+puts: 
+  ; save registers we will modify 
+  push si
+  push ax
+
+.loop:
+  ; LODSB, LODSW, LODSD: these instructions load a byte/word/double-word from DS:SI into AL/AX/EAX, 
+  ; then increment SI by the number of loaded bytes
+  ; In this case we use LODSB because each character occupies a byte
+  lodsb
+
+  ; OR destination, source: performs bitwise OR between source and destination, stores result in destination
+  ; NOTE: OR the value to itself won't modify the value but will modify some flags register,
+  ; such as the zero flag if the result is 0
+  or al, al
+  ; If the next character is the NULL character, then we're done
+  jz .done
+
+  ; The BIOS provides basic functions which allow us to do basic stuff such as writing text to the screen
+  ; by using interrupts
+  mov ah, 0x0E ; Write character in TTY mode 
+  mov bh, 0 ; Set the page number to 0
+  int 0x10 ; Call interrupt for video services
+
+  ; Continue with the next character (byte)
+  jmp .loop
+
+.done: 
+  pop ax
+  pop si
+  ret
+
+
 main: ; Where our code begins
+  ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized
+  ; Since we can't write a constant directly to registers, we have to use an intermediary register (ax)
+  mov ax, 0
+  mov ds, ax
+  mov es, ax
+
+  ; Setup the SS (Stack Segment) and the stack pointer to the begin of our program
+  mov ss, ax
+  mov sp, 0x7C00 ; Stack grows downwards from where we are loaded in memory
+  
+  mov si, msg_hello
+  call puts
+
+
   hlt
 
 .halt: 
   jmp .halt
+
+; Declare string variable
+msg_hello: db "Hello world!", ENDL, 0x0
+
 
 ; We'll be putting our program on a 1.44 MB floppy disk where one sector has 512 bytes
 ; The BIOS expects that the last two bytes of the first sector are AA and 55 repectively
@@ -57,4 +121,5 @@ main: ; Where our code begins
 times 510 - ($ - $$) db 0
 ; We declare the signature
 ; The DW (signature): similar to DB but it declares a two byte constant (also known as a "word")
+; NOTE: the bytes are in reverse order because x86 is little endian
 dw 0xAA55
