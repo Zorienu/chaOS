@@ -1,6 +1,7 @@
 ## Install needed tools
 - nasm: `brew install nasm`
 - qemu: `brew install qemu`
+- see guide to cross-compiler
 
 ## Commands
 - compile: `make`
