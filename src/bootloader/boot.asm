@@ -25,6 +25,14 @@
 ; NOTE: The BIOS automatically sets up the CS (Code Segment) register to segment 0 (with 0x7C00 offset)
 org 0x7C00
 
+; The BITS (directive): tells the assembler to emit 16/32/64 bit code
+; Any x86 CPU must be backwards compatible with the original 8086 CPU
+; If an OS written for the 8086 is run in a modern CPU it still needs to think that its running on a 8086
+; because of this, the CPU always starts in 16 bit mode
+; IMPORTANT: using "bits 32" won't make the processor run in 32 bit mode (just for the assembler)
+bits 16
+
+
 ; To print a new line we need to print boot the line feed and the carriage return characters
 ; NASM macro
 %define ENDL 0x0D, 0x0A
@@ -36,13 +44,6 @@ org 0x7C00
 ; - Assembler specific - different assemblers may have different directives
 ; Instruction
 ; - Translated to a machine code instruction that the CPU will execute
-
-; The BITS (directive): tells the assembler to emit 16/32/64 bit code
-; Any x86 CPU must be backwards compatible with the original 8086 CPU
-; If an OS written for the 8086 is run in a modern CPU it still needs to think that its running on a 8086
-; because of this, the CPU always starts in 16 bit mode
-; IMPORTANT: using "bits 32" won't make the processor run in 32 bit mode (just for the assembler)
-bits 16
 
 start: 
   jmp main
