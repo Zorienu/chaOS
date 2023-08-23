@@ -43,7 +43,7 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 bootloader: $(BUILD_DIR)/bootloader.bin
 # Build the bootloader
 $(BUILD_DIR)/bootloader.bin: always
-	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/boot.bin
+	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/bootloader.bin
 
 #
 # Kernel
