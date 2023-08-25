@@ -74,6 +74,55 @@ ebr_system_id:                      db ' FAT 12 ' ; 8 bytes string padded with s
 ;
 ; -----------------------------------------------------------------------------------------------
 
+;
+; Disk routines
+; 
+
+; 
+; LBA address to CHS conversion
+; Parameters: 
+;   - ax: LBA address
+; Returns:
+;   - cx [bits 0 - 5]: sector number
+;   - cx [bits 6 - 15]: cylinder number
+;   - dh: head
+;
+lba_to_chs:
+  push ax
+  push dx
+
+  xor dx, dx ; dx = 0
+  div word [bpb_number_of_sectors_per_track] ; ax = LBA / sectorsPerTrack
+                                             ; dx = LBA % sectorsPerTrack
+
+  inc dx ; dx = dx + 1 = LBA % sectorsPerTrack + 1 = sector number
+  mov cx, dx ; cx = sector number
+
+  xor dx, dx ; dx = 0
+  div word [bpb_number_of_heads] ; ax = LBA / sectorsPerTrack / numberOfHeads = cylinder number
+                                 ; dx = LBA / sectorsPerTrack % numberOfHeads = head number (in dl actually)
+
+  mov dh, dl ; dh = head number
+
+  ; ax ---ah--- | ---al---
+  ;    xxxxxx98 | 76543210
+  ; because is little endian we have to end up with the cylinder number in cx like this
+  ; cx ---ch--- | ---cl---
+  ;    76543210 | 98--dx-- Where dx contains the sector number
+  shl ah, 6 ; ah << 6: xxxxxx98 => 98000000
+  mov cl, dl ; cl = dl : cl = sector number
+  or cl, ah ; Put upper 2 bits of the cylinder in cx: 98000000 OR sector number
+  mov ch, al ; Put lower 8 bits of the cylinder: ch = 76543210
+
+  pop ax ; Pop dx into ax
+  mov dl, al ; We put the head number in dh, so we restore dl only, 
+             ; since we cannot push 8 bit values to the stack, we pushed the hole register and get dl later
+  pop ax
+
+  ret
+
+
+
 
 
 ; Difference between Directive and Instruction

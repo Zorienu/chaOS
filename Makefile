@@ -30,6 +30,7 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	mkfs.fat -F 12 -n "CHAOS" $(BUILD_DIR)/main_floppy.img
 	# Put the bootloader into the first sector of the disk
 	# conv=notrunc: tells dd to not truncate the file, otherwise we will lose the rest of the image
+	# removing it will cause the img to be 512 bytes (the size of the bootloader)
 	dd if=$(BUILD_DIR)/bootloader.bin of=$(BUILD_DIR)/main_floppy.img conv=notrunc
 	# Now we have a filesystem, we can copy the files to the img
 	# mtools can manipulate FAT images directly without having to mount them
