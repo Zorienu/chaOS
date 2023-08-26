@@ -25,6 +25,14 @@
 ; NOTE: The BIOS automatically sets up the CS (Code Segment) register to segment 0 (with 0x7C00 offset)
 org 0x7C00
 
+; Difference between Directive and Instruction
+; Directive: 
+; - Gives a clue to the assembler that will affect how the program gets compiled.
+;   NOT translated to machine code!
+; - Assembler specific - different assemblers may have different directives
+; Instruction
+; - Translated to a machine code instruction that the CPU will execute
+
 ; The BITS (directive): tells the assembler to emit 16/32/64 bit code
 ; Any x86 CPU must be backwards compatible with the original 8086 CPU
 ; If an OS written for the 8086 is run in a modern CPU it still needs to think that its running on a 8086
@@ -74,6 +82,37 @@ ebr_system_id:                      db ' FAT 12 ' ; 8 bytes string padded with s
 ;
 ; -----------------------------------------------------------------------------------------------
 
+
+; Put here to avoid getting error "short jump is out of range"
+start: 
+  jmp main
+
+; -----------------------------------------------------------------------------------------------
+;
+; Error handlers
+;
+;
+; Displays an error if failed reading sector from disk
+;
+floppy_error:
+  mov si, msg_error_reading_from_disk
+  call puts
+  jmp wait_key_and_reboot
+
+wait_key_and_reboot:
+  mov ah, 0
+  int 0x16 ; Wait for key press
+  jmp 0xFFFF ; Jump to beggining of the BIOS, should reboot
+
+.halt
+  cli
+  hlt
+;
+; End of defining error handlers
+;
+; -----------------------------------------------------------------------------------------------
+
+; -----------------------------------------------------------------------------------------------
 ;
 ; Disk routines
 ; 
@@ -121,20 +160,89 @@ lba_to_chs:
 
   ret
 
+; 
+; Read sectors from disk
+; Parameters:
+;   - ax: LBA address
+;   - cl: number of sectors to read
+;   - dl: drive number
+;   - es:bx: Memory address where to store the read data
+; Returns:
+;   - cf: Set on error, clear if no error
+;   - ah: Return code
+;   - al: Actual sectors read count
+;
+disk_read:
+  ; Save register we will modify
+  push ax 
+  push bx
+  push cx
+  push dx
+  push di
+
+  push cx ; Temporarily save cl (number of sectors to read), since the lba_to_chs routine will write to it
+
+  call lba_to_chs ; Compute CHS values
+
+  pop ax ; al = number of sectors to read (pushed cl previously)
+  mov ah, 0x02 ; Read sectors from drive
+
+  mov di, 3 ; Initialize retries for reading from disk to 3
+
+.retry:
+  pusha ; Save all registers, since we don't know what BIOS modifies
+  stc ; Set carry flag, some BIOS'es don't set it
+
+  int 0x13 ; Call the interrupt, Carry flag (cf) is clear, then success, else error
+  jnc .done ; Jump near if not carry (cf = 0)
+
+  ; Read disk failed, reset disk controller
+  popa 
+  call disk_reset
+
+  dec di ; Consume 1 retry
+  test di, di ; Still have retries?
+  jnz .retry ; If attempts exhausted, then fail
+
+.fail
+  ; All attempts exhausted
+  jmp floppy_error
+
+.done:
+  popa
+
+  ; Restore registers we modified
+  pop di 
+  pop dx
+  pop cx
+  pop bx
+  pop ax
+
+  ret
 
 
+;
+; Resets disk controller
+; Parameters:
+;  - dl: drive number
+;
+disk_reset:
+  pusha 
 
+  mov si, msg_test
+  call puts
 
-; Difference between Directive and Instruction
-; Directive: 
-; - Gives a clue to the assembler that will affect how the program gets compiled.
-;   NOT translated to machine code!
-; - Assembler specific - different assemblers may have different directives
-; Instruction
-; - Translated to a machine code instruction that the CPU will execute
+  mov ah, 0
+  stc
+  int 0x13
+  jc floppy_error
 
-start: 
-  jmp main
+  popa
+  ret
+;
+; End of defining disk routines
+;
+; -----------------------------------------------------------------------------------------------
 
 ;
 ; Prints a string to the screen
@@ -184,6 +292,13 @@ main: ; Where our code begins
   ; Setup the SS (Stack Segment) and the stack pointer to the begin of our program
   mov ss, ax
   mov sp, 0x7C00 ; Stack grows downwards from where we are loaded in memory
+
+  ; Read something from floppy disk
+  mov [ebr_drive_number], dl ; BIOS should set dl to drive number
+  mov ax, 1 ; LBA=1, second sector from disk
+  mov cl, 1 ; Number of sectors to read (just 1)
+  mov bx, 0x7E00 ; Put the read sector after the bootloader code
+  call disk_read
   
   mov si, msg_hello
   call puts
@@ -196,6 +311,8 @@ main: ; Where our code begins
 
 ; Declare string variable
 msg_hello: db "Hello world!", ENDL, 0x0
+msg_error_reading_from_disk: db "Read from disk failed!", ENDL, 0x0
+msg_test: db "test", ENDL, 0x0
 
 
 ; We'll be putting our program on a 1.44 MB floppy disk where one sector has 512 bytes
