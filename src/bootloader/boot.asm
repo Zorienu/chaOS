@@ -149,7 +149,6 @@ lba_to_chs:
   ; cx ---ch--- | ---cl---
   ;    76543210 | 98--dx-- Where dx contains the sector number
   shl ah, 6 ; ah << 6: xxxxxx98 => 98000000
-  mov cl, dl ; cl = dl : cl = sector number
   or cl, ah ; Put upper 2 bits of the cylinder in cx: 98000000 OR sector number
   mov ch, al ; Put lower 8 bits of the cylinder: ch = 76543210
 
