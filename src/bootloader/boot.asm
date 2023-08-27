@@ -104,7 +104,7 @@ wait_key_and_reboot:
   int 0x16 ; Wait for key press
   jmp 0xFFFF ; Jump to beggining of the BIOS, should reboot
 
-.halt
+halt:
   cli
   hlt
 ;
@@ -201,7 +201,7 @@ disk_read:
 
   dec di ; Consume 1 retry
   test di, di ; Still have retries?
-  jnz .retry ; If attempts exhausted, then fail
+  jnz .retry ; If attempts remaining, then retry
 
 .fail
   ; All attempts exhausted
@@ -227,9 +227,6 @@ disk_read:
 ;
 disk_reset:
   pusha 
-
-  mov si, msg_test
-  call puts
 
   mov ah, 0
   stc
@@ -302,11 +299,7 @@ main: ; Where our code begins
   mov si, msg_hello
   call puts
 
-
-  hlt
-
-.halt: 
-  jmp .halt
+  call halt
 
 ; Declare string variable
 msg_hello: db "Hello world!", ENDL, 0x0
