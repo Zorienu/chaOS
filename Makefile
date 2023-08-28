@@ -27,7 +27,7 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	# Create filesystem
 	# -F 12: tells it to use FAT12
 	#  -n "CHAOS": label
-	mkfs.fat -F 12 -n "CHAOS" $(BUILD_DIR)/main_floppy.img
+	mkfs.fat -F 32 -n "CHAOS" $(BUILD_DIR)/main_floppy.img
 	# Put the bootloader into the first sector of the disk
 	# conv=notrunc: tells dd to not truncate the file, otherwise we will lose the rest of the image
 	# removing it will cause the img to be 512 bytes (the size of the bootloader)

@@ -55,28 +55,34 @@ jmp short start
 nop 
 
 ; BPB (BIOS Parameter Block)
-bpb_oem_identifier:                 db "MSWIN4.1" ; 8 bytes
-bpb_number_of_bytes_per_sector:     dw 512 ; This is represented as 00 02 in little endian which is 0x200 = 512
-bpb_number_of_sectors_per_cluster:  db 1
-bpb_number_of_reserved_sectors:     dw 1
-bpb_fat_count:                      db 2
-bpb_dir_entries_count:              dw 0xE0
-bpb_total_sectors:                  dw 2880 ; This is represented as 40 0B in little endian which is 0xB40 = 2880
-bpb_media_descriptor_type:          db 0xF0 ; 0xF0 = 3.5" floppy disk
-bpb_number_of_sectors_per_fat:      dw 9 ; This is represented as 09 00 in little endian which is 0x09 = 9
-bpb_number_of_sectors_per_track:    dw 18 ; This is represented 12 00 in little endian which is 0x12 = 18
-bpb_number_of_heads:                dw 2 ; This is represented 02 00 in little endian which is 0x02 = 2
-bpb_hidden_sector_count:            dd 0 
-bpb_large_sector_count:             dd 0
+bpb_oem_identifier:                     db "MSWIN4.1" ; 8 bytes
+bpb_number_of_bytes_per_sector:         dw 512 ; This is represented as 00 02 in little endian which is 0x200 = 512
+bpb_number_of_sectors_per_cluster:      db 1
+bpb_number_of_reserved_sectors:         dw 0x20 ; 1 for FAT12, 32 for FAT32
+bpb_fat_count:                          db 2
+bpb_dir_entries_count:                  dw 0xE0
+bpb_total_sectors:                      dw 2880 ; This is represented as 40 0B in little endian which is 0xB40 = 2880
+bpb_media_descriptor_type:              db 0xF0 ; 0xF0 = 3.5" floppy disk
+bpb_number_of_sectors_per_fat:          dw 0 ; This is represented as 09 00 in little endian which is 0x09 = 9, 9 for FAT12, 0 for FAT32
+bpb_number_of_sectors_per_track:        dw 18 ; This is represented 12 00 in little endian which is 0x12 = 18
+bpb_number_of_heads:                    dw 2 ; This is represented 02 00 in little endian which is 0x02 = 2
+bpb_hidden_sector_count:                dd 0 
+bpb_large_sector_count:                 dd 0
 
 ; EBR (Extended Boot Record)
-ebr_drive_number:                   db 0 ; 0x00 floppy, 0x80 hard disks. This number is useless because the media 
-                                 ; is likely to be moved to another machine and inserted in a drive with a different drive number.
-                                    db 0 ; Reserved
-ebr_signature:                      db 0x29 ; Must be 0x28 or 0x29
-ebr_volume_serial_number:           db 0x78, 0x56, 0x34, 0x12 ; Hex to get 12345678 serial, does not matter
-ebr_volume_label_string:            db '   CHAOS   ' ; 11 bytes string padded with spaces
-ebr_system_id:                      db ' FAT 12 ' ; 8 bytes string padded with spaces
+ebr_number_of_sectors_per_fat:          dd 0x16 
+ebr_flags:                              dw 0
+ebr_fat_version_number:                 dw 0
+ebr_root_dir_cluster_number:            dd 0x02
+ebr_fs_info_structure_sector_number:    dw 0x01
+ebr_backup_bootsector_sector_number:    dw 0x06
+                                        times 12 db 0 ; reserved
+ebr_drive_number:                       db 0 ; 0x00 floppy, 0x80 hard disks. This number is useless because the media 
+ebr_windows_nt_flags:                   db 0
+ebr_signature:                          db 0x29 ; Signature, must be 0x28 or 0x29
+ebr_volume_serial_number:               db 0x78, 0x56, 0x34, 0x12 ; Hex to get 12345678 serial, does not matter
+ebr_volume_label_string:                db '   CHAOS   ' ; 11 bytes string padded with spaces
+ebr_system_id:                          db 'FAT32   ' ; 8 bytes string padded with spaces
 ;
 ; End of defining FAT12 header
 ;
