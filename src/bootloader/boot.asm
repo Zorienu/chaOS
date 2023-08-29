@@ -283,6 +283,63 @@ puts:
   pop si
   ret
 
+; 
+; Test whether the A20 address line was already enabled by the BIOS
+; When accessing RAM with A20 disabled, any address above 1MiB wraps around to zero
+; Returns:
+;   - ax: A20 enabled? 1 -> yes, 0 -> no
+;
+testA20Line:
+  push ds
+  push es
+  push di
+  push si
+
+  cli ; Disable interrupts
+
+  xor ax, ax ; ax = 0
+  mov es, ax ; set es segment to be 0x0000 (segment 0 which is physical 0)
+
+  not ax ; ax = 0xFFFF
+  mov ds, ax ; set ds segment to be 0xFFFF (segment 65535 which is physical address 1048560)
+
+  mov di, 0x0500 ; Offset for segment 0, resulting in physical address: segment 0 * 16 + 1280 = 1280 = 0x500
+  mov si, 0x0510 ; Offset for segment 65535, resulting in physical address: segment 65535 * 16 + 1296 = 1049856 = 0x100500
+                 ; We can get this offset from doing: (0x500 + 0x10000) (we want 1MiB above) - (the segment * 16) =
+                 ;                                    (0x100500) - (0xFFFF * 16) =
+                 ;                                    (0x100500) - (0xFFFF0) = 0x510
+
+  mov al, [es:di] ; Get the current value stored in 0x0000:0x0500
+  push ax ; Store it into the stack temporarily
+
+  mov al, [ds:si] ; Get the current value stored in 0xFFFF:0x0510
+  push ax ; Store it into the stack temporarily
+
+  mov byte [es:di], 0x00 ; Set the value of 0x0000:0x0500 to 0x00
+  mov byte [ds:si], 0xFF ; Set the value of 0xFFFF:0x0510 to 0xFF (something totally different)
+
+  cmp byte [es:di], 0xFF ; Compare the value stored in 0x000:0x0500 (which is 0x00) to 0xFF
+                         ; If equal, it means the A20 line is not enabled (is like we are seeing 0x0000:0x0500),
+                         ; otherwise is activated
+
+  pop ax
+  mov byte [ds:si], al ; Restore the previously saved value of 0xFFFF:0x0500
+  pop ax
+  mov byte [es:di], al ; Restore the previously saved value of 0x0000:0x0500
+
+  mov ax, 0
+  je .testA20LineExit
+
+  mov ax, 1
+
+.testA20LineExit:
+  pop si
+  pop di
+  pop es
+  pop ds
+
+  ret
+
 
 main: ; Where our code begins
   ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized
@@ -302,6 +359,9 @@ main: ; Where our code begins
   mov bx, 0x7E00 ; Put the read sector after the bootloader code
   call disk_read
   
+  call testA20Line
+
+  ; mov si, msg_hello
   mov si, msg_hello
   call puts
 
