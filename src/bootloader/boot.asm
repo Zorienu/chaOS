@@ -209,7 +209,7 @@ disk_read:
   test di, di ; Still have retries?
   jnz .retry ; If attempts remaining, then retry
 
-.fail
+.fail:
   ; All attempts exhausted
   jmp floppy_error
 
@@ -368,7 +368,47 @@ enableA20Line:
 ;
 ; -----------------------------------------------------------------------------------------------
 
+;
+; Enter protected mode
+;
+bits 16
+enterProtectedMode: 
+  cli ; Disable interrupts
+  call enableA20Line
+  lgdt [GDTDescriptor] ; Load GDT register with start address of GDT
 
+  mov eax, cr0
+  or al, 1 ; Set PE (Protection Enable) bit in CR0 (Control Register 0)
+  mov cr0, eax 
+
+  jmp 0x08:PModeMain
+
+%define GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 16
+;
+; Already in protected mode
+;
+bits 32
+PModeMain:
+  ; Setup segments register to 16 (0x10) which is the offset within the GDT to use the kernel mode data segment
+  mov ax, GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+  mov ss, ax
+
+  mov esp, 0x090000 ; Set the stack TODO: set it correctly
+  
+  mov edi, 0xB8000
+  mov byte [edi], 'P'
+  inc edi
+  mov byte [edi], 0x1B
+
+  ; TODO: call OS (in C) from here?
+  call halt
+
+
+bits 16
 main: ; Where our code begins
   ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized
   ; Since we can't write a constant directly to registers, we have to use an intermediary register (ax)
@@ -387,7 +427,7 @@ main: ; Where our code begins
   ; mov bx, 0x7E00 ; Put the read sector after the bootloader code
   ; call disk_read
   
-  call enableA20Line
+  call enterProtectedMode
 
   ; mov si, msg_hello
   mov si, msg_hello
