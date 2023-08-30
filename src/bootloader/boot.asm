@@ -283,6 +283,11 @@ puts:
   pop si
   ret
 
+
+; -----------------------------------------------------------------------------------------------
+; 
+; A20 line configuration
+;
 ; 
 ; Test whether the A20 address line was already enabled by the BIOS
 ; When accessing RAM with A20 disabled, any address above 1MiB wraps around to zero
@@ -340,6 +345,29 @@ testA20Line:
 
   ret
 
+; 
+; Enable A20 line if not enabled yet
+;
+enableA20Line:
+  push ax
+
+  call testA20Line
+  test ax, ax ; ax & ax === 1 ? ZF = 0 : ZF = 1
+  jnz .endEnableA20Line
+
+  in al, 0x92
+  or al, 2
+  out 0x92, al
+
+.endEnableA20Line:
+  pop ax
+  ret
+  
+;
+; End of A20 line configuration
+;
+; -----------------------------------------------------------------------------------------------
+
 
 main: ; Where our code begins
   ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized
@@ -353,13 +381,13 @@ main: ; Where our code begins
   mov sp, 0x7C00 ; Stack grows downwards from where we are loaded in memory
 
   ; Read something from floppy disk
-  mov [ebr_drive_number], dl ; BIOS should set dl to drive number
-  mov ax, 1 ; LBA=1, second sector from disk
-  mov cl, 1 ; Number of sectors to read (just 1)
-  mov bx, 0x7E00 ; Put the read sector after the bootloader code
-  call disk_read
+  ; mov [ebr_drive_number], dl ; BIOS should set dl to drive number
+  ; mov ax, 1 ; LBA=1, second sector from disk
+  ; mov cl, 1 ; Number of sectors to read (just 1)
+  ; mov bx, 0x7E00 ; Put the read sector after the bootloader code
+  ; call disk_read
   
-  call testA20Line
+  call enableA20Line
 
   ; mov si, msg_hello
   mov si, msg_hello
