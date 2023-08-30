@@ -400,6 +400,78 @@ msg_hello: db "Hello world!", ENDL, 0x0
 msg_error_reading_from_disk: db "Read from disk failed!", ENDL, 0x0
 msg_test: db "test", ENDL, 0x0
 
+;
+; Declare GDT segment descriptors
+;
+; Access type byte:
+; - P (7): Present bit, 1 for any valid segment
+; - DPL (6-5): Descriptor Privilege Level field, CPU privilege level of the segment
+;              0 (0b00): highest privilege (kernel)
+;              3 (0b11): lowest privilege (user apps) 
+; - S (4): descriptor type bit
+;          0: system segment (e.g. a Task State Segment)
+;          1: defines a code or data segment
+; - E (3): executable bit:
+;          0: data segment (not executable)
+;          1: code segment (executable)
+; - DC (2): Direction bit / Conforming bit
+;           - For data selectors: Direction bit:
+;                                 0: the segment grows up
+;                                 1: the segment grows down
+;           - For code selectors: Conforming bit:
+;                                 0: code in this segment can be executed from the ring set in DPL
+;                                 1: code in this segment can be executed from an equal or lower privilege level, e.g.
+;                                    code in ring 3 (lower privilege) can far-jmp to conforming code in a ring 2 segment
+;                                    The DPL represents the highest privelege level that is allowed to execute the segment.
+;                                    For example, code in ring 0 cannot far-jmp to a conforming code segment where DPL is 2,
+;                                    while code in ring 2 or 3 can.
+;                                    Note that the privelege level remains the same, ie. a far-jmp from ring 3 to a segment
+;                                    with a DPL of 2 remains in ring 3 after the jmp
+; - RW (1): Readable bit/Writeable bit
+;           - For code segments: Readable bit (Write access is never allowed for code segments)
+;                                0: read access for this segment is not allowed
+;                                1: read access is allowed
+;           - For data segments: Writeable bit (Read access is always allowed for data segments)
+;                                0: write access for this segment is not allowed
+;                                1: write access is allowed
+; - A (0): Accessed bit: best left clear (0), the CPU will set it when the segment is accessed
+GDTStart:
+.GDTNullSegment: dq 0 ; 8 bytes in 0
+.GDTKernelModeCodeSegment: dw 0xFFFF ; Limit
+                           dw 0x0000 ; Base
+                           db 0x00   ; Base
+                           db 0b10011010 ; Access type (0x9A)
+                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble)
+                           db 0x00 ; Base
+
+.GDTKernelModeDataSegment: dw 0xFFFF ; Limit                                                
+                           dw 0x0000 ; Base                                                 
+                           db 0x00   ; Base                                                 
+                           db 0b10010010 ; Access type (0x92)                               
+                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble) 
+                           db 0x00 ; Base                                                   
+
+.GDTUserModeCodeSegment:   dw 0xFFFF ; Limit                                                 
+                           dw 0x0000 ; Base                                                  
+                           db 0x00   ; Base                                                  
+                           db 0b11111010 ; Access type (0xFA)
+                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble)  
+                           db 0x00 ; Base                                                    
+
+.GDTUserModeDataSegment:   dw 0xFFFF ; Limit                                                 
+                           dw 0x0000 ; Base                                                  
+                           db 0x00   ; Base                                                  
+                           db 0b11110010 ; Access type (0xF2)
+                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble)  
+                           db 0x00 ; Base                                                    
+GDTEnd:
+
+GDTDescriptor:
+.GDTSize:    dw GDTEnd - GDTStart
+.GDTAddress: dd GDTStart
+
+
+
 
 ; We'll be putting our program on a 1.44 MB floppy disk where one sector has 512 bytes
 ; The BIOS expects that the last two bytes of the first sector are AA and 55 repectively
