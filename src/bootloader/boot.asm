@@ -23,7 +23,7 @@
 ; The ORG (directive): tells the assembler where we expect our code to be loaded.
 ; The assembler uses this information to calculate label addressses.
 ; NOTE: The BIOS automatically sets up the CS (Code Segment) register to segment 0 (with 0x7C00 offset)
-org 0x7C00
+;  org 0x7C00
 
 ; Difference between Directive and Instruction
 ; Directive: 
