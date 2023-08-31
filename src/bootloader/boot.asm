@@ -40,6 +40,8 @@
 ; IMPORTANT: using "bits 32" won't make the processor run in 32 bit mode (just for the assembler)
 bits 16
 
+section .boot
+
 
 ; To print a new line we need to print boot the line feed and the carriage return characters
 ; NASM macro
@@ -398,14 +400,8 @@ PModeMain:
   mov ss, ax
 
   mov esp, 0x090000 ; Set the stack TODO: set it correctly
-  
-  mov edi, 0xB8000
-  mov byte [edi], 'P'
-  inc edi
-  mov byte [edi], 0x1B
 
-  ; TODO: call OS (in C) from here?
-  call halt
+  call OSEntry
 
 
 bits 16
@@ -420,18 +416,17 @@ main: ; Where our code begins
   mov ss, ax
   mov sp, 0x7C00 ; Stack grows downwards from where we are loaded in memory
 
-  ; Read something from floppy disk
-  ; mov [ebr_drive_number], dl ; BIOS should set dl to drive number
-  ; mov ax, 1 ; LBA=1, second sector from disk
-  ; mov cl, 1 ; Number of sectors to read (just 1)
-  ; mov bx, 0x7E00 ; Put the read sector after the bootloader code
-  ; call disk_read
-  
-  call enterProtectedMode
+  ; Load sector containing the C code
+  mov [ebr_drive_number], dl ; BIOS should set dl to drive number
+  mov ax, 1 ; LBA=1, second sector from disk
+  mov cl, 1 ; Number of sectors to read (just 1)
+  mov bx, 0x7E00 ; Put the read sector after the bootloader code
+  call disk_read
 
-  ; mov si, msg_hello
   mov si, msg_hello
   call puts
+  
+  call enterProtectedMode
 
   call halt
 
@@ -527,3 +522,15 @@ times 510 - ($ - $$) db 0
 ; The DW (signature): similar to DB but it declares a two byte constant (also known as a "word")
 ; NOTE: the bytes are in reverse order because x86 is little endian
 dw 0xAA55
+
+; OS Code
+bits 32
+
+extern OSStart
+
+section .text
+
+OSEntry:
+  call OSStart
+  cli 
+  hlt
