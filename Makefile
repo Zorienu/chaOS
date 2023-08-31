@@ -1,7 +1,11 @@
+TARGET=i686-elf
 ASM=nasm
+GCC=$(TARGET)-gcc
+LD=$(TARGET)-ld
 
 SRC_DIR=src
 BUILD_DIR=build
+BUILD_DIR_IMG=$(BUILD_DIR)/bin
 
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names
@@ -39,12 +43,19 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
 
 #
+# Linker
+#
+linker: clean bootloader kernel
+	$(LD) $(BUILD_DIR)/*.o -T linker.ld -o $(BUILD_DIR_IMG)/boot.img
+
+#
 # Bootloader: rules for building the bootloader
 #
 bootloader: $(BUILD_DIR)/bootloader.bin
 # Build the bootloader
 $(BUILD_DIR)/bootloader.bin: always
-	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/bootloader.bin
+	#$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/bootloader.bin
+	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f elf32 -o $(BUILD_DIR)/bootloader.o
 
 #
 # Kernel
@@ -52,14 +63,17 @@ $(BUILD_DIR)/bootloader.bin: always
 kernel: $(BUILD_DIR)/kernel/main.bin
 # Build the kernel
 $(BUILD_DIR)/kernel/main.bin: always
-	$(ASM) $(SRC_DIR)/kernel/main.asm -f bin -o $(BUILD_DIR)/kernel.bin
+	# $(ASM) $(SRC_DIR)/kernel/main.asm -f bin -o $(BUILD_DIR)/kernel.bin
+	$(GCC) -c src/kernel/*.c -nostdlib -ffreestanding
+	mv *.o ./$(BUILD_DIR)
 
 # 
 # Always: this target will be used to create the build directory 
 # if it does not exist
 #
-always:
+always: 
 	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR_IMG)
 
 #
 # Clean: this target cleans the build directory
