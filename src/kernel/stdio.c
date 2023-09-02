@@ -86,16 +86,16 @@ void putNumber (int number, int base) {
   char *prefix;
   switch (base) {
     case 2: {
-      prefix = "0b";
+      prefix = "0b\0";
       break;
     }
     case 16: {
-      prefix = "0x";
+      prefix = "0x\0";
       break;
     }
     case 10:
     default: {
-      prefix = "";
+      prefix = "\0";
     }
   }
 

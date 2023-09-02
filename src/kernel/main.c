@@ -16,6 +16,12 @@ void OSStart() {
   putNumber(255, 2);
   puts("\n");
   putNumber(255, 16);
+  puts("\n");
+  putNumber(511, 10);
+  puts("\n");
+  putNumber(511, 10);
+  puts("\n");
+  putNumber(1 << 30, 16);
 
   puts("\n");
   puts(string);
