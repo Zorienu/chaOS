@@ -418,9 +418,11 @@ main: ; Where our code begins
 
   ; Load sector containing the C code
   mov [ebr_drive_number], dl ; BIOS should set dl to drive number
-  mov ax, 1 ; LBA=1, second sector from disk
+  mov ax, 0x1000 ; Use the segment to access 0x1000:0x0000 which is address 0x10000 
+  mov es, ax
+  mov ax, 1 ; LBA=1, second sector from disk, where our kernel is in the img
   mov cl, 3 ; Number of sectors to read (just 1)
-  mov bx, 0x7E00 ; Put the read sector after the bootloader code
+  mov bx, 0x0 ; Put the read sector after the bootloader code
   call disk_read
 
   mov si, msg_hello
