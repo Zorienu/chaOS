@@ -105,7 +105,7 @@ void putNumber (int number, int base) {
   puts(prefix);
   number = abs(number);
 
-  char *digits = "";
+  char digits[50] = {};
 
   int i = 0;
   while (number > 0) {
