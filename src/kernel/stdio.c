@@ -8,6 +8,10 @@
 int currX = 0, currY = 0;
 uint8_t *textModeVGAPtr;
 
+// Current background and foreground color
+uint8_t backgroundColor = BLUE;
+uint8_t foregroundColor = WHITE;
+
 void hScroll () {
   // We do not need to scroll yet
   if (currY < SCREEN_HEIGHT) return;
@@ -29,9 +33,6 @@ void putc (unsigned char c) {
   int offset = ((SCREEN_WIDTH * currY) + currX);
   uint16_t *location = (uint16_t *)textModeVGAPtr + offset;
 
-  uint8_t backcolor = BLUE;
-  uint8_t forecolor = WHITE;
-
   if (c == '\n') {
     currX = 0;
     currY++;
@@ -41,7 +42,7 @@ void putc (unsigned char c) {
     // -------------------------------------------------
     // |   Backcolor   |   Forecolor   |   Character   |
     // -------------------------------------------------
-    *location = backcolor << 12 | forecolor << 8 | c;
+    *location = backgroundColor << 12 | foregroundColor << 8 | c;
     currX++;
   }
 
@@ -55,7 +56,13 @@ void putc (unsigned char c) {
    hScroll();  
 }
 
+void setForegroundColor (enum colors color) {
+  foregroundColor = color;
+}
 
+void setBackgroundColor (enum colors color) {
+  backgroundColor = color;
+}
 
 void cls (void) {
   uint8_t *vga = textModeVGAPtr;

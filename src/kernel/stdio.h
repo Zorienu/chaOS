@@ -38,6 +38,16 @@ void putNumber (int number, int base);
 void cls (void);
 
 /*
+ * Set the foreground color to use for next characters in text-mode
+ */
+void setForegroundColor (enum colors color);
+
+/*
+ * Set the background color to use for next characters in text-mode
+ */
+void setBackgroundColor (enum colors color);
+
+/*
  * Set the text-mode VGA pointer, then clears the screen
  */
 void initVideo (void);
