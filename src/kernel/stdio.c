@@ -1,30 +1,8 @@
 #include <stdint.h>
 #include "math.h"
 #include "mem.h"
+#include "stdio.h"
 
-#define SCREEN_WIDTH 80
-#define SCREEN_HEIGHT 25
-#define VGA_BUFFER_ADDRESS 0xB8000
-
-// Possible background and foreground colors
-enum colors {
-  BLACK,
-  BLUE,
-  GREEN,
-  CYAN,
-  RED,	
-  MAGENTA,
-  BROWN,
-  LIGHT_GREY,
-  DARK_GREY,
-  LIGHT_BLUE,
-  LIGHT_GREEN,
-  LIGHT_CYAN,
-  LIGHT_RED,
-  LIGHT_MAGENTA,
-  LIGHT_BROWN,
-  WHITE,
-};
 
 // Current location in the screen
 int currX = 0, currY = 0;
