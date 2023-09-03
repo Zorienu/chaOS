@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "math.h"
+#include "mem.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
@@ -29,6 +30,23 @@ enum colors {
 int currX = 0, currY = 0;
 uint8_t *textModeVGAPtr;
 
+void hScroll () {
+  // We do not need to scroll yet
+  if (currY < SCREEN_HEIGHT) return;
+
+  int bytesPerLine = SCREEN_WIDTH * 2;
+  int screenBytes = bytesPerLine * SCREEN_HEIGHT;
+  uint8_t *secondLine = (uint8_t *)textModeVGAPtr + bytesPerLine;
+
+  memcpy(textModeVGAPtr, secondLine, screenBytes - bytesPerLine);
+
+  // Clear the last line
+  uint8_t *lastLine = (uint8_t *)textModeVGAPtr + (SCREEN_HEIGHT - 1) * bytesPerLine;
+  memset(lastLine, 0x0, bytesPerLine);
+
+  currY = SCREEN_HEIGHT - 1;
+}
+
 void putc (unsigned char c) {
   int offset = ((SCREEN_WIDTH * currY) + currX);
   uint16_t *location = (uint16_t *)textModeVGAPtr + offset;
@@ -55,12 +73,11 @@ void putc (unsigned char c) {
     currX = 0;
     currY++;
   }
+
+   hScroll();  
 }
 
 
-void hScroll () {
-  // TODO: memset
-}
 
 void cls (void) {
   uint8_t *vga = textModeVGAPtr;
