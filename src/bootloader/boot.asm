@@ -370,6 +370,8 @@ enableA20Line:
 ;
 ; -----------------------------------------------------------------------------------------------
 
+%define GDT_KERNEL_MODE_CODE_SEGMENT_ENTRY 8
+%define GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 16
 ;
 ; Enter protected mode
 ;
@@ -383,9 +385,8 @@ enterProtectedMode:
   or al, 1 ; Set PE (Protection Enable) bit in CR0 (Control Register 0)
   mov cr0, eax 
 
-  jmp 0x08:PModeMain
+  jmp GDT_KERNEL_MODE_CODE_SEGMENT_ENTRY:PModeMain
 
-%define GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 16
 ;
 ; Already in protected mode
 ;
