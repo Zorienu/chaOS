@@ -47,6 +47,12 @@ section .boot
 ; NASM macro
 %define ENDL 0x0D, 0x0A
 
+;
+; Bootloader starts at address 0x7C00, we will use this for setting the stack
+; since we don't need the content before this physical address 
+; remember: the stack grows downwards
+;
+bootloader:
 ; -----------------------------------------------------------------------------------------------
 ; 
 ; Define FAT12 header
@@ -400,7 +406,7 @@ PModeMain:
   mov gs, ax
   mov ss, ax
 
-  mov esp, 0x090000 ; Set the stack TODO: set it correctly
+  mov esp, bootloader ; Set the stack at 0x7C00
 
   call OSEntry
 
@@ -415,7 +421,7 @@ main: ; Where our code begins
 
   ; Setup the SS (Stack Segment) and the stack pointer to the begin of our program
   mov ss, ax
-  mov sp, 0x7C00 ; Stack grows downwards from where we are loaded in memory
+  mov sp, bootloader ; Stack grows downwards from where we are loaded in memory
 
   ; Load sector containing the C code
   mov [ebr_drive_number], dl ; BIOS should set dl to drive number
