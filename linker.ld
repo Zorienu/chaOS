@@ -18,6 +18,7 @@ SECTIONS
 
   . = kernelPhys;
   /* Put kernel code at sector 1, just after the boot sector
+   * But load it in RAM at address 0x10000 
    * (second sector in disk) */
   .text kernelPhys : AT(ADDR(.boot) + 512) {
     *(.text)
