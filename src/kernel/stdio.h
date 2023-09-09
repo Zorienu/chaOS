@@ -2,7 +2,7 @@
 #define SCREEN_HEIGHT 25
 #define VGA_BUFFER_ADDRESS 0xB8000
 
-// Possible background and foreground colors
+// Possible background and foreground colors in text-mode in text-mode
 enum colors {
   BLACK = 0,
   BLUE = 1,
@@ -18,8 +18,8 @@ enum colors {
   LIGHT_CYAN = 11,
   LIGHT_RED = 12,
   LIGHT_MAGENTA = 13,
-  LIGHT_BROWN,
-  WHITE,
+  LIGHT_BROWN = 14,
+  WHITE = 15,
 };
 
 /*
