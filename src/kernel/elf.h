@@ -119,6 +119,46 @@ typedef struct {
 } ELF32_sectionHeader;
 // -----------------------------------------------------------------------------------------------
 
+/*
+ * ELF sections
+ */
+
+/*
+ * Macros for accessing bind or type values within ELF32_Symbol->info
+ */
+#define ELF32_SYMBOL_TABLE_BIND(INFO)	((INFO) >> 4)
+#define ELF32_SYMBOL_TABLE_TYPE(INFO)	((INFO) & 0x0F)
+ 
+enum SymbolTable_Bindings {
+	STB_LOCAL		= 0, // Local scope
+	STB_GLOBAL	= 1, // Global scope
+	STB_WEAK		= 2  // Weak, (ie. __attribute__((weak)))
+};
+ 
+enum SymbolTable_Types {
+	STT_NOTYPE		= 0, // No type
+	STT_OBJECT		= 1, // Variables, arrays, etc.
+	STT_FUNCTION  = 2  // Methods or functions
+};
+
+/*
+ * The symbol table: 
+ * section that defines the location, type, visibility and other traits of various symbols
+ * declared in the original source, created during compilation or linking or otherwise present in the file
+ * ELF object can have multiple symbol tables, so, it is necessary to either iterate over the file's section headers
+ * or to follow a reference from another section in order to access one.
+ * NOTE: the first entry in each symbol table is a NULL entry, so all of it's fields are 0.
+ */
+typedef struct {
+	ELF32_Word		  name;      // Symbol name, may be STN_UNDEF
+	ELF32_Address		value;     // Symbol's value, may be absolute or relative address of value
+	ELF32_Word		  size;      
+	uint8_t			    info;      // Contains both the symbol type (SymbolTable_Types) and binding (SymbolTable_Bindings)
+	uint8_t			    other;
+	ELF32_Half		  shndx;
+} ELF32_Symbol;
+
+
 
 /*
  * Check if the given ELF header satisfy the magic signature
