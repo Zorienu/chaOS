@@ -20,24 +20,26 @@ void loadOS() {
  */
 void waitDisk(void) {
   // Wait for disk ready.
-  while((inb(0x1F7) & 0xC0) != 0x40);
+  while((inb(DISK_PORT_BASE + 7) & 0xC0) != 0x40);
 }
 
+/*
+ * Read from the specified 'sector' and put in 'destination'
+ */
 void readSector(uint8_t *destination, uint32_t sector) {
-
   waitDisk();
   
   // Issue command
-  outb(0x1F2, 1); // count = 1 sector 
-  outb(0x1F3, sector); // Take the 1st LSB
-  outb(0x1F4, sector >> 8); // Take the 2nd LSB
-  outb(0x1F5, sector >> 16); // Take the 3rd LSB
-  outb(0x1F6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now), TODO: investigate the 0xE0
-  outb(0x1F7, 0x20); // cmd 0x20 - read sectors
+  outb(DISK_PORT_BASE + 2, 1); // count = 1 sector 
+  outb(DISK_PORT_BASE + 3, sector); // Take the 1st LSB
+  outb(DISK_PORT_BASE + 4, sector >> 8); // Take the 2nd LSB
+  outb(DISK_PORT_BASE + 5, sector >> 16); // Take the 3rd LSB
+  outb(DISK_PORT_BASE + 6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now), TODO: investigate the 0xE0
+  outb(DISK_PORT_BASE + 7, DISK_READ_CMD); // cmd 0x20 - read sectors
 
   // Read data
   waitDisk();
-  insl(0x1F0, destination, SECTOR_SIZE / 4); // Read 4-bytes 128 times, getting the 512 bytes
+  insl(DISK_PORT_BASE, destination, SECTOR_SIZE / 4); // Read 4-bytes 128 times, getting the 512 bytes
 }
 
 /*

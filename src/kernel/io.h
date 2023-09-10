@@ -1,5 +1,11 @@
 #include <stdint.h>
 
+/* Ports */
+#define DISK_PORT_BASE 0x1F0
+
+/* Commands */
+#define DISK_READ_CMD 0x20
+
 static inline uint8_t inb(uint16_t port) {
   uint8_t data;
 
