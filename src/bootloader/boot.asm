@@ -530,14 +530,14 @@ times 510 - ($ - $$) db 0
 ; NOTE: the bytes are in reverse order because x86 is little endian
 dw 0xAA55
 
-; OS Code
+; OS bootloader code (bootmain.c)
 bits 32
 
-extern OSStart
+extern loadOS
 
 section .text
 
 OSEntry:
-  call OSStart
+  call loadOS
   cli 
   hlt
