@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
+
+#define ELF_MAGIC 0x464C457FU  // "\x7FELF" in little endian
  
 typedef uint16_t ELF32_Half;	// Unsigned half int
 typedef uint32_t ELF32_Offset;	  // Unsigned offset
