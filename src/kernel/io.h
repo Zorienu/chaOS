@@ -35,3 +35,13 @@ static inline void insl(int port, void *address, int count) {
                "d" (port), "0" (address), "1" (count) :
                "memory", "cc");
 }
+
+/*
+ * Fill 'count' words with 'data' starting from 'address'
+ */
+static inline void stosb(void *address, int data, int count) {
+  asm volatile("cld; rep stosb" :
+               "=D" (address), "=c" (count) :
+               "0" (address), "1" (count), "a" (data) :
+               "memory", "cc");
+}
