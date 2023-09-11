@@ -42,27 +42,35 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	# "::kernel.bin": specifies the destination path within the disk img, in this case in /kernel.bin (root dir)
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
 
-img: link_bootloader
+img: clean link_bootloader link_kernel
 	dd if=/dev/zero of=$(BUILD_DIR_IMG)/boot.img count=10000
 	dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
+	dd if=$(BUILD_DIR_IMG)/kernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=3
 
 #
-# Linker
+# Link bootloader (everything inside src/bootloader)
 #
-link_bootloader: clean bootloader
+link_bootloader: bootloader
 	$(LD) $(BUILD_DIR)/*.o -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
 	rm ./$(BUILD_DIR)/*.o
 
 #
 # Bootloader: rules for building the bootloader
 #
-bootloader: $(BUILD_DIR)/bootloader.o
+bootloader: $(BUILD_DIR)/bootloader
 # Build the bootloader
-$(BUILD_DIR)/bootloader.o: always
+$(BUILD_DIR)/bootloader: always
 	#$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/bootloader.bin
 	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f elf32 -o $(BUILD_DIR)/bootloader.o
 	$(GCC) -c src/bootloader/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
+
+# 
+# Link kernel (everything inside src/kernel)
+#
+link_kernel: kernel
+	$(LD) $(BUILD_DIR)/*.o -T kernel.ld -o $(BUILD_DIR_IMG)/kernel
+	rm ./$(BUILD_DIR)/*.o
 
 #
 # Kernel
@@ -70,7 +78,6 @@ $(BUILD_DIR)/bootloader.o: always
 kernel: $(BUILD_DIR)/kernel
 # Build the kernel
 $(BUILD_DIR)/kernel: always
-	# $(ASM) $(SRC_DIR)/kernel/main.asm -f bin -o $(BUILD_DIR)/kernel.bin
 	$(GCC) -c src/kernel/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
 
