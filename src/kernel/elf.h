@@ -64,19 +64,19 @@ enum Elf_Filetype {
  */
 typedef struct {
   uint8_t		    ident[ELF_NIDENT];
-	ELF32_Half	  type;               // Elf_Filetype
-	ELF32_Half	  machine;            // ELF_MACHINE_386
-	ELF32_Word	  version;            // 
-	ELF32_Address	entry;
-	ELF32_Offset	physOffset;
-	ELF32_Offset	sectionHeaderOffset; // Position of the first section header from the beginning of the file img
-	ELF32_Word    flags;
-	ELF32_Half    ehSize;
-	ELF32_Half    phEntrySize;
-	ELF32_Half    phnum;
-	ELF32_Half    sectionHeaderEntSize;
-	ELF32_Half    sectionHeaderNum;
-	ELF32_Half    sectionHeaderStrNdx;           // Index of the section name string table
+	ELF32_Half	  type;										// Elf_Filetype
+	ELF32_Half	  machine;								// ELF_MACHINE_386
+	ELF32_Word	  version;								// 
+	ELF32_Address	entry;									// Virtual address where to jmp after loading everything  						
+	ELF32_Offset	programHeaderOffset;		// Position of the first program header from the beginning of the file img
+	ELF32_Offset	sectionHeaderOffset;		// Position of the first section header from the beginning of the file img
+	ELF32_Word    flags;									//
+	ELF32_Half    elfHeaderSize;					// ELF header size (52 bytes)
+	ELF32_Half    programHeaderEntrySize; // Program header entry size (32 bytes)
+	ELF32_Half    programHeaderNum;       // Amount of program headers in the file
+	ELF32_Half    sectionHeaderEntrySize; // Section header entry size (28 bytes)
+	ELF32_Half    sectionHeaderNum;       // Amount of section headers in the file
+	ELF32_Half    sectionHeaderStrNdx;    // Index of the section name string table
 } ELF32_header;
 // -----------------------------------------------------------------------------------------------
 
