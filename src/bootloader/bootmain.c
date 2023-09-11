@@ -5,14 +5,38 @@
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096
 
+#define KERNEL_ELF_DISK_OFFSET 0x400
+
 void readSegment(uint8_t *, uint32_t, uint32_t);
 
 void loadOS() {
   ELF32_header *elf = (ELF32_header *)0x10000;
 
-  readSegment((uint8_t *)elf, PAGE_SIZE / 4, -1);
-  uint16_t *vga = (uint16_t *)0xB8000;
-  *vga = 1 << 12 | 5 << 8 | '@';
+  readSegment((uint8_t *)elf, PAGE_SIZE, 0);
+
+  uint32_t elfMagic = *(uint32_t *)elf->ident;
+
+  // Is this an ELF executable?
+  if (elfMagic != ELF_MAGIC) return;
+
+  ELF32_programHeader *programHeader = (ELF32_programHeader *)((uint8_t *)elf + elf->programHeaderOffset);
+  ELF32_programHeader *endProgramHeader = programHeader + elf->programHeaderNum;
+  uint8_t *physicalAddress;
+
+  for (; programHeader < endProgramHeader; programHeader++) {
+    physicalAddress = (uint8_t *)programHeader->physicalAddress;
+    readSegment(physicalAddress, programHeader->fileSize, programHeader->offset);
+
+    // Fill remaining bytes with 0 in case the memory size of this section
+    // is greater than the size in the ELF file
+    if (programHeader->memorySize > programHeader->fileSize) {
+      stosb(physicalAddress + programHeader->fileSize, 0, programHeader->memorySize - programHeader->fileSize);
+    }
+  }
+
+  // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
+  void (*entry)(void) = (void(*)(void))(elf->entry);
+  entry();
 }
 
 /*
@@ -20,7 +44,7 @@ void loadOS() {
  */
 void waitDisk(void) {
   // Wait for disk ready.
-  while((inb(DISK_PORT_BASE + 7) & 0xC0) != 0x40);
+  while((inb(DISK_PORT_BASE + 7) & 0xC0) != 0x40); // TODO: explain https://youtu.be/fZY1zr_nW6c?list=PLiUHDN3DAZZX_uTTp0l8QppxK3giZM2bC
 }
 
 /*
@@ -46,11 +70,14 @@ void readSector(uint8_t *destination, uint32_t sector) {
  * Read 'bytes' from disk at 'address' and put them in 'destination' (physical address)
  */
 void readSegment(uint8_t *destination, uint32_t bytes, uint32_t address) {
+  // Take the kenel ELF offset in disk into consideration (stored in sector 4)
+  address += KERNEL_ELF_DISK_OFFSET;
+
   // Calculate the final address
   uint8_t *endDestination = destination + bytes;
 
   // Calculate the sector to read
-  // kernel starts at sector 1 (address 0x200 - 512 bytes)
+  // kernel starts at sector 4 (address 0x600 - 1536 bytes)
   int sector = (address / SECTOR_SIZE) + 1; 
 
   // This is needed becauses we read from disk in sectors
