@@ -79,6 +79,27 @@ typedef struct {
 	ELF32_Half    sectionHeaderStrNdx;    // Index of the section name string table
 } ELF32_header;
 // -----------------------------------------------------------------------------------------------
+/*
+ * Program header
+ */
+
+// 32 bytes
+typedef struct {
+	ELF32_Word	  type;               
+	ELF32_Word	  offset;              
+	ELF32_Word	  virtualAddresss;
+	ELF32_Word	  physicalAddress;
+	ELF32_Word	  fileSize;
+	ELF32_Word	  memorySize;
+	ELF32_Word	  flags;
+	ELF32_Word	  align;
+} ELF32_programHeader;
+
+// TODO: add types for program header
+// -----------------------------------------------------------------------------------------------
+/*
+ * Section header
+ */
 
 # define ELF_SECTION_HEADER_NAMES_UNDEF	(0x00) // String section names table Undefined/Not present
  
