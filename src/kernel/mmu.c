@@ -10,3 +10,8 @@ PageDirectoryEntry minimalPageDirectory[PAGE_DIRECTORY_ENTRIES]  __attribute__((
   [0] = (0) | PAGE_SIZE_4_MB | READ_AND_WRITE_PAGE | PRESENT_PAGE,
   [PAGE_DIRECTORY_ENTRIES - 1] = (0) | PAGE_SIZE_4_MB | READ_AND_WRITE_PAGE | PRESENT_PAGE,
 };
+
+void loadPageDirectory(PageDirectoryEntry *pageDirectory) {
+  asm volatile("mov %0, %%cr3" : : "r" (pageDirectory) : "memory");
+}
+
