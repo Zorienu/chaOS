@@ -2,9 +2,11 @@
 #include "stdio.h"
 #include "string.h"
 #include "mem.h"
+#include "mmu.h"
 
 
 void OSStart() {
+  enablePagination();
   initVideo();
   for (int i = 0; i < 100; i ++) {
     setBackgroundColor(i % 16);

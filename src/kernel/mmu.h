@@ -15,3 +15,10 @@
 #define READ_AND_WRITE_PAGE 1 << 2
 #define PRESENT_PAGE        1 << 0
 
+/*
+ * Enable pagination by:
+ * - Loading the CR3 register with a barely defined page directory (using 4MiB pages)
+ * - Turning on PSE (Page Size Extension) for using 4MiB pages by setting the second bit in the CR4 register
+ * - Enabling paging and write protection setting the CR0 register
+ */
+void enablePagination();
