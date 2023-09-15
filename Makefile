@@ -78,6 +78,7 @@ link_kernel: kernel
 kernel: $(BUILD_DIR)/kernel
 # Build the kernel
 $(BUILD_DIR)/kernel: always
+	$(ASM) $(SRC_DIR)/kernel/entry.asm -f elf32 -o $(BUILD_DIR)/entry.o
 	$(GCC) -c src/kernel/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
 
