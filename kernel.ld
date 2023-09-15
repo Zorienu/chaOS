@@ -1,16 +1,30 @@
 OUTPUT_FORMAT("elf32-i386")
-/* src/kernel/main.c -> void OSStart () { ... } */
-ENTRY(OSStart) 
+/* src/kernel/entry.asm -> entry */
+KERNEL_BASE = 0x80000000;
 
+/* 
+ * This replaces ENTRY(...)
+ * Point the entry point to the physical address where entry.asm starts
+ * This is needed becauses at this point we haven't enable paging yet
+ */
+start = entry - KERNEL_BASE;
+
+/* 
+ * Where in physical memory the kernel code will be placed 
+ */
 kernelPhys = 0x100000;
+
+/* 
+ * Where in virtual memory the kernel code will be placed
+ * placed 0x100000 above to avoid I/O space
+ */
+kernelVirtual = 0x80100000;
 
 SECTIONS
 {
-  . = kernelPhys;
-  /* Put kernel code at sector 1, just after the boot sector
-   * But load it in RAM at address 0x10000 
-   * (second sector in disk) */
-  .text : {
+  . = kernelVirtual;
+
+  .text : AT(kernelPhys) {
     *(.text)
   }
 
@@ -22,9 +36,11 @@ SECTIONS
     *(.data)
   }
 
-  . = kernelPhys + 0x200000;
   .bss : {
     *(.bss)
   }
+
+  /* This symbol will let us know where in physical memory the kernel ends */
+  PROVIDE(end = .);
 }
 
