@@ -78,6 +78,7 @@ void readSegment(uint8_t *destination, uint32_t bytes, uint32_t address) {
 
   // Calculate the sector to read
   // kernel starts at sector 4 (address 0x600 - 1536 bytes)
+  // + 1 because LBAs start at 1
   int sector = (address / SECTOR_SIZE) + 1; 
 
   // This is needed becauses we read from disk in sectors

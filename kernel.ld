@@ -41,6 +41,6 @@ SECTIONS
   }
 
   /* This symbol will let us know where in physical memory the kernel ends */
-  PROVIDE(end = .);
+  PROVIDE(kernelEnd = .);
 }
 
