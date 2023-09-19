@@ -1,6 +1,7 @@
 OUTPUT_FORMAT("elf32-i386")
 /* src/kernel/entry.asm -> entry */
-KERNEL_BASE = 0x80000000;
+/* Kernel will be loaded at 3GB virtual address */
+KERNEL_BASE = 0xC0000000;
 
 /* 
  * This replaces ENTRY(...)
@@ -18,7 +19,7 @@ kernelPhys = 0x100000;
  * Where in virtual memory the kernel code will be placed
  * placed 0x100000 above to avoid I/O space
  */
-kernelVirtual = 0x80100000;
+kernelVirtual = KERNEL_BASE + kernelPhys;
 
 SECTIONS
 {

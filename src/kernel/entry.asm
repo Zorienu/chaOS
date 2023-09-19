@@ -7,7 +7,7 @@ extern OSStart            ; Defined in main.c
 
 ; TODO: avoid defining this again,
 ; use the values defined in memLayout.h and mmu.h
-%define KERNEL_BASE 0x80000000
+%define KERNEL_BASE 0xC0000000
 %define CR0_PG      0x80000000
 %define CR4_PSE     0x00000010
 

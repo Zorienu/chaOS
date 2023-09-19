@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#define KERNEL_BASE 0x80000000 // 2 GiB
+#define KERNEL_BASE 0xC0000000 // 3 GiB
 #define IO_SPACE    0x100000 
 #define PHYSICAL_STOP 0xE000000 // Total physical memory - 224 MiB
 
