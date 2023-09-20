@@ -62,6 +62,7 @@ bootloader: $(BUILD_DIR)/bootloader
 $(BUILD_DIR)/bootloader: always
 	#$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/bootloader.bin
 	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f elf32 -o $(BUILD_DIR)/bootloader.o
+	$(ASM) $(SRC_DIR)/bootloader/stage2.asm -f elf32 -o $(BUILD_DIR)/stage2.o
 	$(GCC) -c src/bootloader/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
 
