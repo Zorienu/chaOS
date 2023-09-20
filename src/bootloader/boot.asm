@@ -52,6 +52,7 @@ section .boot
 ; since we don't need the content before this physical address 
 ; remember: the stack grows downwards
 ;
+global bootloader
 bootloader:
 ; -----------------------------------------------------------------------------------------------
 ; 
@@ -118,6 +119,7 @@ wait_key_and_reboot:
   int 0x16 ; Wait for key press
   jmp 0xFFFF ; Jump to beggining of the BIOS, should reboot
 
+global halt
 halt:
   cli
   hlt
@@ -140,6 +142,7 @@ halt:
 ;   - cx [bits 6 - 15]: cylinder number
 ;   - dh: head
 ;
+bits 16
 lba_to_chs:
   push ax
   push dx
@@ -233,7 +236,6 @@ disk_read:
 
   ret
 
-
 ;
 ; Resets disk controller
 ; Parameters:
@@ -259,6 +261,7 @@ disk_reset:
 ; Params:
 ;   - ds:si points to string
 ;
+global puts
 puts: 
   ; save registers we will modify 
   push si
@@ -292,126 +295,8 @@ puts:
   ret
 
 
-; -----------------------------------------------------------------------------------------------
-; 
-; A20 line configuration
-;
-; 
-; Test whether the A20 address line was already enabled by the BIOS
-; When accessing RAM with A20 disabled, any address above 1MiB wraps around to zero
-; Returns:
-;   - ax: A20 enabled? 1 -> yes, 0 -> no
-;
-testA20Line:
-  push ds
-  push es
-  push di
-  push si
-
-  cli ; Disable interrupts
-
-  xor ax, ax ; ax = 0
-  mov es, ax ; set es segment to be 0x0000 (segment 0 which is physical 0)
-
-  not ax ; ax = 0xFFFF
-  mov ds, ax ; set ds segment to be 0xFFFF (segment 65535 which is physical address 1048560)
-
-  mov di, 0x0500 ; Offset for segment 0, resulting in physical address: segment 0 * 16 + 1280 = 1280 = 0x500
-  mov si, 0x0510 ; Offset for segment 65535, resulting in physical address: segment 65535 * 16 + 1296 = 1049856 = 0x100500
-                 ; We can get this offset from doing: (0x500 + 0x10000) (we want 1MiB above) - (the segment * 16) =
-                 ;                                    (0x100500) - (0xFFFF * 16) =
-                 ;                                    (0x100500) - (0xFFFF0) = 0x510
-
-  mov al, [es:di] ; Get the current value stored in 0x0000:0x0500
-  push ax ; Store it into the stack temporarily
-
-  mov al, [ds:si] ; Get the current value stored in 0xFFFF:0x0510
-  push ax ; Store it into the stack temporarily
-
-  mov byte [es:di], 0x00 ; Set the value of 0x0000:0x0500 to 0x00
-  mov byte [ds:si], 0xFF ; Set the value of 0xFFFF:0x0510 to 0xFF (something totally different)
-
-  cmp byte [es:di], 0xFF ; Compare the value stored in 0x000:0x0500 (which is 0x00) to 0xFF
-                         ; If equal, it means the A20 line is not enabled (is like we are seeing 0x0000:0x0500),
-                         ; otherwise is activated
-
-  pop ax
-  mov byte [ds:si], al ; Restore the previously saved value of 0xFFFF:0x0500
-  pop ax
-  mov byte [es:di], al ; Restore the previously saved value of 0x0000:0x0500
-
-  mov ax, 0
-  je .testA20LineExit
-
-  mov ax, 1
-
-.testA20LineExit:
-  pop si
-  pop di
-  pop es
-  pop ds
-
-  ret
-
-; 
-; Enable A20 line if not enabled yet
-;
-enableA20Line:
-  push ax
-
-  call testA20Line
-  test ax, ax ; ax & ax === 1 ? ZF = 0 : ZF = 1
-  jnz .endEnableA20Line
-
-  in al, 0x92
-  or al, 2
-  out 0x92, al
-
-.endEnableA20Line:
-  pop ax
-  ret
-  
-;
-; End of A20 line configuration
-;
-; -----------------------------------------------------------------------------------------------
-
-%define GDT_KERNEL_MODE_CODE_SEGMENT_ENTRY 8
-%define GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 16
-;
-; Enter protected mode
-;
 bits 16
-enterProtectedMode: 
-  cli ; Disable interrupts
-  call enableA20Line
-  lgdt [GDTDescriptor] ; Load GDT register with start address of GDT
-
-  mov eax, cr0
-  or al, 1 ; Set PE (Protection Enable) bit in CR0 (Control Register 0)
-  mov cr0, eax 
-
-  jmp GDT_KERNEL_MODE_CODE_SEGMENT_ENTRY:PModeMain
-
-;
-; Already in protected mode
-;
-bits 32
-PModeMain:
-  ; Setup segments register to 16 (0x10) which is the offset within the GDT to use the kernel mode data segment
-  mov ax, GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 
-  mov ds, ax
-  mov es, ax
-  mov fs, ax
-  mov gs, ax
-  mov ss, ax
-
-  mov esp, bootloader ; Set the stack at 0x7C00
-
-  call OSEntry
-
-
-bits 16
+extern stage2 ; include stage2 from stage2.asm
 main: ; Where our code begins
   ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized
   ; Since we can't write a constant directly to registers, we have to use an intermediary register (ax)
@@ -426,94 +311,20 @@ main: ; Where our code begins
   ; Load sector containing the C code
   mov [ebr_drive_number], dl ; BIOS should set dl to drive number
   mov ax, 1 ; LBA=1, second sector from disk, where our kernel is in the img
-  mov cl, 2 ; Number of sectors to read (increment this value if bootmain.c grows)
+  mov cl, 3 ; Number of sectors to read (increment this value if bootmain.c grows)
   mov bx, 0x7E00 ; Put the read sector after the bootloader code
   call disk_read
 
   mov si, msg_hello
   call puts
   
-  call enterProtectedMode
+  call stage2
 
   call halt
 
 ; Declare string variable
 msg_hello: db "Hello world!", ENDL, 0x0
 msg_error_reading_from_disk: db "Read from disk failed!", ENDL, 0x0
-msg_test: db "test", ENDL, 0x0
-
-;
-; Declare GDT segment descriptors
-;
-; Access type byte:
-; - P (7): Present bit, 1 for any valid segment
-; - DPL (6-5): Descriptor Privilege Level field, CPU privilege level of the segment
-;              0 (0b00): highest privilege (kernel)
-;              3 (0b11): lowest privilege (user apps) 
-; - S (4): descriptor type bit
-;          0: system segment (e.g. a Task State Segment)
-;          1: defines a code or data segment
-; - E (3): executable bit:
-;          0: data segment (not executable)
-;          1: code segment (executable)
-; - DC (2): Direction bit / Conforming bit
-;           - For data selectors: Direction bit:
-;                                 0: the segment grows up
-;                                 1: the segment grows down
-;           - For code selectors: Conforming bit:
-;                                 0: code in this segment can be executed from the ring set in DPL
-;                                 1: code in this segment can be executed from an equal or lower privilege level, e.g.
-;                                    code in ring 3 (lower privilege) can far-jmp to conforming code in a ring 2 segment
-;                                    The DPL represents the highest privelege level that is allowed to execute the segment.
-;                                    For example, code in ring 0 cannot far-jmp to a conforming code segment where DPL is 2,
-;                                    while code in ring 2 or 3 can.
-;                                    Note that the privelege level remains the same, ie. a far-jmp from ring 3 to a segment
-;                                    with a DPL of 2 remains in ring 3 after the jmp
-; - RW (1): Readable bit/Writeable bit
-;           - For code segments: Readable bit (Write access is never allowed for code segments)
-;                                0: read access for this segment is not allowed
-;                                1: read access is allowed
-;           - For data segments: Writeable bit (Read access is always allowed for data segments)
-;                                0: write access for this segment is not allowed
-;                                1: write access is allowed
-; - A (0): Accessed bit: best left clear (0), the CPU will set it when the segment is accessed
-GDTStart:
-.GDTNullSegment: dq 0 ; 8 bytes in 0
-.GDTKernelModeCodeSegment: dw 0xFFFF ; Limit
-                           dw 0x0000 ; Base
-                           db 0x00   ; Base
-                           db 0b10011010 ; Access type (0x9A)
-                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble)
-                           db 0x00 ; Base
-
-.GDTKernelModeDataSegment: dw 0xFFFF ; Limit                                                
-                           dw 0x0000 ; Base                                                 
-                           db 0x00   ; Base                                                 
-                           db 0b10010010 ; Access type (0x92)                               
-                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble) 
-                           db 0x00 ; Base                                                   
-
-.GDTUserModeCodeSegment:   dw 0xFFFF ; Limit                                                 
-                           dw 0x0000 ; Base                                                  
-                           db 0x00   ; Base                                                  
-                           db 0b11111010 ; Access type (0xFA)
-                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble)  
-                           db 0x00 ; Base                                                    
-
-.GDTUserModeDataSegment:   dw 0xFFFF ; Limit                                                 
-                           dw 0x0000 ; Base                                                  
-                           db 0x00   ; Base                                                  
-                           db 0b11110010 ; Access type (0xF2)
-                           db 0b11001111 ; Flags (0xC) (A nibble) - Limit (0xFF) (A nibble)  
-                           db 0x00 ; Base                                                    
-GDTEnd:
-
-GDTDescriptor:
-.GDTSize:    dw GDTEnd - GDTStart
-.GDTAddress: dd GDTStart
-
-
-
 
 ; We'll be putting our program on a 1.44 MB floppy disk where one sector has 512 bytes
 ; The BIOS expects that the last two bytes of the first sector are AA and 55 repectively
@@ -529,15 +340,3 @@ times 510 - ($ - $$) db 0
 ; The DW (signature): similar to DB but it declares a two byte constant (also known as a "word")
 ; NOTE: the bytes are in reverse order because x86 is little endian
 dw 0xAA55
-
-; OS bootloader code (bootmain.c)
-bits 32
-
-extern loadOS
-
-section .text
-
-OSEntry:
-  call loadOS
-  cli 
-  hlt
