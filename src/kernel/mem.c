@@ -4,6 +4,9 @@
 #include "memLayout.h"
 #include "mmu.h"
 
+#define SMAP_NUM_ENTRIES_ADDRESS 0xA500;
+#define SMAP_ENTRIES_ADDRESS     0xA504;
+
 extern uint32_t *kernelEnd;
 
 void memcpy(void *_destination, void *_source, size_t count) {
