@@ -151,8 +151,7 @@ PModeMain:
 ;  - ecx: configured memory 1MB to 16MB in KB
 ;  - edx: configured memory above 16MB in 64KB blocks (to know the amount of KB, multiply by 64)
 bits 16
-global memorySize
-memorySize: dd 0
+memorySize equ 0xA4FC ; Store number of memory map entries here
 
 getMemorySize:
   push ecx
@@ -189,6 +188,93 @@ getMemorySize:
   pop edx
   pop ecx
   ret
+
+; 
+; Address range descriptor; The buffer used by this interrupt as an array of descriptors that follow the following format:
+;
+struc MemoryMapEntry
+  .baseAddress resq 1 ; Base address of the address range
+  .length      resq 1 ; Length of address range in bytes
+  .type        resd 1 ; Type of address range:
+                      ; - 1: Available Memory
+                      ; - 2: Reserved, do not use. (e.g. system ROM, memory-mapped device)
+                      ; - 3: ACPI Reclaim Memory (usable by OS after reading ACPI tables)
+                      ; - 4: ACPI NVS Memory (OS is required to save this memory between NVS sessions)
+                      ; All other values should be treated as undefined.
+  .acpi_null   resd 1 ; Reserved
+endstruc
+
+;
+; Get memory map: this will let us know what memory is available for use and what is reserved
+; params:
+;  - eax: 0x0000E820
+;  - ebx: continuation value or 0 to start the beginning of map
+;  - ecx: size of bugger for result (Must be >= 20 bytes)
+;  - edx: 0x534D4150 ('SMAP')
+;  - es:di: buffer for result
+; returns: 
+;  - cf: clear if successful
+;  - eax: 0x534D4150h ('SMAP')
+;  - ebx: offset of the next entry to copy from or 0 if done
+;  - ecx: actual length returned in bytes
+;  - es:di: buffer filled
+;  - ah: if error, contains error code
+memmap_entries equ 0xA500 ; Store number of memory map entries here
+
+getMemoryMap:
+	pushad
+
+	mov di, 0xA504      ; Memory map entries start here
+
+	xor	ebx, ebx        ; ebx = 0 to start, will contain continuation values
+	xor	bp, bp			    ; bp will contain the number of entries
+	mov	edx, 'PAMS'	  	; 'SMAP' in little endian
+	mov	eax, 0xE820
+	mov	ecx, 24			    ; Memory map entry struct is up to 24 bytes
+	int	0x15			      ; Get first entry
+
+	jc	.error	        ; If carry is set, function not supported or errored
+
+	cmp	eax, 'PAMS'		  ; BIOS returns SMAP in eax on successful call
+	jne	.error
+
+	test	ebx, ebx		  ; Does ebx = 0? if so only 1 entry or no entries :(
+	je	.error
+	jmp	.start          ; ebx != 0, have a valid entry
+
+.next_entry:
+	mov	edx, 'PAMS'		  ; Some BIOS's trash this register, reset this to 'SMAP'
+	mov	ecx, 24			    ; Reset ecx, Entry is 24 bytes
+	mov	eax, 0xE820     ; Reset eax
+	int	0x15			      ; Get next entry
+
+.start:
+	jcxz	.skip_entry		; Memory map entry is 0 bytes in length, skip
+
+.notext:
+	mov	ecx, [es:di + MemoryMapEntry.length]	    ; Get length (low dword)
+	test	ecx, ecx		                            ; If length is 0, skip
+	jne	short .good_entry
+	mov	ecx, [es:di + MemoryMapEntry.length + 4]  ; Get length (upper dword)
+	jecxz	.skip_entry		                          ; If length is 0, skip
+	  
+.good_entry:
+	inc	bp			                                  ; Increment entry count
+	add	di, 24			                              ; Point di to next entry in buffer
+	  
+.skip_entry:
+	cmp	ebx, 0			                              ; If ebx != 0, still have entries to read 
+	jne	.next_entry		                            ; Get next entry
+	jmp	.done
+	  
+.error:
+	stc
+	
+.done:
+  mov [memmap_entries], bp                      ; Store the number of entries in 0xA500
+	popad
+	ret
+
 ;
 ; End of RAM utils
 ;
@@ -197,6 +283,7 @@ getMemorySize:
 global stage2
 stage2: 
   call getMemorySize
+  call getMemoryMap
   call enterProtectedMode
 
 
