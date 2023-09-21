@@ -1,3 +1,4 @@
+#include <stdint.h>
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 #define VGA_BUFFER_ADDRESS 0xB8000
@@ -25,29 +26,34 @@ enum colors {
 /*
  * Print the given string to the screen
  */
-void puts (char *string);
+void puts(char *string);
+
+/*
+ * Print the given unsigned hex number
+ */
+void putHex(uint32_t address);
 
 /*
  * Print the given number in the specified base to the screen
  */
-void putNumber (int number, int base);
+void putNumber(int number, int base);
 
 /*
  * Clear the whole screen
  */
-void cls (void);
+void cls(void);
 
 /*
  * Set the foreground color to use for next characters in text-mode
  */
-void setForegroundColor (enum colors color);
+void setForegroundColor(enum colors color);
 
 /*
  * Set the background color to use for next characters in text-mode
  */
-void setBackgroundColor (enum colors color);
+void setBackgroundColor(enum colors color);
 
 /*
  * Set the text-mode VGA pointer, then clears the screen
  */
-void initVideo (void);
+void initVideo(void);

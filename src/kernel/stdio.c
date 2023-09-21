@@ -82,6 +82,29 @@ void puts (char *string) {
   while (*string) putc(*string++);
 }
 
+void putHex (uint32_t address) {
+  char *numbers = "0123456789ABCDEF";
+
+  puts("0x");
+
+  if (address == 0) {
+    putc('0');
+    return;
+  }
+
+  char digits[50] = {};
+
+  int i = 0;
+  while (address > 0) {
+    uint8_t digit = address % 16;
+    digits[i++] = numbers[digit];
+    address /= 16;
+  }
+
+  while (i--) 
+    putc(digits[i]);
+}
+
 void putNumber (int number, int base) {
   char *numbers = "0123456789ABCDEF";
   
@@ -101,9 +124,15 @@ void putNumber (int number, int base) {
     }
   }
 
+
   if (number < 0) putc('-');
   puts(prefix);
   number = abs(number);
+
+  if (number == 0) {
+    putc('0');
+    return;
+  }
 
   char digits[50] = {};
 
