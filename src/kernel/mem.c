@@ -9,6 +9,20 @@
 
 extern uint32_t *kernelEnd;
 
+typedef struct {
+  uint64_t baseAddress; // Base address of the address range
+  uint64_t length;      // Length of address range in bytes
+  uint32_t type;        // Type of address range (enum )
+  uint32_t acpi;
+} SMAP_entry_t;
+
+enum SMAP_entry_type {
+  AVAILABLE           = 1, 
+  reserved            = 2, // e.g. system ROM, memory-mapped devices
+  ACPI_RECLAIM_MEMORY = 3, // Usable by OS after reading ACPI tables
+  ACPI_NVS_MEMORY     = 4 // OS is required to save this memory between NVS sessions
+};
+
 void memcpy(void *_destination, void *_source, size_t count) {
   uint8_t *destination = _destination;
   uint8_t *source = _source;
