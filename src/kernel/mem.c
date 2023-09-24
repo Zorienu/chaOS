@@ -18,10 +18,19 @@ typedef struct {
 
 enum SMAP_entry_type {
   AVAILABLE           = 1, 
-  reserved            = 2, // e.g. system ROM, memory-mapped devices
+  RESERVED            = 2, // e.g. system ROM, memory-mapped devices
   ACPI_RECLAIM_MEMORY = 3, // Usable by OS after reading ACPI tables
   ACPI_NVS_MEMORY     = 4 // OS is required to save this memory between NVS sessions
 };
+
+#define MAX_BLOCKS_AMOUNT 1024 * 1024
+
+struct {
+  // TODO: add lock
+  uint32_t availableMemoryStack[MAX_BLOCKS_AMOUNT];
+  uint32_t *top;
+} physicalMemory;
+
 
 void memcpy(void *_destination, void *_source, size_t count) {
   uint8_t *destination = _destination;
