@@ -47,24 +47,94 @@ void memset(void *_destination, uint8_t value, size_t count) {
     *destination++ = value;
 }
 
-void kmalloc(size_t count) {
-  int kernelEndPhys = (uint32_t)V2P(&kernelEnd);
-  int alignedAddress = kernelEndPhys + PAGE_SIZE - (kernelEndPhys % PAGE_SIZE);
+uint32_t availableBlocks = 0;
 
-  puts("\nKernel physical memory end: ");
-  putNumber(kernelEndPhys, 16);
-  puts("\nKernel physical memory end aligned: ");
-  putNumber(alignedAddress, 16);
+void freeBlock(uint32_t address) {
+  // We cannot fill the block with junk because is not pointed by any PET
+  // doing that will cause a page fault
 
-  int pages = 0;
+  availableBlocks++;
+  *physicalMemory.top-- = address;
+}
 
-  for (; alignedAddress < PHYSICAL_STOP; alignedAddress += PAGE_SIZE){
-    pages++;
+uint32_t getBlock() {
+  if (physicalMemory.top == physicalMemory.availableMemoryStack + MAX_BLOCKS_AMOUNT - 1)
+    return 0;
+
+  availableBlocks--;
+  return *++physicalMemory.top;
+}
+
+void printMemoryMap() {
+  uint32_t SMAPNumEntries = *(uint32_t *)SMAP_NUM_ENTRIES_ADDRESS;
+  SMAP_entry_t *SMAPEntry = (SMAP_entry_t *)SMAP_ENTRIES_ADDRESS;
+
+  uint32_t availableBlocks = 0;
+  uint32_t reservedBlocks = 0;
+
+  for (int i = 0; i < SMAPNumEntries; i++) {
+    puts("\nRegion: ");
+    putNumber(i, 10);
+    puts(" Base Address: ");
+    putHex(SMAPEntry->baseAddress);
+    puts(" Length: ");
+    putNumber(SMAPEntry->length, 16);
+    puts(" Type: ");
+    putNumber(SMAPEntry->type, 10);
+
+    if (SMAPEntry->type == AVAILABLE) 
+      availableBlocks += SMAPEntry->length;
+    else 
+      reservedBlocks += SMAPEntry->length;
+
+    SMAPEntry++;
   }
 
-    puts("\nPages: ");
-    putNumber(pages, 10);
-    puts("\nFinal page address: ");
-    putNumber(alignedAddress, 16);
+  puts("\n\nTotal memory in bytes: ");
+  putHex(SMAPEntry->baseAddress + SMAPEntry->length - 1);
+  puts("\nAvailable blocks: ");
+  putHex(availableBlocks / PAGE_SIZE);
+  puts("\nReserved blocks: ");
+  putHex(reservedBlocks / PAGE_SIZE);
+}
 
+void initializePhysicalMemoryManager() {
+  printMemoryMap();
+
+  // Initialize stack
+  physicalMemory.top = physicalMemory.availableMemoryStack + MAX_BLOCKS_AMOUNT - 1;
+
+  uint32_t SMAPNumEntries = *(uint32_t *)SMAP_NUM_ENTRIES_ADDRESS;
+  SMAP_entry_t *SMAPEntry = (SMAP_entry_t *)SMAP_ENTRIES_ADDRESS;
+
+  for (int i = 0; i < SMAPNumEntries; i++) {
+    if (SMAPEntry->type == AVAILABLE) {
+      // Allocate only available memory
+      uint32_t alignedBaseAddress = ALIGN_ADDRESS_UP(SMAPEntry->baseAddress);
+
+      for (int offset = 0; offset + PAGE_SIZE < SMAPEntry->length; offset += PAGE_SIZE) 
+        if ((alignedBaseAddress + offset) > V2P(&kernelEnd))
+          freeBlock(alignedBaseAddress + offset);
+    }
+
+    // Continue with the next entry in the table
+    SMAPEntry++;
+  }
+
+  puts("\n\n--Stack--");
+  puts("\nStack address: ");
+  putHex((uint32_t)physicalMemory.availableMemoryStack);
+  puts("\nTop address: ");
+  putHex((uint32_t)physicalMemory.top);
+  puts("\nKernel end: ");
+  putHex((uint32_t)&kernelEnd);
+  puts("\nKernel end: ");
+  putHex((uint32_t)V2P(&kernelEnd));
+  puts("\nAvailable blocks: ");
+  putNumber(availableBlocks, 10);
+
+  puts("\nfirst allocation: ");
+  putHex(getBlock());
+  puts("\nsecond allocation: ");
+  putHex(getBlock());
 }
