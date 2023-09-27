@@ -4,13 +4,14 @@
 #include "mem.h"
 #include "mmu.h"
 #include "mem.h"
+#include "memLayout.h"
+
+extern uint32_t *kernelEnd;
+
+#define NELEM 10
 
 void OSStart() {
   initVideo();
-  kmalloc(1);
-  // for (int i = 0; i < 100; i ++) {
-  //   setBackgroundColor(i % 16);
-  //   putNumber(i, 10);
-  //   puts("\n");
-  // }
+  initializePhysicalMemoryManager();
+  puts("\ndone");
 }
