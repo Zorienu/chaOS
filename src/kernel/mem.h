@@ -11,5 +11,7 @@ void memcpy(void *_destination, void *_source, size_t count);
  */
 void memset(void *_destination, uint8_t value, size_t count);
 
-void kmalloc(size_t count);
-
+/* 
+ * Initialize the physical memory manager
+ */
+void initializePhysicalMemoryManager();
