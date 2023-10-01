@@ -324,10 +324,20 @@ int *printfNumber(int *argp, int length, bool sign, int radix) {
     buffer[pos++] = g_HexChars[remainder];
   } while (number > 0);
 
+  if (radix == 16) {
+    buffer[pos++] = 'x';
+    buffer[pos++] = '0';
+  }
+  else if (radix == 2) {
+    buffer[pos++] = 'B';
+    buffer[pos++] = '0';
+  }
+
   // Add sign
   if (sign && number_sign < 0) {
     buffer[pos++] = '-';
   }
+
 
   // Print number in reverse order
   while (--pos >= 0) {
