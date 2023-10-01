@@ -13,5 +13,8 @@ extern uint32_t *kernelEnd;
 void OSStart() {
   initVideo();
   initializePhysicalMemoryManager();
-  puts("\ndone");
+  
+  // Test printf implementation
+  printf("\nFormatted %d %i %x %p %o %hd %hi %hhu %hhd", 1234, -5678, 0xdead, 0xbeef, 012345, (short)27, (short)-42, (uint8_t)20, (int8_t)-10);
+  printf("\nFormatted %lx %ld %lld %llx",  0xdeadbeeful, -100000000l, 10200300400ll, 0xdeadbeeffeebdaedull);
 }
