@@ -24,21 +24,6 @@ enum colors {
 };
 
 /*
- * Print the given string to the screen
- */
-void puts(char *string);
-
-/*
- * Print the given unsigned hex number
- */
-void putHex(uint32_t address);
-
-/*
- * Print the given number in the specified base to the screen
- */
-void putNumber(int number, int base);
-
-/*
  * Clear the whole screen
  */
 void cls(void);

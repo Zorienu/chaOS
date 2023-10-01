@@ -73,14 +73,10 @@ void printMemoryMap() {
   uint32_t reservedBlocks = 0;
 
   for (int i = 0; i < SMAPNumEntries; i++) {
-    puts("\nRegion: ");
-    putNumber(i, 10);
-    puts(" Base Address: ");
-    putHex(SMAPEntry->baseAddress);
-    puts(" Length: ");
-    putNumber(SMAPEntry->length, 16);
-    puts(" Type: ");
-    putNumber(SMAPEntry->type, 10);
+    printf("\nRegion: %d", i);
+    printf(" Base Address: %x", SMAPEntry->baseAddress);
+    printf(" Length: %x", SMAPEntry->length);
+    printf(" Type: %d", SMAPEntry->type);
 
     if (SMAPEntry->type == AVAILABLE) 
       availableBlocks += SMAPEntry->length;
@@ -90,12 +86,9 @@ void printMemoryMap() {
     SMAPEntry++;
   }
 
-  puts("\n\nTotal memory in bytes: ");
-  putHex(SMAPEntry->baseAddress + SMAPEntry->length - 1);
-  puts("\nAvailable blocks: ");
-  putHex(availableBlocks / PAGE_SIZE);
-  puts("\nReserved blocks: ");
-  putHex(reservedBlocks / PAGE_SIZE);
+  printf("\n\nTotal memory in bytes: %x", SMAPEntry->baseAddress + SMAPEntry->length - 1);
+  printf("\nAvailable blocks: %x", availableBlocks / PAGE_SIZE);
+  printf("\nReserved blocks: %x", reservedBlocks / PAGE_SIZE);
 }
 
 void initializePhysicalMemoryManager() {
@@ -121,20 +114,13 @@ void initializePhysicalMemoryManager() {
     SMAPEntry++;
   }
 
-  puts("\n\n--Stack--");
-  puts("\nStack address: ");
-  putHex((uint32_t)physicalMemory.availableMemoryStack);
-  puts("\nTop address: ");
-  putHex((uint32_t)physicalMemory.top);
-  puts("\nKernel end: ");
-  putHex((uint32_t)&kernelEnd);
-  puts("\nKernel end: ");
-  putHex((uint32_t)V2P(&kernelEnd));
-  puts("\nAvailable blocks: ");
-  putNumber(availableBlocks, 10);
+  printf("\n\n--Stack--");
+  printf("\nStack address: %x", physicalMemory.availableMemoryStack);
+  printf("\nTop address: %x", physicalMemory.top);
+  printf("\nKernel end: %x", &kernelEnd);
+  printf("\nKernel end: %x", V2P(&kernelEnd));
+  printf("\nAvailable blocks: %d", availableBlocks);
 
-  puts("\nfirst allocation: ");
-  putHex(getBlock());
-  puts("\nsecond allocation: ");
-  putHex(getBlock());
+  printf("\nfirst allocation: %x", getBlock());
+  printf("\nsecond allocation: %x", getBlock());
 }
