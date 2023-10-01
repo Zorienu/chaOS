@@ -80,6 +80,7 @@ kernel: $(BUILD_DIR)/kernel
 # Build the kernel
 $(BUILD_DIR)/kernel: always
 	$(ASM) $(SRC_DIR)/kernel/entry.asm -f elf32 -o $(BUILD_DIR)/entry.o
+	$(ASM) $(SRC_DIR)/kernel/x86.asm -f elf32 -o $(BUILD_DIR)/x86.o
 	$(GCC) -c src/kernel/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
 
