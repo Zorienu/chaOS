@@ -57,3 +57,8 @@ void setBackgroundColor(enum colors color);
  * Set the text-mode VGA pointer, then clears the screen
  */
 void initVideo(void);
+
+/*
+ * Implementation of the same printf you have in C std
+ */
+void printf(char *format, ...);
