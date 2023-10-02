@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "math.h"
 #include "mem.h"
+#include "string.h"
 #include "stdio.h"
 #include "x86.h"
 
