@@ -3,11 +3,11 @@
 #include <stdint.h>
 
 void *V2P(void *va) {
-  return va - KERNEL_BASE;
+  return (uint8_t *)va - KERNEL_BASE;
 }
 
 void *P2V(void *pa) {
-  return pa + KERNEL_BASE;
+  return (uint8_t *)pa + KERNEL_BASE;
 }
 
 uint32_t ALIGN_ADDRESS_UP(uint32_t address) {
