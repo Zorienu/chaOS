@@ -1,3 +1,6 @@
+#include <stddef.h>
+#include <stdint.h>
+
 /*
  * Get the size in bytes of the given string
  *
@@ -5,8 +8,6 @@
  *
  * returns: the size of the string
  */
-#include <stddef.h>
-#include <stdint.h>
 unsigned long strlen (char *string) {
   int result = 0;
 
