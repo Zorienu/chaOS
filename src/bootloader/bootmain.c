@@ -1,11 +1,12 @@
-#include "../kernel/elf.h"
-#include "../kernel/io.h"
 #include <stdint.h>
+#include "../include/io/io.h"
+#include "../include/c/string.h"
+#include "../include/elf/elf.h"
 
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096
 
-#define KERNEL_ELF_DISK_OFFSET 0x400
+#define KERNEL_ELF_DISK_OFFSET 0xC00
 
 void readSegment(uint8_t *, uint32_t, uint32_t);
 
