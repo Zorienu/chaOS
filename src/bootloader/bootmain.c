@@ -2,6 +2,7 @@
 #include "../include/io/io.h"
 #include "../include/c/string.h"
 #include "../include/elf/elf.h"
+#include "../include/mem/mem.h"
 
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096
@@ -34,6 +35,8 @@ void loadOS() {
       stosb(physicalAddress + programHeader->fileSize, 0, programHeader->memorySize - programHeader->fileSize);
     }
   }
+
+  initializePhysicalMemoryManager();
 
   // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
   void (*entry)(void) = (void(*)(void))(elf->entry);

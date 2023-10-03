@@ -2,12 +2,12 @@
 #include <stdint.h>
 #include "memLayout.h"
 #include "mmu.h"
-#include "../include/c/stdio.h"
+#include "../c/stdio.h"
 
 #define SMAP_NUM_ENTRIES_ADDRESS 0xA500;
 #define SMAP_ENTRIES_ADDRESS     0xA504;
 
-extern uint32_t *kernelEnd;
+// extern uint32_t *kernelEnd;
 
 typedef struct {
   uint64_t baseAddress; // Base address of the address range
@@ -78,8 +78,6 @@ void printMemoryMap() {
 }
 
 void initializePhysicalMemoryManager() {
-  printMemoryMap();
-
   // Initialize stack
   physicalMemory.top = physicalMemory.availableMemoryStack + MAX_BLOCKS_AMOUNT - 1;
 
@@ -92,7 +90,7 @@ void initializePhysicalMemoryManager() {
       uint32_t alignedBaseAddress = ALIGN_ADDRESS_UP(SMAPEntry->baseAddress);
 
       for (int offset = 0; offset + PAGE_SIZE < SMAPEntry->length; offset += PAGE_SIZE) 
-        if ((alignedBaseAddress + offset) > V2P(&kernelEnd))
+        // if ((alignedBaseAddress + offset) > V2P(&kernelEnd))
           freeBlock(alignedBaseAddress + offset);
     }
 
@@ -100,13 +98,12 @@ void initializePhysicalMemoryManager() {
     SMAPEntry++;
   }
 
-  printf("\n\n--Stack--");
-  printf("\nStack address: %x", physicalMemory.availableMemoryStack);
-  printf("\nTop address: %x", physicalMemory.top);
-  printf("\nKernel end: %x", &kernelEnd);
-  printf("\nKernel end: %x", V2P(&kernelEnd));
-  printf("\nAvailable blocks: %d", availableBlocks);
-
-  printf("\nfirst allocation: %x", getBlock());
-  printf("\nsecond allocation: %x", getBlock());
+  // printf("\n\n--Stack--");
+  // printf("\nStack address: %x", physicalMemory.availableMemoryStack);
+  // printf("\nTop address: %x", physicalMemory.top);
+  // printf("\nKernel end: %x", &kernelEnd);
+  // printf("\nKernel end: %x", V2P(&kernelEnd));
+  // printf("\nAvailable blocks: %d", availableBlocks);
+  // printf("\nfirst allocation: %x", getBlock());
+  // printf("\nsecond allocation: %x", getBlock());
 }

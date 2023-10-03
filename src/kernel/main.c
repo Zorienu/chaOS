@@ -1,10 +1,7 @@
 #include <stdint.h>
-#include "mem.h"
-#include "mmu.h"
-#include "mem.h"
-#include "memLayout.h"
 #include "../include/c/string.h"
 #include "../include/c/stdio.h"
+#include "../include/mem/mem.h"
 
 extern uint32_t *kernelEnd;
 
@@ -12,8 +9,7 @@ extern uint32_t *kernelEnd;
 
 void OSStart() {
   initVideo();
-  initializePhysicalMemoryManager();
-
+  printMemoryMap();
   
   // Test printf implementation
   printf("\nFormatted %d %i %x %p %o %hd %hi %hhu %hhd", 1234, -5678, 0xdead, 0xbeef, 012345, (short)27, (short)-42, (uint8_t)20, (int8_t)-10);
