@@ -1,11 +1,9 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "math.h"
-#include "mem.h"
-#include "string.h"
 #include "stdio.h"
-#include "x86.h"
-
+#include "math.h"
+#include "string.h"
+#include "../x86/x86.h"
 
 // Current location in the screen
 int currX = 0, currY = 0;

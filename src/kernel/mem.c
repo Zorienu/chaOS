@@ -1,8 +1,8 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "stdio.h"
 #include "memLayout.h"
 #include "mmu.h"
+#include "../include/c/stdio.h"
 
 #define SMAP_NUM_ENTRIES_ADDRESS 0xA500;
 #define SMAP_ENTRIES_ADDRESS     0xA504;
