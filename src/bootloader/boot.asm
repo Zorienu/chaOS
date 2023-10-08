@@ -310,7 +310,7 @@ main: ; Where our code begins
   ; Load sector containing the C code
   mov [ebr_drive_number], dl ; BIOS should set dl to drive number
   mov ax, 1 ; LBA=1, second sector from disk, where our kernel is in the img
-  mov cl, 6 ; Number of sectors to read (increment this value if bootmain.c grows)
+  mov cl, 12 ; Number of sectors to read (increment this value if bootmain.c grows)
   mov bx, 0x7E00 ; Put the read sector after the bootloader code
   call disk_read
 

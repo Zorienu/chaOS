@@ -269,11 +269,11 @@ void printf(char *format, ...) {
   }
 }
 
-char *g_HexChars = "0123456789ABCDEF";
 
 int *printfNumber(int *argp, int length, bool sign, int radix) {
+  char *g_HexChars = "0123456789ABCDEF";
   char buffer[32] = { 0 };
-  unsigned long long number = 0;
+  unsigned long long int number = 0;
   int number_sign = 1;
 
   // Process length

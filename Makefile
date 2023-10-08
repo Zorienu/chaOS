@@ -45,7 +45,9 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 img: clean link_bootloader link_kernel
 	dd if=/dev/zero of=$(BUILD_DIR_IMG)/boot.img count=10000
 	dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
-	dd if=$(BUILD_DIR_IMG)/kernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=7
+	# seek=7  -> 0xE00 (0x200 * 7)
+	# seek=50 -> 0x6400 (0x200 * 50)
+	dd if=$(BUILD_DIR_IMG)/kernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=50
 
 #
 # Link bootloader (everything inside src/bootloader)
@@ -60,7 +62,6 @@ link_bootloader: bootloader
 bootloader: $(BUILD_DIR)/bootloader
 # Build the bootloader
 $(BUILD_DIR)/bootloader: always
-	#$(ASM) $(SRC_DIR)/bootloader/boot.asm -f bin -o $(BUILD_DIR)/bootloader.bin
 	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f elf32 -o $(BUILD_DIR)/bootloader.o
 	$(ASM) $(SRC_DIR)/bootloader/stage2.asm -f elf32 -o $(BUILD_DIR)/stage2.o
 	$(ASM) $(SRC_DIR)/include/x86/x86.asm -f elf32 -o $(BUILD_DIR)/x86.o
