@@ -36,6 +36,10 @@ void loadOS() {
     }
   }
 
+  // Calculate the end of the kernel
+  programHeader--;
+  uint32_t kernelEnd = (uint32_t)(physicalAddress + programHeader->memorySize);
+
   initializePhysicalMemoryManager();
 
   // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
