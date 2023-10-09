@@ -53,7 +53,16 @@ typedef struct {
 typedef struct {
     PageDirectoryEntry entries[TABLES_PER_DIRECTORY];
 } PageDirectory;
+
+
 /*
  * Set the given paging attribute to the given page table entry
  */
 void setAttribute(PageTableEntry *entry, PAGE_TABLE_FLAGS attribute);
+
+/*
+ * Set the given frame as the physical frame for the given page table entry
+ */
+void setPhysicalFrame(PageTableEntry *entry, PhysicalAddress frame);
+
+
