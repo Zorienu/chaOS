@@ -65,4 +65,12 @@ void setAttribute(PageTableEntry *entry, PAGE_TABLE_FLAGS attribute);
  */
 void setPhysicalFrame(PageTableEntry *entry, PhysicalAddress frame);
 
+/*
+ * Load the given page directory to the CR3 register
+ */
+void loadPageDirectory(PageDirectory *pageDirectory);
 
+/*
+ * Enable pagination
+ */
+void enablePagination();
