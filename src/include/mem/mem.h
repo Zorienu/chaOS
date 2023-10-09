@@ -10,3 +10,8 @@ void printMemoryMap();
  * Initialize the physical memory manager
  */
 void initializePhysicalMemoryManager();
+
+/* 
+ * Initialize the virtual memory manager
+ */
+void initializeVirtualMemoryManager();

@@ -43,7 +43,14 @@ void loadOS() {
   programHeader--;
   uint32_t kernelEnd = (uint32_t)(physicalAddress + programHeader->memorySize);
 
+  initVideo();
+  setForegroundColor(WHITE);
+  setBackgroundColor(GREEN);
+  printf("\nKernel end: %lx", kernelEnd);
+
   initializePhysicalMemoryManager();
+
+  initializeVirtualMemoryManager();
 
   // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
   void (*entry)(void) = (void(*)(void))(elf->entry);

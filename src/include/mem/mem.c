@@ -1,8 +1,10 @@
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include "memLayout.h"
-#include "mmu.h"
+#include "virtualMem.h"
 #include "../c/stdio.h"
+#include "../c/string.h"
 
 #define SMAP_NUM_ENTRIES_ADDRESS 0xA500;
 #define SMAP_ENTRIES_ADDRESS     0xA504;
@@ -120,4 +122,84 @@ void map4MBPage(PageTable *pageTable, PhysicalAddress physicalFrame, VirtualAddr
     // Add page entry to the page table
     pageTable->entries[PT_INDEX(virtualAddress)] = entry;
   }
+}
+
+bool initializeVirtualMemoryManager() {
+  PageDirectory *pageDirectory = (PageDirectory *)getBlock();
+
+  // Out of memory
+  if (!pageDirectory) return false;
+
+  memset(pageDirectory, 0, sizeof(PageDirectory));
+
+  for (int i = 0; i < TABLES_PER_DIRECTORY; i++) {
+    pageDirectory->entries[i] = PTE_READ_WRITE; // Supervisor, read/write, not present
+  }
+
+  // For identity map from 0x0 to 4MB
+  PageTable *identityPageTable = (PageTable *)getBlock();
+  // Out of memory
+  if (!identityPageTable) return false;
+  memset(identityPageTable, 0, sizeof(PageTable));
+  // Fill identity mapped page table from 0x0 to 4MB
+  map4MBPage(identityPageTable, 0x0, 0x0);
+
+  // For identity map from 4MB to 8MB
+  PageTable *identityPageTable2 = (PageTable *)getBlock();
+  // Out of memory
+  if (!identityPageTable2) return false;
+  memset(identityPageTable2, 0, sizeof(PageTable));
+  // Fill identity mapped page table from 4MB to 8MB
+  map4MBPage(identityPageTable2, 4 * MB, 4 * MB);
+
+
+  // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
+  PageTable *pageTable3GB = (PageTable *)getBlock();
+  // Out of memory
+  if (!pageTable3GB) return false;
+  memset(pageTable3GB, 0, sizeof(PageTable));
+  // Fill page table for mapping 3GB to 0x0 (where the kernel resides)
+  map4MBPage(pageTable3GB, 0x0, KERNEL_BASE);
+
+  // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
+  PageTable *pageTable3GB2 = (PageTable *)getBlock();
+  // Out of memory
+  if (!pageTable3GB2) return false;
+  memset(pageTable3GB2, 0, sizeof(PageTable));
+  // Fill page table for mapping (3GB + 4MB) to 4MB (where the kernel resides)
+  map4MBPage(pageTable3GB2, 4 * MB, KERNEL_BASE + 4 * MB);
+
+
+  PageDirectoryEntry *entry1 = &pageDirectory->entries[PD_INDEX(0x0)];
+  setAttribute(entry1, PTE_PRESENT);
+  setAttribute(entry1, PTE_READ_WRITE);
+  setPhysicalFrame(entry1, (PhysicalAddress)identityPageTable);
+
+  PageDirectoryEntry *entry2 = &pageDirectory->entries[PD_INDEX(4 * MB)];
+  setAttribute(entry2, PTE_PRESENT);
+  setAttribute(entry2, PTE_READ_WRITE);
+  setPhysicalFrame(entry2, (PhysicalAddress)identityPageTable2);
+
+
+
+  PageDirectoryEntry *entry3 = &pageDirectory->entries[PD_INDEX(KERNEL_BASE)];
+  setAttribute(entry3, PTE_PRESENT);
+  setAttribute(entry3, PTE_READ_WRITE);
+  setPhysicalFrame(entry3, (PhysicalAddress)pageTable3GB);
+
+  PageDirectoryEntry *entry4 = &pageDirectory->entries[PD_INDEX(KERNEL_BASE + 4 * MB)];
+  setAttribute(entry4, PTE_PRESENT);
+  setAttribute(entry4, PTE_READ_WRITE);
+  setPhysicalFrame(entry4, (PhysicalAddress)pageTable3GB2);
+
+  // Switch to the page directory
+  loadPageDirectory(pageDirectory);
+
+  // Enable paging: Set PG (paging) bit 31 and PE (protection enable) bit 0 of CR0
+  // asm volatile ("mov %CR0, %EAX; or $0x80000000, %EAX; mov %EAX, %CR0");
+  enablePagination();
+
+  printf("\nPage directory: %lx", pageDirectory);
+
+  return true;
 }
