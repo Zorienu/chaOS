@@ -107,3 +107,17 @@ void initializePhysicalMemoryManager() {
   // printf("\nfirst allocation: %x", getBlock());
   // printf("\nsecond allocation: %x", getBlock());
 }
+
+void map4MBPage(PageTable *pageTable, PhysicalAddress physicalFrame, VirtualAddress virtualAddress) {
+  for (uint32_t i = 0; i < PAGES_PER_TABLE; i++, physicalFrame += PAGE_SIZE, virtualAddress += PAGE_SIZE) {
+    // Create new page entry
+    PageTableEntry entry = 0;
+
+    setAttribute(&entry, PTE_PRESENT);
+    setAttribute(&entry, PTE_READ_WRITE);
+    setPhysicalFrame(&entry, physicalFrame);
+
+    // Add page entry to the page table
+    pageTable->entries[PT_INDEX(virtualAddress)] = entry;
+  }
+}
