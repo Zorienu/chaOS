@@ -48,8 +48,7 @@ void loadOS() {
   setBackgroundColor(GREEN);
   printf("\nKernel end: %lx", kernelEnd);
 
-  initializePhysicalMemoryManager();
-
+  initializePhysicalMemoryManager(kernelEnd);
   initializeVirtualMemoryManager();
 
   // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
