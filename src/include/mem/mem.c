@@ -27,31 +27,18 @@ enum SMAP_entry_type {
 
 #define MAX_BLOCKS_AMOUNT 1024 * 1024
 
+// DELETE:
 struct {
   // TODO: add lock
   uint32_t availableMemoryStack[MAX_BLOCKS_AMOUNT];
   uint32_t *top;
+} physicalMemoryUnUsed;
+
+struct {
+  uint32_t bitmap[MAX_BLOCKS_AMOUNT / 32];
 } physicalMemory;
 
-
-
 uint32_t availableBlocks = 0;
-
-void freeBlock(uint32_t address) {
-  // We cannot fill the block with junk because is not pointed by any PET
-  // doing that will cause a page fault
-
-  availableBlocks++;
-  *physicalMemory.top-- = address;
-}
-
-uint32_t getBlock() {
-  if (physicalMemory.top == physicalMemory.availableMemoryStack + MAX_BLOCKS_AMOUNT - 1)
-    return 0;
-
-  availableBlocks--;
-  return *++physicalMemory.top;
-}
 
 void printMemoryMap() {
   uint32_t SMAPNumEntries = *(uint32_t *)SMAP_NUM_ENTRIES_ADDRESS;
@@ -60,6 +47,9 @@ void printMemoryMap() {
   uint32_t availableBlocks = 0;
   uint32_t reservedBlocks = 0;
 
+  // Available:
+  // base address:      0x0, length: 0x9FC00
+  // base address: 0x100000, length: 0x7EE0000
   for (int i = 0; i < SMAPNumEntries; i++) {
     printf("\nRegion: %d", i);
     printf(" Base Address: %x", SMAPEntry->baseAddress);
@@ -79,9 +69,54 @@ void printMemoryMap() {
   printf("\nReserved blocks: %x", reservedBlocks / PAGE_SIZE);
 }
 
-void initializePhysicalMemoryManager() {
-  // Initialize stack
-  physicalMemory.top = physicalMemory.availableMemoryStack + MAX_BLOCKS_AMOUNT - 1;
+void initializeBlock(uint32_t address) {
+  uint32_t block = address / PAGE_SIZE;
+  uint32_t *entry = &physicalMemory.bitmap[block / 32];
+  uint32_t bit = block % 32;
+
+  *entry = *entry | (1 << bit);
+
+  availableBlocks++;
+}
+
+void deinitializeBlock(uint32_t address) {
+  uint32_t block = address / PAGE_SIZE;
+  uint32_t *entry = &physicalMemory.bitmap[block / 32];
+  uint32_t bit = block % 32;
+
+  *entry = *entry & ~(1 << bit);
+
+  availableBlocks--;
+}
+
+void *allocateBlock() {
+  bool found = false;
+  uint32_t entryIdx = 0;
+
+  // Find an entry with at least 1 free block
+  while (!physicalMemory.bitmap[entryIdx]) entryIdx++;
+
+  uint32_t entry = physicalMemory.bitmap[entryIdx];
+
+  // The bit within the entry
+  uint8_t bit = 0;
+
+  // Found a free page within the entry
+  while (!(entry & (1 << bit))) bit++;
+
+  uint32_t address = (entryIdx * 32 + bit) * PAGE_SIZE;
+
+  deinitializeBlock(address);
+
+  // Calculate the address of the found block
+  return (void *)address;
+}
+
+void initializePhysicalMemoryManager(uint32_t kernelEnd) {
+  uint32_t page = 0;
+
+  // Initialize all memory as used
+  memset(physicalMemory.bitmap, 0, MAX_BLOCKS_AMOUNT / 32);
 
   uint32_t SMAPNumEntries = *(uint32_t *)SMAP_NUM_ENTRIES_ADDRESS;
   SMAP_entry_t *SMAPEntry = (SMAP_entry_t *)SMAP_ENTRIES_ADDRESS;
@@ -92,23 +127,17 @@ void initializePhysicalMemoryManager() {
       uint32_t alignedBaseAddress = ALIGN_ADDRESS_UP(SMAPEntry->baseAddress);
 
       for (int offset = 0; offset + PAGE_SIZE < SMAPEntry->length; offset += PAGE_SIZE) 
-        // if ((alignedBaseAddress + offset) > V2P(&kernelEnd))
-          freeBlock(alignedBaseAddress + offset);
+        if ((alignedBaseAddress + offset) > kernelEnd)
+          initializeBlock(alignedBaseAddress + offset);
     }
 
     // Continue with the next entry in the table
     SMAPEntry++;
   }
 
-  // printf("\n\n--Stack--");
-  // printf("\nStack address: %x", physicalMemory.availableMemoryStack);
-  // printf("\nTop address: %x", physicalMemory.top);
-  // printf("\nKernel end: %x", &kernelEnd);
-  // printf("\nKernel end: %x", V2P(&kernelEnd));
-  // printf("\nAvailable blocks: %d", availableBlocks);
-  // printf("\nfirst allocation: %x", getBlock());
-  // printf("\nsecond allocation: %x", getBlock());
+  printf("\nFirst allocation: %lx", allocateBlock());
 }
+
 
 void map4MBPage(PageTable *pageTable, PhysicalAddress physicalFrame, VirtualAddress virtualAddress) {
   for (uint32_t i = 0; i < PAGES_PER_TABLE; i++, physicalFrame += PAGE_SIZE, virtualAddress += PAGE_SIZE) {
@@ -125,7 +154,7 @@ void map4MBPage(PageTable *pageTable, PhysicalAddress physicalFrame, VirtualAddr
 }
 
 bool initializeVirtualMemoryManager() {
-  PageDirectory *pageDirectory = (PageDirectory *)getBlock();
+  PageDirectory *pageDirectory = (PageDirectory *)allocateBlock();
 
   // Out of memory
   if (!pageDirectory) return false;
@@ -137,7 +166,7 @@ bool initializeVirtualMemoryManager() {
   }
 
   // For identity map from 0x0 to 4MB
-  PageTable *identityPageTable = (PageTable *)getBlock();
+  PageTable *identityPageTable = (PageTable *)allocateBlock();
   // Out of memory
   if (!identityPageTable) return false;
   memset(identityPageTable, 0, sizeof(PageTable));
@@ -145,7 +174,7 @@ bool initializeVirtualMemoryManager() {
   map4MBPage(identityPageTable, 0x0, 0x0);
 
   // For identity map from 4MB to 8MB
-  PageTable *identityPageTable2 = (PageTable *)getBlock();
+  PageTable *identityPageTable2 = (PageTable *)allocateBlock();
   // Out of memory
   if (!identityPageTable2) return false;
   memset(identityPageTable2, 0, sizeof(PageTable));
@@ -154,7 +183,7 @@ bool initializeVirtualMemoryManager() {
 
 
   // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
-  PageTable *pageTable3GB = (PageTable *)getBlock();
+  PageTable *pageTable3GB = (PageTable *)allocateBlock();
   // Out of memory
   if (!pageTable3GB) return false;
   memset(pageTable3GB, 0, sizeof(PageTable));
@@ -162,7 +191,7 @@ bool initializeVirtualMemoryManager() {
   map4MBPage(pageTable3GB, 0x0, KERNEL_BASE);
 
   // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
-  PageTable *pageTable3GB2 = (PageTable *)getBlock();
+  PageTable *pageTable3GB2 = (PageTable *)allocateBlock();
   // Out of memory
   if (!pageTable3GB2) return false;
   memset(pageTable3GB2, 0, sizeof(PageTable));
@@ -200,6 +229,10 @@ bool initializeVirtualMemoryManager() {
   enablePagination();
 
   printf("\nPage directory: %lx", pageDirectory);
+  printf("\nIdentity page table (0 to 4MB): %lx", identityPageTable);
+  printf("\nIdentity page table (4 to 8MB): %lx", identityPageTable2);
+  printf("\nKernel page table (0 to 4MB): %lx", pageTable3GB);
+  printf("\nKernel page table (4 to 8MB): %lx", pageTable3GB2);
 
   return true;
 }

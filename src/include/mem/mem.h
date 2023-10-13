@@ -9,7 +9,7 @@ void printMemoryMap();
 /* 
  * Initialize the physical memory manager
  */
-void initializePhysicalMemoryManager();
+void initializePhysicalMemoryManager(uint32_t kernelEnd);
 
 /* 
  * Initialize the virtual memory manager
