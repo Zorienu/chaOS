@@ -254,6 +254,10 @@ void printf(char *format, ...) {
                     argp = printfNumber(argp, length, sign, radix);
                     break;
 
+          case 'b': radix = 2; sign = false;
+                    argp = printfNumber(argp, length, sign, radix);
+                    break;
+
           // Ignore invalid characters
           default:  break;
         }
