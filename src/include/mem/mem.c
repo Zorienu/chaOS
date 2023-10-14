@@ -223,7 +223,6 @@ bool initializeVirtualMemoryManager() {
   loadPageDirectory(pageDirectory);
 
   // Enable paging: Set PG (paging) bit 31 and PE (protection enable) bit 0 of CR0
-  // asm volatile ("mov %CR0, %EAX; or $0x80000000, %EAX; mov %EAX, %CR0");
   enablePagination();
 
   return true;

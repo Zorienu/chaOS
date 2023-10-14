@@ -34,3 +34,9 @@ PageDirectory *getPageDirectory() {
 
   return cr3;
 }
+
+PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry) {
+  // Remove the 12 bits flags
+  return (PageTable *)(*entry & ~0xFFF);
+}
+

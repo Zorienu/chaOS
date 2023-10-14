@@ -7,7 +7,6 @@
 
 #define PD_INDEX(address) ((address) >> 22)
 #define PT_INDEX(address) ((address) >> 12) & 0x3FF // 0x3FF -> 1023
-#define PAGE_PHYSICAL_ADDRESS (directoryEntry) ((*directoryEntry) & ~0xFFF)
 #define REMOVE_ATTRIBUTE (entry, attribute) (*entry &= ~attribute)
 #define TEST_ATTRIBUTE (entry, attribute) (*entry & attribute)
 
@@ -74,6 +73,11 @@ void loadPageDirectory(PageDirectory *pageDirectory);
  * Enable pagination
  */
 void enablePagination();
+
+/*
+ * Get the physical memory address of the page table pointed by the given page directory
+ */
+PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry);
 
 /*
  * Get the current active page directory
