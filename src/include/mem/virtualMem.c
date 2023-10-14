@@ -40,3 +40,12 @@ PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry) {
   return (PageTable *)(*entry & ~0xFFF);
 }
 
+void mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress) {
+  PageDirectory *currentPageDirectory = getPageDirectory();
+
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX(virtualAddress)];
+  PageTable *pageTable = getPagePhysicalAddress(pageDirectoryEntry);
+  PageTableEntry *pageTableEntry = &pageTable->entries[PT_INDEX(virtualAddress)];
+
+  setPhysicalFrame(pageTableEntry, physicalAddress);
+}

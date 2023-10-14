@@ -83,3 +83,9 @@ PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry);
  * Get the current active page directory
  */
 PageDirectory *getPageDirectory();
+
+/*
+ * Map the given virtual address to the given physical address
+ * in the current page directory
+ */
+void mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
