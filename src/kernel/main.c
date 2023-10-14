@@ -10,6 +10,7 @@ extern uint32_t *kernelEnd;
 void OSStart() {
   initVideo();
   printMemoryMap();
+  printf("\nFirst allocation from kernel: %lx", allocateBlock());
   
   // Test printf implementation
   printf("\nFormatted %d %i %x %p %o %hd %hi %hhu %hhd", 1234, -5678, 0xdead, 0xbeef, 012345, (short)27, (short)-42, (uint8_t)20, (int8_t)-10);
