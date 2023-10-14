@@ -26,3 +26,11 @@ void enablePagination() {
   asm volatile("or %0, %%eax" : : "i" (CR0_PG) ); // TODO: enabling with CR0_WP crashes
   asm volatile("mov %eax, %cr0");
 }
+
+PageDirectory *getPageDirectory() {
+  PageDirectory *cr3 = 0;
+
+  asm volatile("mov %%cr3, %%eax" : "=a" (cr3));
+
+  return cr3;
+}

@@ -74,3 +74,8 @@ void loadPageDirectory(PageDirectory *pageDirectory);
  * Enable pagination
  */
 void enablePagination();
+
+/*
+ * Get the current active page directory
+ */
+PageDirectory *getPageDirectory();
