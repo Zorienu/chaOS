@@ -32,7 +32,7 @@ struct PhysicalMemory {
   uint32_t bitmap[MAX_BLOCKS_AMOUNT / 32];
 };
 
-struct PhysicalMemory *physicalMemory = 0;
+struct PhysicalMemory *physicalMemory = (struct PhysicalMemory *)MEMORY_BITMAP_ADDRESS;
 uint32_t availableBlocks = 0;
 
 void printMemoryMap() {
@@ -85,6 +85,7 @@ void deinitializeBlock(uint32_t address) {
 }
 
 void *allocateBlock() {
+  printf("\nAllocate block: %lx", &physicalMemory);
   uint32_t entryIdx = 0;
 
   // Find an entry with at least 1 free block
@@ -108,7 +109,6 @@ void *allocateBlock() {
 }
 
 void initializePhysicalMemoryManager(uint32_t kernelEnd) {
-  physicalMemory = (struct PhysicalMemory *)MEMORY_BITMAP_ADDRESS;
   uint32_t page = 0;
 
   // Initialize all memory as used
