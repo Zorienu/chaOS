@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "memLayout.h"
+#include "mem.h"
 #include "virtualMem.h"
 #include "../c/stdio.h"
 #include "../c/string.h"
@@ -27,17 +28,11 @@ enum SMAP_entry_type {
 
 #define MAX_BLOCKS_AMOUNT 1024 * 1024
 
-// DELETE:
-struct {
-  // TODO: add lock
-  uint32_t availableMemoryStack[MAX_BLOCKS_AMOUNT];
-  uint32_t *top;
-} physicalMemoryUnUsed;
-
-struct {
+struct PhysicalMemory {
   uint32_t bitmap[MAX_BLOCKS_AMOUNT / 32];
-} physicalMemory;
+};
 
+struct PhysicalMemory *physicalMemory = 0;
 uint32_t availableBlocks = 0;
 
 void printMemoryMap() {
@@ -71,7 +66,7 @@ void printMemoryMap() {
 
 void initializeBlock(uint32_t address) {
   uint32_t block = address / PAGE_SIZE;
-  uint32_t *entry = &physicalMemory.bitmap[block / 32];
+  uint32_t *entry = &physicalMemory->bitmap[block / 32];
   uint32_t bit = block % 32;
 
   *entry = *entry | (1 << bit);
@@ -81,7 +76,7 @@ void initializeBlock(uint32_t address) {
 
 void deinitializeBlock(uint32_t address) {
   uint32_t block = address / PAGE_SIZE;
-  uint32_t *entry = &physicalMemory.bitmap[block / 32];
+  uint32_t *entry = &physicalMemory->bitmap[block / 32];
   uint32_t bit = block % 32;
 
   *entry = *entry & ~(1 << bit);
@@ -90,13 +85,12 @@ void deinitializeBlock(uint32_t address) {
 }
 
 void *allocateBlock() {
-  bool found = false;
   uint32_t entryIdx = 0;
 
   // Find an entry with at least 1 free block
-  while (!physicalMemory.bitmap[entryIdx]) entryIdx++;
+  while (!physicalMemory->bitmap[entryIdx]) entryIdx++;
 
-  uint32_t entry = physicalMemory.bitmap[entryIdx];
+  uint32_t entry = physicalMemory->bitmap[entryIdx];
 
   // The bit within the entry
   uint8_t bit = 0;
@@ -105,6 +99,7 @@ void *allocateBlock() {
   while (!(entry & (1 << bit))) bit++;
 
   uint32_t address = (entryIdx * 32 + bit) * PAGE_SIZE;
+  printf("\nAllocated address: %lx", address);
 
   deinitializeBlock(address);
 
@@ -113,10 +108,11 @@ void *allocateBlock() {
 }
 
 void initializePhysicalMemoryManager(uint32_t kernelEnd) {
+  physicalMemory = (struct PhysicalMemory *)MEMORY_BITMAP_ADDRESS;
   uint32_t page = 0;
 
   // Initialize all memory as used
-  memset(physicalMemory.bitmap, 0, MAX_BLOCKS_AMOUNT / 32);
+  memset(physicalMemory->bitmap, 0, MAX_BLOCKS_AMOUNT / 32);
 
   uint32_t SMAPNumEntries = *(uint32_t *)SMAP_NUM_ENTRIES_ADDRESS;
   SMAP_entry_t *SMAPEntry = (SMAP_entry_t *)SMAP_ENTRIES_ADDRESS;
@@ -134,10 +130,7 @@ void initializePhysicalMemoryManager(uint32_t kernelEnd) {
     // Continue with the next entry in the table
     SMAPEntry++;
   }
-
-  printf("\nFirst allocation: %lx", allocateBlock());
 }
-
 
 void map4MBPage(PageTable *pageTable, PhysicalAddress physicalFrame, VirtualAddress virtualAddress) {
   for (uint32_t i = 0; i < PAGES_PER_TABLE; i++, physicalFrame += PAGE_SIZE, virtualAddress += PAGE_SIZE) {
@@ -158,6 +151,7 @@ bool initializeVirtualMemoryManager() {
 
   // Out of memory
   if (!pageDirectory) return false;
+  printf("\nPage directory: %lx", pageDirectory);
 
   memset(pageDirectory, 0, sizeof(PageDirectory));
 
@@ -167,6 +161,7 @@ bool initializeVirtualMemoryManager() {
 
   // For identity map from 0x0 to 4MB
   PageTable *identityPageTable = (PageTable *)allocateBlock();
+  printf("\nIdentity page table: %lx", identityPageTable);
   // Out of memory
   if (!identityPageTable) return false;
   memset(identityPageTable, 0, sizeof(PageTable));
@@ -175,6 +170,7 @@ bool initializeVirtualMemoryManager() {
 
   // For identity map from 4MB to 8MB
   PageTable *identityPageTable2 = (PageTable *)allocateBlock();
+  printf("\nIdentity page table 2: %lx", identityPageTable2);
   // Out of memory
   if (!identityPageTable2) return false;
   memset(identityPageTable2, 0, sizeof(PageTable));
@@ -184,6 +180,7 @@ bool initializeVirtualMemoryManager() {
 
   // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
   PageTable *pageTable3GB = (PageTable *)allocateBlock();
+  printf("\nPage table 3GB: %lx", pageTable3GB);
   // Out of memory
   if (!pageTable3GB) return false;
   memset(pageTable3GB, 0, sizeof(PageTable));
@@ -192,6 +189,7 @@ bool initializeVirtualMemoryManager() {
 
   // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
   PageTable *pageTable3GB2 = (PageTable *)allocateBlock();
+  printf("\nPage table 3GB 2: %lx", pageTable3GB2);
   // Out of memory
   if (!pageTable3GB2) return false;
   memset(pageTable3GB2, 0, sizeof(PageTable));
@@ -227,12 +225,6 @@ bool initializeVirtualMemoryManager() {
   // Enable paging: Set PG (paging) bit 31 and PE (protection enable) bit 0 of CR0
   // asm volatile ("mov %CR0, %EAX; or $0x80000000, %EAX; mov %EAX, %CR0");
   enablePagination();
-
-  printf("\nPage directory: %lx", pageDirectory);
-  printf("\nIdentity page table (0 to 4MB): %lx", identityPageTable);
-  printf("\nIdentity page table (4 to 8MB): %lx", identityPageTable2);
-  printf("\nKernel page table (0 to 4MB): %lx", pageTable3GB);
-  printf("\nKernel page table (4 to 8MB): %lx", pageTable3GB2);
 
   return true;
 }
