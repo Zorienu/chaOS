@@ -23,3 +23,4 @@ bool initializeVirtualMemoryManager();
  * Allocate a block from physical memory
  */
 void *allocateBlock();
+

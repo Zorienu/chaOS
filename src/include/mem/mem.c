@@ -28,12 +28,14 @@ enum SMAP_entry_type {
 
 #define MAX_BLOCKS_AMOUNT 1024 * 1024
 
+
 struct PhysicalMemory {
   uint32_t bitmap[MAX_BLOCKS_AMOUNT / 32];
 };
 
 struct PhysicalMemory *physicalMemory = (struct PhysicalMemory *)MEMORY_BITMAP_ADDRESS;
 uint32_t availableBlocks = 0;
+
 
 void printMemoryMap() {
   uint32_t SMAPNumEntries = *(uint32_t *)SMAP_NUM_ENTRIES_ADDRESS;
@@ -85,7 +87,6 @@ void deinitializeBlock(uint32_t address) {
 }
 
 void *allocateBlock() {
-  printf("\nAllocate block: %lx", &physicalMemory);
   uint32_t entryIdx = 0;
 
   // Find an entry with at least 1 free block
@@ -100,7 +101,6 @@ void *allocateBlock() {
   while (!(entry & (1 << bit))) bit++;
 
   uint32_t address = (entryIdx * 32 + bit) * PAGE_SIZE;
-  printf("\nAllocated address: %lx", address);
 
   deinitializeBlock(address);
 
@@ -227,3 +227,4 @@ bool initializeVirtualMemoryManager() {
 
   return true;
 }
+
