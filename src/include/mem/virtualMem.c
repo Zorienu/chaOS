@@ -67,4 +67,7 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
 
   return virtualAddress;
 }
+
+VirtualAddress quickmapPage(PhysicalAddress physicalAddress) {
+  return mapPage((VirtualAddress)&quickmapPageAddress, physicalAddress);
 }

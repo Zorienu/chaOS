@@ -89,3 +89,8 @@ PageDirectory *getPageDirectory();
  * in the current page directory
  */
 VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
+
+/*
+ * Map the reserved quickmap page table to the given physical address
+ */
+VirtualAddress quickmapPage(PhysicalAddress physicalAddress);
