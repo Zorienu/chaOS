@@ -75,7 +75,7 @@ void loadPageDirectory(PageDirectory *pageDirectory);
 void enablePagination();
 
 /*
- * Get the physical memory address of the page table pointed by the given page directory
+ * Get the physical memory address of the page table pointed by the given page directory entry
  */
 PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry);
 
@@ -88,4 +88,4 @@ PageDirectory *getPageDirectory();
  * Map the given virtual address to the given physical address
  * in the current page directory
  */
-void mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
+VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress);
