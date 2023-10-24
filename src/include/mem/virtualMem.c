@@ -27,6 +27,14 @@ void enablePagination() {
   asm volatile("mov %eax, %cr0");
 }
 
+/*
+ * Store current page directory for kernel to use 
+ */
+void reloadCR3() {
+  asm volatile("mov %cr3, %ecx");
+  asm volatile("mov %ecx, %cr3");
+}
+
 PageDirectory *getPageDirectory() {
   PageDirectory *cr3 = 0;
 
