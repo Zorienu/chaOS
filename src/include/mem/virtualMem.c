@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include "virtualMem.h"
 #include "mmu.h"
+#include "mem.h"
+#include "../c/string.h"
+#include "../c/stdio.h"
 
 /*
  * Used to map a predefined virtual address to any physical address 
@@ -59,8 +62,26 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
 
   PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX(virtualAddress)];
   PageTable *pageTable = getPagePhysicalAddress(pageDirectoryEntry);
+
+  // TODO: change to test attribute PDE_PRESENT for the page directory entry
+  // TODO: implement quickmap pd and pt as in SerenetyOS
+  // https://github.dev/SerenityOS/serenity/blob/master/Kernel/Memory/MemoryManager.cpp - MemoryManager::pte
+  if (!pageTable) {
+    void *allocatedBlock = allocateBlock();
+    pageTable = (PageTable *)quickmapPage((PhysicalAddress)allocatedBlock);
+    memset((void *)pageTable, 0x0, sizeof(PageTable));
+
+    setAttribute(pageDirectoryEntry, PTE_PRESENT);
+    setAttribute(pageDirectoryEntry, PTE_READ_WRITE);
+    setPhysicalFrame(pageDirectoryEntry, (PhysicalAddress)allocatedBlock);
+
+    printf("\nEntered here - page Table: %lx, v address: %lx, PT_INDEX: %lx", pageTable, allocatedBlock, PT_INDEX(virtualAddress));
+  }
+
   PageTableEntry *pageTableEntry = &pageTable->entries[PT_INDEX(virtualAddress)];
 
+  setAttribute(pageTableEntry, PTE_PRESENT);
+  setAttribute(pageTableEntry, PTE_READ_WRITE);
   setPhysicalFrame(pageTableEntry, physicalAddress);
 
   reloadCR3();
