@@ -10,6 +10,8 @@
  * Useful for creating PageTables on no identity mapped physical addresses
  */
 __attribute__((section(".kernel_quickmap_page"))) PageTable quickmapPageAddress;
+__attribute__((section(".kernel_quickmap_page"))) PageDirectory quickmapPageDirectoryAddress;
+__attribute__((section(".kernel_quickmap_page"))) PageTable quickmapPageTableAddress;
 
 void setAttribute(PageTableEntry *entry, PAGE_TABLE_FLAGS attribute) {
   *entry |= attribute;
