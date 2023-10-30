@@ -73,6 +73,16 @@ void loadPageDirectory(PageDirectory *pageDirectory);
 void enablePagination();
 
 /*
+ * Get the index of the given virtual address within a page directory
+ */
+uint32_t getPageDirectoryIndex(VirtualAddress virtualAddress);
+
+/*
+ * Get the index of the given virtual address within a page table
+ */
+uint32_t getPageTableIndex(VirtualAddress virtualAddress);
+
+/*
  * Get the physical memory address of the page table pointed by the given page directory entry
  */
 PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry);

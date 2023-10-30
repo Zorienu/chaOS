@@ -142,7 +142,7 @@ void map4MBPage(PageTable *pageTable, PhysicalAddress physicalFrame, VirtualAddr
     setPhysicalFrame(&entry, physicalFrame);
 
     // Add page entry to the page table
-    pageTable->entries[PT_INDEX(virtualAddress)] = entry;
+    pageTable->entries[getPageTableIndex(virtualAddress)] = entry;
   }
 }
 
@@ -197,24 +197,24 @@ bool initializeVirtualMemoryManager() {
   map4MBPage(pageTable3GB2, 4 * MB, KERNEL_BASE + 4 * MB);
 
 
-  PageDirectoryEntry *entry1 = &pageDirectory->entries[PD_INDEX(0x0)];
+  PageDirectoryEntry *entry1 = &pageDirectory->entries[getPageDirectoryIndex(0x0)];
   setAttribute(entry1, PTE_PRESENT);
   setAttribute(entry1, PTE_READ_WRITE);
   setPhysicalFrame(entry1, (PhysicalAddress)identityPageTable);
 
-  PageDirectoryEntry *entry2 = &pageDirectory->entries[PD_INDEX(4 * MB)];
+  PageDirectoryEntry *entry2 = &pageDirectory->entries[getPageDirectoryIndex(4 * MB)];
   setAttribute(entry2, PTE_PRESENT);
   setAttribute(entry2, PTE_READ_WRITE);
   setPhysicalFrame(entry2, (PhysicalAddress)identityPageTable2);
 
 
 
-  PageDirectoryEntry *entry3 = &pageDirectory->entries[PD_INDEX(KERNEL_BASE)];
+  PageDirectoryEntry *entry3 = &pageDirectory->entries[getPageDirectoryIndex(KERNEL_BASE)];
   setAttribute(entry3, PTE_PRESENT);
   setAttribute(entry3, PTE_READ_WRITE);
   setPhysicalFrame(entry3, (PhysicalAddress)pageTable3GB);
 
-  PageDirectoryEntry *entry4 = &pageDirectory->entries[PD_INDEX(KERNEL_BASE + 4 * MB)];
+  PageDirectoryEntry *entry4 = &pageDirectory->entries[getPageDirectoryIndex(KERNEL_BASE + 4 * MB)];
   setAttribute(entry4, PTE_PRESENT);
   setAttribute(entry4, PTE_READ_WRITE);
   setPhysicalFrame(entry4, (PhysicalAddress)pageTable3GB2);
