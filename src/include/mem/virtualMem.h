@@ -5,8 +5,6 @@
 #define PAGES_PER_TABLE 1024
 #define TABLES_PER_DIRECTORY 1024
 
-#define PD_INDEX(address) ((address) >> 22)
-#define PT_INDEX(address) ((address) >> 12) & 0x3FF // 0x3FF -> 1023
 #define REMOVE_ATTRIBUTE (entry, attribute) (*entry &= ~attribute)
 #define TEST_ATTRIBUTE (entry, attribute) (*entry & attribute)
 
