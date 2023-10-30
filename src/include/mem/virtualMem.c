@@ -39,7 +39,7 @@ void enablePagination() {
 }
 
 /*
- * Store current page directory for kernel to use 
+ * Reload the CR3 control register
  */
 void reloadCR3() {
   asm volatile("mov %cr3, %ecx");
@@ -59,8 +59,46 @@ PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry) {
   return (PageTable *)(*entry & ~0xFFF);
 }
 
-VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress) {
+VirtualAddress quickmapPage(PhysicalAddress physicalAddress) {
+  return mapPage((VirtualAddress)&quickmapPageAddress, physicalAddress);
+}
+
+PageDirectory *quickmapPageDirectory(PageDirectory *pageDirectory) {
   PageDirectory *currentPageDirectory = getPageDirectory();
+
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX((VirtualAddress)&quickmapPageDirectoryAddress)];
+  PageTable *pageTable = getPagePhysicalAddress(pageDirectoryEntry);
+
+  PageTableEntry *pageTableEntry = &pageTable->entries[PT_INDEX((VirtualAddress)&quickmapPageDirectoryAddress)];
+
+  setAttribute(pageTableEntry, PTE_PRESENT);
+  setAttribute(pageTableEntry, PTE_READ_WRITE);
+  setPhysicalFrame(pageTableEntry, (PhysicalAddress)pageDirectory);
+
+  reloadCR3();
+
+  return &quickmapPageDirectoryAddress;
+}
+
+PageTable *quickmapPageTable(PageTable *pageTable) {
+  PageDirectory *currentPageDirectory = getPageDirectory();
+
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX((VirtualAddress)&quickmapPageTableAddress)];
+  PageTable *quickmapPageTable = getPagePhysicalAddress(pageDirectoryEntry);
+
+  PageTableEntry *pageTableEntry = &quickmapPageTable->entries[PT_INDEX((VirtualAddress)&quickmapPageTableAddress)];
+
+  setAttribute(pageTableEntry, PTE_PRESENT);
+  setAttribute(pageTableEntry, PTE_READ_WRITE);
+  setPhysicalFrame(pageTableEntry, (PhysicalAddress)pageTable);
+
+  reloadCR3();
+
+  return &quickmapPageTableAddress;
+}
+
+VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress) {
+  PageDirectory *currentPageDirectory = quickmapPageDirectory(getPageDirectory());
 
   PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX(virtualAddress)];
   PageTable *pageTable = getPagePhysicalAddress(pageDirectoryEntry);
@@ -70,7 +108,7 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
   // https://github.dev/SerenityOS/serenity/blob/master/Kernel/Memory/MemoryManager.cpp - MemoryManager::pte
   if (!pageTable) {
     void *allocatedBlock = allocateBlock();
-    pageTable = (PageTable *)quickmapPage((PhysicalAddress)allocatedBlock);
+    pageTable = quickmapPageTable((PageTable *)allocatedBlock);
     memset((void *)pageTable, 0x0, sizeof(PageTable));
 
     setAttribute(pageDirectoryEntry, PTE_PRESENT);
@@ -89,8 +127,4 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
   reloadCR3();
 
   return virtualAddress;
-}
-
-VirtualAddress quickmapPage(PhysicalAddress physicalAddress) {
-  return mapPage((VirtualAddress)&quickmapPageAddress, physicalAddress);
 }
