@@ -54,6 +54,14 @@ PageDirectory *getPageDirectory() {
   return cr3;
 }
 
+uint32_t getPageDirectoryIndex(VirtualAddress virtualAddress) {
+  return virtualAddress >> 22;
+}
+
+uint32_t getPageTableIndex(VirtualAddress virtualAddress) {
+  return virtualAddress >> 12 & (0x3FF);
+}
+
 PageTable *getPagePhysicalAddress(PageDirectoryEntry *entry) {
   // Remove the 12 bits flags
   return (PageTable *)(*entry & ~0xFFF);
@@ -66,10 +74,10 @@ VirtualAddress quickmapPage(PhysicalAddress physicalAddress) {
 PageDirectory *quickmapPageDirectory(PageDirectory *pageDirectory) {
   PageDirectory *currentPageDirectory = getPageDirectory();
 
-  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX((VirtualAddress)&quickmapPageDirectoryAddress)];
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[getPageDirectoryIndex((VirtualAddress)&quickmapPageDirectoryAddress)];
   PageTable *pageTable = getPagePhysicalAddress(pageDirectoryEntry);
 
-  PageTableEntry *pageTableEntry = &pageTable->entries[PT_INDEX((VirtualAddress)&quickmapPageDirectoryAddress)];
+  PageTableEntry *pageTableEntry = &pageTable->entries[getPageTableIndex((VirtualAddress)&quickmapPageDirectoryAddress)];
 
   setAttribute(pageTableEntry, PTE_PRESENT);
   setAttribute(pageTableEntry, PTE_READ_WRITE);
@@ -83,10 +91,10 @@ PageDirectory *quickmapPageDirectory(PageDirectory *pageDirectory) {
 PageTable *quickmapPageTable(PageTable *pageTable) {
   PageDirectory *currentPageDirectory = getPageDirectory();
 
-  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX((VirtualAddress)&quickmapPageTableAddress)];
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[getPageDirectoryIndex((VirtualAddress)&quickmapPageTableAddress)];
   PageTable *quickmapPageTable = getPagePhysicalAddress(pageDirectoryEntry);
 
-  PageTableEntry *pageTableEntry = &quickmapPageTable->entries[PT_INDEX((VirtualAddress)&quickmapPageTableAddress)];
+  PageTableEntry *pageTableEntry = &quickmapPageTable->entries[getPageTableIndex((VirtualAddress)&quickmapPageTableAddress)];
 
   setAttribute(pageTableEntry, PTE_PRESENT);
   setAttribute(pageTableEntry, PTE_READ_WRITE);
@@ -100,7 +108,7 @@ PageTable *quickmapPageTable(PageTable *pageTable) {
 VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAddress) {
   PageDirectory *currentPageDirectory = quickmapPageDirectory(getPageDirectory());
 
-  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[PD_INDEX(virtualAddress)];
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[getPageDirectoryIndex(virtualAddress)];
   PageTable *pageTable = getPagePhysicalAddress(pageDirectoryEntry);
 
   // TODO: change to test attribute PDE_PRESENT for the page directory entry
@@ -115,10 +123,10 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
     setAttribute(pageDirectoryEntry, PTE_READ_WRITE);
     setPhysicalFrame(pageDirectoryEntry, (PhysicalAddress)allocatedBlock);
 
-    printf("\nEntered here - page Table: %lx, v address: %lx, PT_INDEX: %lx", pageTable, allocatedBlock, PT_INDEX(virtualAddress));
+    printf("\nEntered here - page Table: %lx, v address: %lx, getPageTableIndex: %lx", pageTable, allocatedBlock, getPageTableIndex(virtualAddress));
   }
 
-  PageTableEntry *pageTableEntry = &pageTable->entries[PT_INDEX(virtualAddress)];
+  PageTableEntry *pageTableEntry = &pageTable->entries[getPageTableIndex(virtualAddress)];
 
   setAttribute(pageTableEntry, PTE_PRESENT);
   setAttribute(pageTableEntry, PTE_READ_WRITE);
