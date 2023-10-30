@@ -136,3 +136,23 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
 
   return virtualAddress;
 }
+
+void printVirtualAddressInfo(VirtualAddress virtualAddress) {
+  printf("\n=== Information for virtual address: %lx ===", virtualAddress);
+  printf("\nCurrently active page directory: %lx", getPageDirectory());
+  printf("\nPage directory index: %lx, (offset within the PD: %lx)", getPageDirectoryIndex(virtualAddress), getPageDirectoryIndex(virtualAddress) * 4);
+  printf("\nPage table index: %lx, (offset within the PT: %lx)", getPageTableIndex(virtualAddress), getPageTableIndex(virtualAddress) * 4);
+
+  PageDirectory *currentPageDirectory = quickmapPageDirectory(getPageDirectory());
+
+  printf("\nCurrent page directory: %lx", currentPageDirectory);
+
+  PageDirectoryEntry *pageDirectoryEntry = &currentPageDirectory->entries[getPageDirectoryIndex(virtualAddress)];
+  printf("\nPage directory entry - address: %lx, value: %lx, block: %lx", pageDirectoryEntry, *pageDirectoryEntry, getPagePhysicalAddress(pageDirectoryEntry));
+
+  PageTable *pageTable = quickmapPageTable(getPagePhysicalAddress(pageDirectoryEntry));
+  printf("\nPage table: %lx", pageTable);
+
+  PageTableEntry *pageTableEntry = &pageTable->entries[getPageTableIndex(virtualAddress)];
+  printf("\nPage table entry - address: %lx, value: %lx, block: %lx", pageTableEntry, *pageTableEntry, getPagePhysicalAddress(pageTableEntry));
+}

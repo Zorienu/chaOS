@@ -92,3 +92,8 @@ VirtualAddress mapPage(VirtualAddress virtualAddress, PhysicalAddress physicalAd
  * Map the reserved quickmap page table to the given physical address
  */
 VirtualAddress quickmapPage(PhysicalAddress physicalAddress);
+
+/* 
+ * Print the information of the given virtual address
+ */
+void printVirtualAddressInfo(VirtualAddress virtualAddress);
