@@ -3,44 +3,27 @@
 #include "../include/c/stdio.h"
 #include "../include/mem/mem.h"
 #include "../include/mem/virtualMem.h"
-
-extern uint32_t *kernelEnd;
-
-#define NELEM 10
+#include "../include/interrupts/idt.h"
+#include "../include/sys/syscallWrappers.h"
+#include "../include/syscalls/syscalls.h"
 
 void OSStart() {
   initVideo();
   printMemoryMap();
 
-  PageDirectory *currentPageDirectory = getPageDirectory();
-  printf("\nCurrently active page directory: %lx", currentPageDirectory);
+  setIDTDescriptor(0x80, syscallDispatcher, 0xEE);
 
-  PageTable *firstKernelPageTable = allocateBlock();
-  memset(firstKernelPageTable, 0, sizeof(PageTable));
+  initIDT();
 
-  printf("\nFirst allocation from kernel: %lx", firstKernelPageTable);
 
-  // 0x401000 -> firstKernelPageTable
-  uint32_t virtualAddress = 4 * MB + 0x1000;
+  int32_t result = syscallTestWrapper();
+  printf("\nTest syscall result: %d", result);
 
-  mapPage(virtualAddress, (PhysicalAddress)firstKernelPageTable);
+  mapPage(0x7EE0000, 0x7ED0000);
+  uint8_t *test = (uint8_t *)0x7EE0000;
+  *test = 0xA2;
 
-  // Get the 4MB + 4096 bytes PageTableEntry
-  printf("\nVirtual address: %lx, Physical address: %lx", virtualAddress, firstKernelPageTable);
+  printf("\nMap far enough page: %x", *test);
 
-  uint32_t *test = (uint32_t *)virtualAddress;
-  printf("\nBefore assignment: %ld", *test); 
-  *test = 0x1234;
-  printf("\nAfter assignment: %ld", *test);
-
-  // 0x401FFC -> firstKernelPageTable + FFC
-  uint32_t *test2 = (uint32_t *)(virtualAddress + 0x1000 - 4);
-  printf("\nBefore assignment: %ld", *test2);
-  *test2 = 0x3412;
-  printf("\nAfter assignment: %ld", *test2);
-
-  
-  // Test printf implementation
-  printf("\nFormatted %d %i %x %p %o %hd %hi %hhu %hhd", 1234, -5678, 0xdead, 0xbeef, 012345, (short)27, (short)-42, (uint8_t)20, (int8_t)-10);
-  printf("\nFormatted %lx %ld %lld %llx",  0xdeadbeeful, -100000000l, 10200300400ll, 0xdeadbeeffeebdaedull);
+  printVirtualAddressInfo(0x7EE0000);
 }
