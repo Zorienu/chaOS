@@ -1,0 +1,30 @@
+#include "idt.h"
+#include <stdint.h>
+
+/*
+ * The IDT (Interrupt Descriptor Table)
+ */
+IDTEntry32 idt32[MAX_IDT_ENTRIES];
+
+/*
+ * Interrupt Descriptor Table Register instance
+ */
+IDTR32 idtr32;
+
+void setIDTDescriptor(uint8_t entryNumber, void *isr, uint8_t flags) {
+  IDTEntry32 *descriptor = &idt32[entryNumber];
+
+  descriptor->isrAddressLow = (uint32_t)isr & 0xFFFF;          // Lower 16 bits of the ISR address
+  descriptor->isrAddressHigh = ((uint32_t)isr >> 16) & 0xFFFF; // Upper 16 bits of the ISR address
+  descriptor->kernelCS = 0x08;                                 // Kernel code segment containing this isr
+  descriptor->reserved = 0x0;                                  // Reserved for intel, set to 0
+  descriptor->attributes = flags;                              // Type & attributes (INT_GATE, TRAP_GATE, etc.)
+}
+
+void initIDT(void) {
+  idtr32.limit = (uint16_t)sizeof(idt32);
+  idtr32.base = (uint32_t)&idt32; // The address where the IDT is located
+
+  // Load IDT to IDT register
+  asm volatile("lidt %0" : : "memory"(idtr32));
+}
