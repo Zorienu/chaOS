@@ -3,7 +3,7 @@
 #define MAX_IDT_ENTRIES 256
 
 /*
- * IDT (Interrupt Descriptor Table) entry
+ * IDT (Interrupt Descriptor Table) entry (8 bytes)
  */
 typedef struct {
   uint16_t isrAddressLow;  // Lower 16 bits of ISR (Interrupt Service Routine) address 

@@ -22,7 +22,7 @@ void setIDTDescriptor(uint8_t entryNumber, void *isr, uint8_t flags) {
 }
 
 void initIDT(void) {
-  idtr32.limit = (uint16_t)sizeof(idt32);
+  idtr32.limit = (uint16_t)sizeof(idt32); // 256 entries * 8 bytes = 0x800
   idtr32.base = (uint32_t)&idt32; // The address where the IDT is located
 
   // Load IDT to IDT register

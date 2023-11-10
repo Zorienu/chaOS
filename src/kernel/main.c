@@ -18,6 +18,7 @@ void OSStart() {
 
   int32_t result = syscallTestWrapper();
   printf("\nTest syscall result: %d", result);
+  printf("\nSyscall dispatcher address: %lx", syscallDispatcher); 
 
   mapPage(0x7EE0000, 0x7ED0000);
   uint8_t *test = (uint8_t *)0x7EE0000;
