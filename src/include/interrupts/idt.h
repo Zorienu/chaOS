@@ -41,6 +41,12 @@ typedef struct {
     uint32_t ss;
 } __attribute__ ((packed)) IntFrame32;
 
+/*
+ * Set the given entry number within the IDT to use the given ISR
+ */
 void setIDTDescriptor(uint8_t entryNumber, void *isr, uint8_t flags);
 
+/*
+ * Initialize the IDT by loading its register (using lidt)
+ */
 void initIDT(void);
