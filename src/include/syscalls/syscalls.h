@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+#define EXIT_SUCCESS 0
+
 /*
  * Registers pushed onto stack when a syscall function is called
  * from the syscall dispatcher
@@ -19,11 +21,6 @@ typedef struct {
     uint32_t gs;
     uint32_t eax;
 } __attribute__ ((packed)) SyscallRegisters;
-
-/*
- * Test syscall implementation
- */
-int32_t syscallTest(SyscallRegisters regs);
 
 
 /*
