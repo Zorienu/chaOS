@@ -11,7 +11,7 @@ void OSStart() {
   initVideo();
   printMemoryMap();
 
-  setIDTDescriptor(0x80, syscallDispatcher, 0xEE);
+  setIDTDescriptor(0x80, syscallDispatcher, INT_GATE_USER_FLAGS);
 
   initIDT();
 
