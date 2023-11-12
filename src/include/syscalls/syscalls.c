@@ -1,15 +1,30 @@
+#include <stdint.h>
 #include "syscalls.h"
+#include "syscallNumbers.h"
+#include "../mem/malloc.h"
+
+
+int32_t syscallTest(SyscallRegisters regs) {
+  return 10 + 20;
+}
+
+int32_t syscallMalloc(SyscallRegisters regs) {
+  int32_t size = regs.ebx;
+
+  void *ptr = mallocNextBlock(size);
+
+  asm volatile("mov %0, %%edx" : : "g"(ptr));
+
+  return EXIT_SUCCESS;
+}
 
 /*
  * Syscall table
  */
 int32_t (*syscalls[10])(SyscallRegisters) = {
-  [0] = syscallTest,
+  [SYSCALL_TEST] = syscallTest,
+  [SYSCALL_MALLOC] = syscallMalloc,
 };
-
-int32_t syscallTest(SyscallRegisters regs) {
-  return 10 + 20;
-}
 
 __attribute__ ((naked)) void syscallDispatcher(void) {
   asm volatile (".intel_syntax noprefix\n"
