@@ -111,6 +111,8 @@ void *allocateBlock() {
 void initializePhysicalMemoryManager(uint32_t kernelEnd) {
   uint32_t page = 0;
 
+  physicalMemory = (struct PhysicalMemory *)MEMORY_BITMAP_ADDRESS;
+
   // Initialize all memory as used
   memset(physicalMemory->bitmap, 0, MAX_BLOCKS_AMOUNT / 32);
 
