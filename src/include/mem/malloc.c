@@ -7,6 +7,7 @@
 MallocBlockType *mallocListHead = 0;
 VirtualAddress mallocVirtualAddress = 0;
 PhysicalAddress mallocPhysicalAddress = 0;
+uint32_t totalMallocPages = 0;
 
 void mallocInit(uint32_t size) {
   mallocPhysicalAddress = (PhysicalAddress)allocateBlock();
@@ -19,6 +20,8 @@ void mallocInit(uint32_t size) {
   mallocListHead->size = PAGE_SIZE - sizeof(MallocBlockType);
   mallocListHead->free = true;
   mallocListHead->next = 0;
+
+  totalMallocPages = 1;
 }
 
 void mallocSplit(MallocBlockType *temp, uint32_t size) {
@@ -64,7 +67,26 @@ void *mallocNextBlock(uint32_t size) {
     mallocSplit(temp, size);
     printf("\nAfter malloc split: temp.next: %lx", temp->next);
   } else {
-    return 0;
+    uint32_t neededAdditionalBytes = size + sizeof(MallocBlockType) - temp->size;
+    uint32_t neededAdditionalPages = neededAdditionalBytes / PAGE_SIZE;
+
+    if (neededAdditionalBytes % PAGE_SIZE) neededAdditionalPages++;
+
+    while (neededAdditionalPages) {
+      totalMallocPages++;
+      neededAdditionalPages--;
+      mapPage(mallocVirtualAddress + totalMallocPages * PAGE_SIZE, (PhysicalAddress)allocateBlock());
+    }
+
+    MallocBlockType *newBlock = (void *)temp + size + sizeof(MallocBlockType);
+
+    newBlock->size = PAGE_SIZE - (uint32_t)newBlock % PAGE_SIZE - sizeof(MallocBlockType);
+    newBlock->free = true;
+    newBlock->next = 0;
+
+    temp->size = size;
+    temp->free = false;
+    temp->next = newBlock;
   }
 
   return (void *)temp + sizeof(MallocBlockType);
