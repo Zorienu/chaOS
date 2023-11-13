@@ -8,6 +8,9 @@
 #include "../include/syscalls/syscalls.h"
 #include "../include/c/stdlib.h"
 
+/*
+ * Entry point of the operating system, called from bootmain.c
+ */
 void OSStart() {
   initVideo();
   printMemoryMap();

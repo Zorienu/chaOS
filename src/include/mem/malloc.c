@@ -24,6 +24,10 @@ void mallocInit(uint32_t size) {
   totalMallocPages = 1;
 }
 
+/*
+ * Split the given block into two
+ * One with the requested size and the another with the remaining bytes
+ */
 void mallocSplit(MallocBlockType *temp, uint32_t size) {
   MallocBlockType *newBlock = (void *)temp + sizeof(MallocBlockType) + size;
   printf("\n-->Temp address: %lx", temp);
