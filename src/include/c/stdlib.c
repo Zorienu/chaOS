@@ -8,3 +8,7 @@ void *malloc(int32_t size) {
 
   return ptr;
 }
+
+void *free(void *ptr) {
+  asm volatile("int $0x80" : : "a"(SYSCALL_FREE), "b"(ptr));
+}

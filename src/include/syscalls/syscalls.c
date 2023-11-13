@@ -18,12 +18,21 @@ int32_t syscallMalloc(SyscallRegisters regs) {
   return EXIT_SUCCESS;
 }
 
+int32_t syscallFree(SyscallRegisters regs) {
+  void *ptr = (void *)regs.ebx;
+
+  mallocFree(ptr);
+
+  return EXIT_SUCCESS;
+}
+
 /*
  * Syscall table
  */
 int32_t (*syscalls[10])(SyscallRegisters) = {
   [SYSCALL_TEST] = syscallTest,
   [SYSCALL_MALLOC] = syscallMalloc,
+  [SYSCALL_FREE] = syscallFree,
 };
 
 __attribute__ ((naked)) void syscallDispatcher(void) {
