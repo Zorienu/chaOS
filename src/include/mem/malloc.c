@@ -86,3 +86,29 @@ void *mallocNextBlock(uint32_t size) {
 
   return (void *)temp + sizeof(MallocBlockType);
 }
+
+/*
+ * Iterate over all the singly linked list and 
+ * If two consecutive previously malloc-ed blocks are free, join then into a single block
+ */
+void mallocMergeFreeBlocks(void) {
+  MallocBlockType *temp = (MallocBlockType *)mallocVirtualAddress;
+
+  for (;temp && temp->next; temp = temp->next) 
+    if (temp->free && temp->next->free) {
+      temp->size += temp->next->size + sizeof(MallocBlockType);
+      temp->next = temp->next->next;
+    }
+}
+
+void mallocFree(void *ptr) {
+  for (MallocBlockType *temp = mallocListHead; temp->next; temp = temp->next) {
+    void *blockPtr = (void *)temp + sizeof(MallocBlockType);
+
+    if (ptr == blockPtr) {
+      temp->free = true;
+      mallocMergeFreeBlocks();
+      break;
+    }
+  }
+}

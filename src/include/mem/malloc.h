@@ -11,3 +11,8 @@ typedef struct MallocBlock {
  * Allocate the next free block of memory
  */
 void *mallocNextBlock(uint32_t size);
+
+/*
+ * Free the block pointed by the given address
+ */
+void mallocFree(void *ptr);
