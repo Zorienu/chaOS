@@ -75,18 +75,13 @@ void *mallocNextBlock(uint32_t size) {
     while (neededAdditionalPages) {
       totalMallocPages++;
       neededAdditionalPages--;
+
       mapPage(mallocVirtualAddress + totalMallocPages * PAGE_SIZE, (PhysicalAddress)allocateBlock());
+
+      temp->size += PAGE_SIZE;
     }
 
-    MallocBlockType *newBlock = (void *)temp + size + sizeof(MallocBlockType);
-
-    newBlock->size = PAGE_SIZE - (uint32_t)newBlock % PAGE_SIZE - sizeof(MallocBlockType);
-    newBlock->free = true;
-    newBlock->next = 0;
-
-    temp->size = size;
-    temp->free = false;
-    temp->next = newBlock;
+    mallocSplit(temp, size);
   }
 
   return (void *)temp + sizeof(MallocBlockType);
