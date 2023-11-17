@@ -45,3 +45,12 @@ static inline void stosb(void *address, int data, int count) {
                "0" (address), "1" (count), "a" (data) :
                "memory", "cc");
 }
+
+/*
+ * Wait 1 I/O cycle for I/O operations to complete
+ */
+static inline void ioWait(void) {
+  // Port 0x80 is used for checkpoints during POST
+  //  Linux uses this, so we "should" be OK to use it also
+  asm volatile("outb %%al, $0x80" : : "a"(0) );
+}
