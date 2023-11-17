@@ -31,3 +31,18 @@
 // Data register                -> read-only
 #define PIC_MASTER_IMR_AND_DATA_REGISTER_PORT       0x21
 #define PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT        0xA1
+
+/*
+ * ICW 1 configuration bits
+ */
+// Bit 0 - We well send ICW4 to the PIC?
+#define ICW1_PIC_RECEIVES_ICW4 1
+// Bit 1 - Slave PIC is present, send clear bit (we'll have to send ICW3)
+#define ICW1_SLAVE_PIC_PRESENT 0
+// Bit 2 - Ignored in x86, send clear bit
+#define ICW1_CALL_ADDRESS_INTERVAL 0
+// Bit 3 - set: operate in Level Triggered Mode, clear: operate in Edge Triggered Mode (we we'll use ETM)
+#define ICW1_PIC_TRIGGER_MODE 0
+// Bit 4 - Initialization bit, set to 1
+#define ICW1_PIC_INITIALIZATION 1 << 4
+// Bits 5-7 are set to 0
