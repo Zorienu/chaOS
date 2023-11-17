@@ -46,3 +46,11 @@
 // Bit 4 - Initialization bit, set to 1
 #define ICW1_PIC_INITIALIZATION 1 << 4
 // Bits 5-7 are set to 0
+
+
+
+/*
+ * Initialize the PIC (Programmable Interrupt Controller) 
+ * by sending the appropiate ICW (Initialization Control Words)
+ */
+void initializePIC();
