@@ -19,3 +19,15 @@
 #define PIC_IRQ_AUXILIARY  4
 #define PIC_IRQ_FPU        5
 #define PIC_IRQ_HDC        6
+
+/*
+ * PIC 8259A software port map
+ */
+// Command register -> write-only
+// Status register  -> read-only
+#define PIC_MASTER_COMMAND_AND_STATUS_REGISTER_PORT 0x20
+#define PIC_SLAVE_COMMAND_AND_STATUS_REGISTER_PORT  0xA0
+// IMR: Interrupt Mask Register -> write-only
+// Data register                -> read-only
+#define PIC_MASTER_IMR_AND_DATA_REGISTER_PORT       0x21
+#define PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT        0xA1
