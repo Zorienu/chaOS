@@ -17,4 +17,13 @@ void initializePIC() {
   ioWait();
   outb(PIC_SLAVE_COMMAND_AND_STATUS_REGISTER_PORT, icw1);
   ioWait();
+
+  // Send ICW 2 to the master PIC command register:
+  // IRQ 0 is not mapped to interrupt 0x20
+  outb(PIC_MASTER_COMMAND_AND_STATUS_REGISTER_PORT, PIC_IRQ_0_IDT_ENTRY);
+  ioWait();
+  // IRQ 8 is not mapped to interrupt 0x28
+  outb(PIC_SLAVE_COMMAND_AND_STATUS_REGISTER_PORT, PIC_IRQ_8_IDT_ENTRY);
+  ioWait();
+
 }

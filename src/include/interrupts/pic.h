@@ -34,6 +34,7 @@
 
 /*
  * ICW 1 configuration bits
+ * Primary control word used for Initialize the PIC
  */
 // Bit 0 - We well send ICW4 to the PIC?
 #define ICW1_PIC_RECEIVES_ICW4 1
@@ -47,6 +48,18 @@
 #define ICW1_PIC_INITIALIZATION 1 << 4
 // Bits 5-7 are set to 0
 
+/*
+ * ICW 2 configuration bits
+ * Used for mapping the base address of the IDT that the PIC will use
+ */
+// 0x20 (32 in decimal) will be the entry within the IDT for handling the PIT (Programmable Interrupt Timer) interrupts
+// 0x20 because we skip the first 32 interrupts (0x0 - 0x1F)
+// which correspond to software interrupts like divide by 0
+// 0x20 - 0x27 for IRQs 0 - 7
+#define PIC_IRQ_0_IDT_ENTRY 0x20
+// 0x28 (40 in decimal) will be the entry within the IDT for handing the RTC (Real Time Clock) interrupts
+// 0x28 - 0x35 for IRQs 8 - 15
+#define PIC_IRQ_8_IDT_ENTRY 0x28
 
 
 /*
