@@ -3,6 +3,7 @@
  * Remember that line 2 is connected to the PIC 2 (slave PIC)
  * Also lower the line number -> higher the priority of the request
  */
+#include <stdint.h>
 #define PIC_IRQ_TIMER      0
 #define PIC_IRQ_KEYBOARD   1
 #define PIC_IRQ_SERIAL_2   3
@@ -84,10 +85,16 @@
  */
 #define PIC_80X86_MODE 1
 
-
+#define PIC_END_OF_INTERRUPT_COMMAND 0x20 // Set bit 5 in the ICW 2
 
 /*
  * Initialize the PIC (Programmable Interrupt Controller) 
  * by sending the appropiate ICW (Initialization Control Words)
  */
 void initializePIC();
+
+/* 
+ * Tell to the PICs (master and slave) that we finished handling the interrupt
+ * ensuring all hardware interrupts are enabled now
+ */
+void sendPICEndOfInterrupt(uint8_t irq);
