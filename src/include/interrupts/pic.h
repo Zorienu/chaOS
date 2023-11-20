@@ -61,6 +61,22 @@
 // 0x28 - 0x35 for IRQs 8 - 15
 #define PIC_IRQ_8_IDT_ENTRY 0x28
 
+/*
+ * ICW 3 configuration bits
+ * Used to let the PICs (master and slave) know what IRQ lines to use when communicating with each other
+ * We must send ICW 3 whenever we enable cascading with ICW 1 and
+ * let each PIC know about each other and how they are connected
+ * We do this by sending the ICW 3 to both PICs containing which IRQ line to use 
+ * for both the master and associated PICs
+ * The 80x86 architecture uses IRQ line 2 to connect the master PIC to the slave PIC.
+ * In the ICW 3 for the master PIC, each bit represents an IRQ (1 << 0 -> IRQ 0, 1 << 7 -> IRQ 7)
+ */
+#define PIC_MASTER_IRQ_BIT_CONNECTED_TO_SLAVE 1 << 2 // IRQ 2 connected to bit 2 -> 0B100 -> set bit 2 to 1
+// For the slave PIC, we must send the IRQ line to be used in binary notation, since we only have 3 bits for this
+// and the other bits (4 - 7) are reserved
+#define PIC_SLAVE_IRQ_BIT_CONNECTED_TO_MASTER 2 // IRQ 2 in bynary notation -> 0B010
+
+
 
 /*
  * Initialize the PIC (Programmable Interrupt Controller) 
