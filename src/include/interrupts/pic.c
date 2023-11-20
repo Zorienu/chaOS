@@ -3,6 +3,10 @@
 #include <stdint.h>
 
 void initializePIC() {
+  // Get and save current mask
+  uint8_t masterPICMask = inb(PIC_MASTER_IMR_AND_DATA_REGISTER_PORT);
+  uint8_t slavePICMask = inb(PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT);
+
   // Set bit 0 -> we will send ICW4 later
   // Set bit 4 -> initialize PIC
   // Resulting in 0x11
@@ -20,11 +24,11 @@ void initializePIC() {
   ioWait();
 
   // Send ICW 2 to the master PIC data register:
-  // IRQ 0 is not mapped to interrupt 0x20
+  // IRQ 0 is now mapped to interrupt 0x20
   outb(PIC_MASTER_IMR_AND_DATA_REGISTER_PORT, PIC_IRQ_0_IDT_ENTRY);
   ioWait();
   // Send ICW 2 to the slave PIC data register:
-  // IRQ 8 is not mapped to interrupt 0x28
+  // IRQ 8 is now mapped to interrupt 0x28
   outb(PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT, PIC_IRQ_8_IDT_ENTRY);
   ioWait();
 
@@ -35,4 +39,14 @@ void initializePIC() {
   outb(PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT, PIC_SLAVE_IRQ_BIT_CONNECTED_TO_MASTER);
   ioWait();
 
+  // Send ICW 4 to master PIC data register:
+  outb(PIC_MASTER_IMR_AND_DATA_REGISTER_PORT, PIC_80X86_MODE);
+  ioWait();
+  // Send ICW 4 to slave PIC data register:
+  outb(PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT, PIC_80X86_MODE);
+  ioWait();
+
+  // Restore previously saved masks
+  outb(PIC_MASTER_IMR_AND_DATA_REGISTER_PORT, masterPICMask);
+  outb(PIC_SLAVE_IMR_AND_DATA_REGISTER_PORT, slavePICMask);
 }

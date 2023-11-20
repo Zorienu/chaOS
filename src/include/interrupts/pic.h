@@ -76,6 +76,14 @@
 // and the other bits (4 - 7) are reserved
 #define PIC_SLAVE_IRQ_BIT_CONNECTED_TO_MASTER 2 // IRQ 2 in bynary notation -> 0B010
 
+/*
+ * ICW 4 configuration bits
+ * We set the first bit in ICW 1 to 1, so, the PICs expect we send ICW 4
+ * bits 5-7 always 0
+ * We just set the PICs to use 80x86 mode by setting the bit 0
+ */
+#define PIC_80X86_MODE 1
+
 
 
 /*
