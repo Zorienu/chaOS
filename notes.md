@@ -25,3 +25,8 @@ Small r/w pieces of memory
 - Debug registers
 - Floating point unit registers
 - SIMD registers
+
+### The PIC (Programmable Interrupt Controller) and the PIT (Programmable Interrupt Timer)
+- http://www.brokenthorn.com/Resources/OSDev16.html
+- http://www.brokenthorn.com/Resources/OSDevPic.html
+- http://www.brokenthorn.com/Resources/OSDevPit.html
