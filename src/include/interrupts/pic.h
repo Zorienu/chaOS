@@ -107,3 +107,8 @@ void sendPICEndOfInterrupt(uint8_t irq);
  * Disable all IRQ lines in master and slave PICs by setting all the bits in the IMR (Interrupt Mask Register)
  */
 void disablePIC(void);
+
+/*
+ * Enable the given IRQ line by clearing the corresponding bit in the master or slave PIC
+ */
+void enableIRQ(uint8_t irq);

@@ -64,3 +64,19 @@ void disablePIC(void) {
   outb(PIC_MASTER_IMR_REGISTER_PORT, 0xFF);
 }
 
+void enableIRQ(uint8_t irq)
+{
+    uint16_t port;
+    uint8_t value;
+
+    if (irq < 8) port = PIC_MASTER_DATA_REGISTER_PORT;
+    else {
+        irq -= 8;
+        port = PIC_SLAVE_DATA_REGISTER_PORT;
+    }
+
+    // Get current IMR value, clear the IRQ bit to unmask it, then write new value to IMR
+    // NOTE: Clearing IRQ2 will enable the 2nd PIC to raise IRQs due to 2nd PIC being mapped to IRQ2 in PIC1
+    value = inb(port) & ~(1 << irq);
+    outb(port, value);
+}
