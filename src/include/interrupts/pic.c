@@ -1,6 +1,7 @@
+#include <stdint.h>
 #include "pic.h"
 #include "../io/io.h"
-#include <stdint.h>
+#include "../c/stdio.h"
 
 void initializePIC() {
   // Get and save current mask
@@ -79,4 +80,10 @@ void enableIRQ(uint8_t irq)
     // NOTE: Clearing IRQ2 will enable the 2nd PIC to raise IRQs due to 2nd PIC being mapped to IRQ2 in PIC1
     value = inb(port) & ~(1 << irq);
     outb(port, value);
+}
+
+__attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame) {
+  uint8_t key = inb(0x60);
+  printf("\nkey: %c %d", key, key);
+  sendPICEndOfInterrupt(PIC_IRQ_KEYBOARD);
 }

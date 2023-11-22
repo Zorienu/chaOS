@@ -1,3 +1,5 @@
+#include "idt.h"
+
 /*
  * The following devices used the PIC 1 (master PIC) to generate interrupts
  * Remember that line 2 is connected to the PIC 2 (slave PIC)
@@ -112,3 +114,8 @@ void disablePIC(void);
  * Enable the given IRQ line by clearing the corresponding bit in the master or slave PIC
  */
 void enableIRQ(uint8_t irq);
+
+/*
+ * Handler for IRQ line 1 which corresponds to the keyboard
+ */
+__attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame);
