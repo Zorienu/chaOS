@@ -56,3 +56,11 @@ void sendPICEndOfInterrupt(uint8_t irq) {
  
   outb(PIC_MASTER_COMMAND_REGISTER_PORT, PIC_END_OF_INTERRUPT_COMMAND);
 }
+
+void disablePIC(void) {
+  // Disable all IRQ lines in master PIC
+  outb(PIC_SLAVE_IMR_REGISTER_PORT, 0xFF);
+  // Disable all IRQ lines in slave PIC
+  outb(PIC_MASTER_IMR_REGISTER_PORT, 0xFF);
+}
+

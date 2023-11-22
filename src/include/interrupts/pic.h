@@ -102,3 +102,8 @@ void initializePIC();
  * ensuring all hardware interrupts are enabled now
  */
 void sendPICEndOfInterrupt(uint8_t irq);
+
+/*
+ * Disable all IRQ lines in master and slave PICs by setting all the bits in the IMR (Interrupt Mask Register)
+ */
+void disablePIC(void);
