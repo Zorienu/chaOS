@@ -3,13 +3,12 @@
 #include "../include/c/string.h"
 #include "../include/elf/elf.h"
 #include "../include/mem/mem.h"
-#include "../include/c/stdio.h"
 
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096
 
 // Should be equal to the "seek" in MakeFile for kernel
-#define KERNEL_SEEK 50
+#define KERNEL_SEEK 100
 #define KERNEL_ELF_DISK_OFFSET (0x200 * KERNEL_SEEK) - 0x200;
 
 void readSegment(uint8_t *, uint32_t, uint32_t);
@@ -42,11 +41,6 @@ void loadOS() {
   // Calculate the end of the kernel
   programHeader--;
   uint32_t kernelEnd = (uint32_t)(physicalAddress + programHeader->memorySize);
-
-  initVideo();
-  setForegroundColor(WHITE);
-  setBackgroundColor(GREEN);
-  printf("\nKernel end: %lx", kernelEnd);
 
   initializePhysicalMemoryManager(kernelEnd);
   initializeVirtualMemoryManager();

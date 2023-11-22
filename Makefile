@@ -7,6 +7,8 @@ SRC_DIR=src
 BUILD_DIR=build
 BUILD_DIR_IMG=$(BUILD_DIR)/bin
 
+CFLAGS=-mgeneral-regs-only #-Wall -Wextra -Wno-pointer-sign -Wno-interrupt-service-routine
+
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names
 .PHONY: all floppy_image kernel bootloader clean always
@@ -47,7 +49,8 @@ img: clean link_bootloader link_kernel
 	dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
 	# seek=7  -> 0xE00 (0x200 * 7)
 	# seek=50 -> 0x6400 (0x200 * 50)
-	dd if=$(BUILD_DIR_IMG)/kernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=50
+	# seek=100 -> 0xC800 (0x200 * 100)
+	dd if=$(BUILD_DIR_IMG)/kernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=100
 
 #
 # Link bootloader (everything inside src/bootloader)
@@ -65,8 +68,8 @@ $(BUILD_DIR)/bootloader: always
 	$(ASM) $(SRC_DIR)/bootloader/boot.asm -f elf32 -o $(BUILD_DIR)/bootloader.o
 	$(ASM) $(SRC_DIR)/bootloader/stage2.asm -f elf32 -o $(BUILD_DIR)/stage2.o
 	$(ASM) $(SRC_DIR)/include/x86/x86.asm -f elf32 -o $(BUILD_DIR)/x86.o
-	$(GCC) -c src/bootloader/*.c -nostdlib -ffreestanding
-	$(GCC) -c src/include/*/*.c -nostdlib -ffreestanding
+	$(GCC) -c $(CFLAGS) src/bootloader/*.c -nostdlib -ffreestanding
+	$(GCC) -c $(CFLAGS) src/include/*/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
 
 # 
@@ -84,8 +87,8 @@ kernel: $(BUILD_DIR)/kernel
 $(BUILD_DIR)/kernel: always
 	$(ASM) $(SRC_DIR)/kernel/entry.asm -f elf32 -o $(BUILD_DIR)/entry.o
 	$(ASM) $(SRC_DIR)/include/x86/x86.asm -f elf32 -o $(BUILD_DIR)/x86.o
-	$(GCC) -c src/kernel/*.c -nostdlib -ffreestanding
-	$(GCC) -c src/include/*/*.c -nostdlib -ffreestanding
+	$(GCC) -c $(CFLAGS) src/kernel/*.c -nostdlib -ffreestanding
+	$(GCC) -c $(CFLAGS) src/include/*/*.c -nostdlib -ffreestanding
 	mv *.o ./$(BUILD_DIR)
 
 # 
