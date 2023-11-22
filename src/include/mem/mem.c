@@ -153,7 +153,7 @@ bool initializeVirtualMemoryManager() {
 
   // Out of memory
   if (!pageDirectory) return false;
-  printf("\nPage directory: %lx", pageDirectory);
+  // printf("\nPage directory: %lx", pageDirectory);
 
   memset(pageDirectory, 0, sizeof(PageDirectory));
 
@@ -163,7 +163,7 @@ bool initializeVirtualMemoryManager() {
 
   // For identity map from 0x0 to 4MB
   PageTable *identityPageTable = (PageTable *)allocateBlock();
-  printf("\nIdentity page table: %lx", identityPageTable);
+  // printf("\nIdentity page table: %lx", identityPageTable);
   // Out of memory
   if (!identityPageTable) return false;
   memset(identityPageTable, 0, sizeof(PageTable));
@@ -172,7 +172,7 @@ bool initializeVirtualMemoryManager() {
 
   // For identity map from 4MB to 8MB
   PageTable *identityPageTable2 = (PageTable *)allocateBlock();
-  printf("\nIdentity page table 2: %lx", identityPageTable2);
+  // printf("\nIdentity page table 2: %lx", identityPageTable2);
   // Out of memory
   if (!identityPageTable2) return false;
   memset(identityPageTable2, 0, sizeof(PageTable));
@@ -182,7 +182,7 @@ bool initializeVirtualMemoryManager() {
 
   // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
   PageTable *pageTable3GB = (PageTable *)allocateBlock();
-  printf("\nPage table 3GB: %lx", pageTable3GB);
+  // printf("\nPage table 3GB: %lx", pageTable3GB);
   // Out of memory
   if (!pageTable3GB) return false;
   memset(pageTable3GB, 0, sizeof(PageTable));
@@ -191,7 +191,7 @@ bool initializeVirtualMemoryManager() {
 
   // For mapping from KERNEL_BASE to 0x0 (0x0 to 4MB)
   PageTable *pageTable3GB2 = (PageTable *)allocateBlock();
-  printf("\nPage table 3GB 2: %lx", pageTable3GB2);
+  // printf("\nPage table 3GB 2: %lx", pageTable3GB2);
   // Out of memory
   if (!pageTable3GB2) return false;
   memset(pageTable3GB2, 0, sizeof(PageTable));
