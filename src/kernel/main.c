@@ -3,10 +3,11 @@
 #include "../include/c/stdio.h"
 #include "../include/mem/mem.h"
 #include "../include/mem/virtualMem.h"
-#include "../include/interrupts/idt.h"
 #include "../include/sys/syscallWrappers.h"
 #include "../include/syscalls/syscalls.h"
 #include "../include/c/stdlib.h"
+#include "../include/interrupts/pic.h"
+#include "../include/io/io.h"
 
 /*
  * Entry point of the operating system, called from bootmain.c
@@ -14,12 +15,18 @@
 void OSStart() {
   initVideo();
   printMemoryMap();
-  allocateBlock();
+  
+  initIDT();
 
   setIDTDescriptor(0x80, syscallDispatcher, INT_GATE_USER_FLAGS);
 
-  initIDT();
+  disablePIC();
+  initializePIC();
+  // setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, testPIT, INT_GATE_FLAGS );
+  setIDTDescriptor(0x21, keyboardIRQ1Handler, INT_GATE_FLAGS);
+  asm volatile("sti");
 
+  while(1);
 
   int32_t result = syscallTestWrapper();
   printf("\nTest syscall result: %d", result);
