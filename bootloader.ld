@@ -14,7 +14,8 @@ SECTIONS
   }
 
   /* Put bootmain.c code at sector 1, just after the boot sector */
-  .text : {
+  /* Skip some addresses to avoid affecting variables defined in boot.asm like SMAP_NUM_ENTRIES_ADDRESS and SMAP_ENTRIES_ADDRESS */
+  .text 0xB000 : { 
     *(.text)
   }
 
