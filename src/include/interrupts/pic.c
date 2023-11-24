@@ -82,6 +82,49 @@ void enableIRQ(uint8_t irq)
     outb(port, value);
 }
 
+void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter) {
+  if (channel > 2) return;
+
+  asm volatile("cli");
+
+  /*
+   * Configuration Word for the PIT
+   * bit 0: Binary counter
+   *   0: Binary <-
+   *   1: Binary Coded Decimal (BCD)
+   * bit 1-3: (M0, M1, M2) Operating mode
+   *   000: Mode 0: Interrupt or Terminal Count
+   *   001: Mode 1: Programmable one-shot
+   *   010: Mode 2: Rate Generator
+   *   011: Mode 3: Square Wave Generator
+   *   100: Mode 4: Software Triggered Strobe
+   *   101: Mode 5: Hardware Triggered Strobe
+   *   110: Undefined; Don't use
+   *   111: Undefined; Don't use
+   * bit 4-5: (RL0, RL1) Read/Load mode. We are going to read or send data to a counter register
+   *   00: Counter value is latched into an internal control register at the time of the I/O write operation.
+   *   01: Read or Load Least Significant Byte (LSB) only
+   *   10: Read or Load Most Significant Byte (MSB) only
+   *   11: Read or Load LSB first then MSB <-
+   * bit 6-7: (SC0, SC1) Select counter or channel (0-2)
+   *   00: Counter 0
+   *   01: Counter 1
+   *   10: Counter 2
+   *   11: Illegal value
+   */
+  uint8_t cw = channel << 6  | 3 << 4 | operatingMode << 1;
+  outb(PIT_CONTROL_WORD_PORT, cw);
+
+  uint8_t msb = counter >> 8;
+  uint8_t lsb = counter & 0xFF;
+
+
+  outb(PIT_COUNTER_0_PORT + channel, lsb);
+  outb(PIT_COUNTER_0_PORT + channel, msb);
+
+  asm volatile("sti");
+}
+
 __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame) {
   uint8_t key = inb(0x60);
 

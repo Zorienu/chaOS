@@ -121,6 +121,11 @@ void disablePIC(void);
 void enableIRQ(uint8_t irq);
 
 /*
+ * Configure the PIT (Programmable Interrrupt Timer)
+ */
+void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter);
+
+/*
  * Handler for IRQ line 1 which corresponds to the keyboard
  */
 __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame);
