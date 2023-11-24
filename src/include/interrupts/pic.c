@@ -142,3 +142,16 @@ __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame) {
 
   sendPICEndOfInterrupt(PIC_IRQ_KEYBOARD);
 }
+
+volatile uint16_t testt = 0;
+volatile uint32_t test2 = 0;
+
+__attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
+  if (testt++ == 2000)
+  {
+    printf("\nTimer: %ld", test2++);
+    testt=0;
+  }
+
+  sendPICEndOfInterrupt(PIC_IRQ_TIMER);
+}

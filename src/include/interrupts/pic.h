@@ -129,3 +129,8 @@ void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter);
  * Handler for IRQ line 1 which corresponds to the keyboard
  */
 __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame);
+
+/*
+ * Handler for IRQ line 0 which corresponds to the PIT (Programmable Interrupt Timer)
+ */
+__attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame);
