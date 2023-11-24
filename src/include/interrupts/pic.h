@@ -93,6 +93,11 @@
 
 #define PIC_END_OF_INTERRUPT_COMMAND 0x20 // Set bit 5 in the ICW 2
 
+#define PIT_COUNTER_0_PORT    0x40
+#define PIT_COUNTER_1_PORT    0x41
+#define PIT_COUNTER_2_PORT    0x42
+#define PIT_CONTROL_WORD_PORT 0x43
+
 /*
  * Initialize the PIC (Programmable Interrupt Controller) 
  * by sending the appropiate ICW (Initialization Control Words)
