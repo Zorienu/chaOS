@@ -22,8 +22,15 @@ void OSStart() {
 
   disablePIC();
   initializePIC();
-  // setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, testPIT, INT_GATE_FLAGS );
+
+  setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, pitIRQ0Handler, INT_GATE_FLAGS );
   setIDTDescriptor(0x21, keyboardIRQ1Handler, INT_GATE_FLAGS);
+
+  configurePIT(0, 2, 1193180 / 100);
+  
+  enableIRQ(PIC_IRQ_KEYBOARD);
+  enableIRQ(PIC_IRQ_TIMER);
+  
   asm volatile("sti");
 
   while(1);
