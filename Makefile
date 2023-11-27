@@ -1,6 +1,7 @@
 TARGET=i686-elf
 ASM=nasm
 GCC=$(TARGET)-gcc
+GPP=$(TARGET)-g++
 LD=$(TARGET)-ld
 
 SRC_DIR=src
