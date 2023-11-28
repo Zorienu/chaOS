@@ -30,3 +30,13 @@ Small r/w pieces of memory
 - http://www.brokenthorn.com/Resources/OSDev16.html
 - http://www.brokenthorn.com/Resources/OSDevPic.html
 - http://www.brokenthorn.com/Resources/OSDevPit.html
+
+### C and C++
+- [What is the effect of extern "C" in C++?](https://stackoverflow.com/questions/1041866/what-is-the-effect-of-extern-c-in-c)
+
+### File I/O
+- [Overview: Serenety Kernel File I/O](https://www.youtube.com/watch?v=JJx7j4mR3CM)
+
+### Git
+- [GitHub - Repository state at specified time](https://stackoverflow.com/questions/21345787/github-repository-state-at-specified-time)
+- [Linux device driver lecture 15 : Character driver](https://www.youtube.com/watch?v=R5qSTZA0PuY)
