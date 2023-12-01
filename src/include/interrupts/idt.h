@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 #define MAX_IDT_ENTRIES 256
@@ -44,7 +45,7 @@ typedef struct {
 /*
  * Set the given entry number within the IDT to use the given ISR
  */
-void setIDTDescriptor(uint8_t entryNumber, void *isr, uint8_t flags);
+void setIDTDescriptor(uint8_t entryNumber, void (*isr)(IntFrame32 *), uint8_t flags);
 
 /*
  * Initialize the IDT by loading its register (using lidt)

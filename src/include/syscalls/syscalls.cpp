@@ -35,7 +35,7 @@ int32_t (*syscalls[10])(SyscallRegisters) = {
   [SYSCALL_FREE] = syscallFree,
 };
 
-__attribute__ ((naked)) void syscallDispatcher(void) {
+__attribute__ ((naked)) void syscallDispatcher(IntFrame32 *frame) {
   asm volatile (".intel_syntax noprefix\n"
 
                 ".equ MAX_SYSCALLS, 10\n"     // Have to define again, inline asm does not see the #define

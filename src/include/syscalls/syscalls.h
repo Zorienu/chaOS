@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "../interrupts/idt.h"
 
 #define EXIT_SUCCESS 0
 
@@ -35,4 +36,4 @@ typedef struct {
  * Already on stack: SS, SP, FLAGS, CS, IP
  * Need to push: AX, GS, FS, ES, DS, BP, DI, SI, DX, CX, BX
  */
-__attribute__ ((naked)) void syscallDispatcher(void); 
+__attribute__ ((naked)) void syscallDispatcher(IntFrame32 *frame); 
