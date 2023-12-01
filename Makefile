@@ -8,7 +8,7 @@ SRC_DIR=src
 BUILD_DIR=build
 BUILD_DIR_IMG=$(BUILD_DIR)/bin
 
-CFLAGS=-mgeneral-regs-only #-Wall -Wextra -Wno-pointer-sign -Wno-interrupt-service-routine
+CFLAGS=-mgeneral-regs-only -nostdlib -ffreestanding #-Wall -Wextra -Wno-pointer-sign -Wno-interrupt-service-routine
 
 # Get crtbegin.o and crtend.o paths
 CRTBEGIN_OBJ:=$(shell $(GPP) $(CFLAGS) -print-file-name=crtbegin.o)
