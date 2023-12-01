@@ -8,16 +8,17 @@
 #include "../include/c/stdlib.h"
 #include "../include/interrupts/pic.h"
 #include "../include/io/io.h"
-#include "test.h"
-#include "test2.h"
 
 /*
  * Entry point of the operating system, called from bootmain.c
+ * Add 'extern "C"' to avoid mangling
  */
-void OSStart() {
+extern "C" void OSStart() {
   initVideo();
   printMemoryMap();
-  
+  printf("Holaaaa from CPP: %d", 123456789);
+  printf("Can this be real :o");
+
   initIDT();
 
   setIDTDescriptor(0x80, syscallDispatcher, INT_GATE_USER_FLAGS);
@@ -34,8 +35,6 @@ void OSStart() {
   enableIRQ(PIC_IRQ_TIMER);
   
   asm volatile("sti");
-
-  printf("%d", test3());
 
   while(1);
 
