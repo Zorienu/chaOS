@@ -14,6 +14,9 @@ CFLAGS=-mgeneral-regs-only -nostdlib -ffreestanding #-Wall -Wextra -Wno-pointer-
 CRTBEGIN_OBJ:=$(shell $(GPP) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ:=$(shell $(GPP) $(CFLAGS) -print-file-name=crtend.o)
 
+CRTI_OBJ=$(BUILD_DIR)/crti.o
+CRTN_OBJ=$(BUILD_DIR)/crtn.o
+
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names
 .PHONY: all floppy_image kernel bootloader clean always
