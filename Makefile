@@ -10,6 +10,10 @@ BUILD_DIR_IMG=$(BUILD_DIR)/bin
 
 CFLAGS=-mgeneral-regs-only #-Wall -Wextra -Wno-pointer-sign -Wno-interrupt-service-routine
 
+# Get crtbegin.o and crtend.o paths
+CRTBEGIN_OBJ:=$(shell $(GPP) $(CFLAGS) -print-file-name=crtbegin.o)
+CRTEND_OBJ:=$(shell $(GPP) $(CFLAGS) -print-file-name=crtend.o)
+
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names
 .PHONY: all floppy_image kernel bootloader clean always
