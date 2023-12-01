@@ -64,7 +64,8 @@ img: clean link_bootloader link_kernel
 # Link bootloader (everything inside src/bootloader)
 #
 link_bootloader: bootloader
-	$(LD) $(BUILD_DIR)/*.o -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
+	# TODO: if watching weird behavior, link crti.o and crtn.o in order
+	$(GPP) $(CFLAGS) $(CRTBEGIN_OBJ) $(BUILD_DIR)/*.o $(CRTEND_OBJ) -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
 	rm ./$(BUILD_DIR)/*.o
 
 #
@@ -86,7 +87,8 @@ $(BUILD_DIR)/bootloader: always
 # Link kernel (everything inside src/kernel)
 #
 link_kernel: kernel
-	$(LD) $(BUILD_DIR)/*.o -T kernel.ld -o $(BUILD_DIR_IMG)/kernel
+	# TODO: if watching weird behavior, link crti.o and crtn.o in order
+	$(GPP) $(CFLAGS) $(CRTBEGIN_OBJ) $(BUILD_DIR)/*.o $(CRTEND_OBJ) -T kernel.ld -o $(BUILD_DIR_IMG)/kernel
 	rm ./$(BUILD_DIR)/*.o
 
 #
