@@ -29,7 +29,7 @@ void mallocInit(uint32_t size) {
  * One with the requested size and the another with the remaining bytes
  */
 void mallocSplit(MallocBlockType *temp, uint32_t size) {
-  MallocBlockType *newBlock = (void *)temp + sizeof(MallocBlockType) + size;
+  MallocBlockType *newBlock = (MallocBlockType *)((VirtualAddress)temp + sizeof(MallocBlockType) + size);
   printf("\n-->Temp address: %lx", temp);
   printf("\n-->New block: %lx", newBlock);
 
@@ -88,7 +88,7 @@ void *mallocNextBlock(uint32_t size) {
     mallocSplit(temp, size);
   }
 
-  return (void *)temp + sizeof(MallocBlockType);
+  return (void *)((VirtualAddress)temp + sizeof(MallocBlockType));
 }
 
 /*
@@ -107,7 +107,7 @@ void mallocMergeFreeBlocks(void) {
 
 void mallocFree(void *ptr) {
   for (MallocBlockType *temp = mallocListHead; temp->next; temp = temp->next) {
-    void *blockPtr = (void *)temp + sizeof(MallocBlockType);
+    void *blockPtr = (void *)((VirtualAddress)temp + sizeof(MallocBlockType));
 
     if (ptr == blockPtr) {
       temp->free = true;

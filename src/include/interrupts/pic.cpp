@@ -129,7 +129,7 @@ __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame) {
   uint8_t key = inb(0x60);
 
   // Scancode set 1 -> Ascii lookup table
-  const uint8_t *scancode_to_ascii = "\x00\x1B" "1234567890-=" "\x08"
+  const char scancode_to_ascii[] = "\x00\x1B" "1234567890-=" "\x08"
   "\x00" "qwertyuiop[]" "\x0D\x1D" "asdfghjkl;'`" "\x00" "\\"
   "zxcvbnm,./" "\x00\x00\x00" " ";
 

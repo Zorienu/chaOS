@@ -18,7 +18,7 @@ unsigned long strlen (char *string) {
 
 void memcpy(void *_destination, void *_source, size_t count) {
   uint8_t *destination = (uint8_t *)_destination;
-  uint8_t *source = _source;
+  uint8_t *source = (uint8_t *)_source;
 
   while (count--) 
     *destination++ = *source++;

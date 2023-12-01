@@ -79,7 +79,7 @@ char *elfGetSectionHeaderName (ELF32_header *header, ELF32_sectionHeader *sectio
 }
 
 void *elfLoadFile(void *file) {
-  ELF32_header *header = file;
+  ELF32_header *header = (ELF32_header *)file;
 
   if (!elfCheckSupported(header)) { 
     // printf("ELF file cannot be loaded\n");

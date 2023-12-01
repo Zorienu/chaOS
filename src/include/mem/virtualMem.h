@@ -10,8 +10,8 @@
 
 typedef uint32_t PageDirectoryEntry;
 typedef uint32_t PageTableEntry;
-typedef uint32_t VirtualAddress;
-typedef uint32_t PhysicalAddress;
+typedef uintptr_t VirtualAddress;
+typedef uintptr_t PhysicalAddress;
 
 typedef enum {
     PTE_PRESENT       = 0x01,
