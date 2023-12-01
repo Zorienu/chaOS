@@ -99,8 +99,6 @@ $(BUILD_DIR)/kernel: always
 	$(ASM) $(SRC_DIR)/kernel/crti.asm -f elf32 -o $(CRTI_OBJ)
 	$(ASM) $(SRC_DIR)/kernel/crtn.asm -f elf32 -o $(CRTN_OBJ)
 	$(ASM) $(SRC_DIR)/include/x86/x86.asm -f elf32 -o $(BUILD_DIR)/x86.o
-	# $(GCC) -c $(CFLAGS) src/kernel/*.c -nostdlib -ffreestanding
-	# $(GCC) -c $(CFLAGS) src/include/*/*.c -nostdlib -ffreestanding
 	$(GPP) -c $(CFLAGS) src/kernel/*.cpp
 	$(GPP) -c $(CFLAGS) src/include/*/*.cpp
 	mv *.o ./$(BUILD_DIR)
