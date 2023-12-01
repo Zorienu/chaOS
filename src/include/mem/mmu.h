@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 // Control Register flags

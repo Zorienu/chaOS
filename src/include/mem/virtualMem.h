@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 #define MB 0x100000

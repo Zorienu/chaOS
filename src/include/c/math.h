@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Get the absolute value of the given number
  */

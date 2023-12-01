@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 #define KERNEL_BASE 0xC0000000 // 3 GiB
