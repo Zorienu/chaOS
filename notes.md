@@ -33,6 +33,7 @@ Small r/w pieces of memory
 
 ### C and C++
 - [What is the effect of extern "C" in C++?](https://stackoverflow.com/questions/1041866/what-is-the-effect-of-extern-c-in-c)
+- [Calling Global Constructors](https://wiki.osdev.org/Calling_Global_Constructors) Explanation for crti.asm and crtn.asm
 
 ### File I/O
 - [Overview: Serenety Kernel File I/O](https://www.youtube.com/watch?v=JJx7j4mR3CM)
