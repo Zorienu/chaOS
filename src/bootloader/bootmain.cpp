@@ -13,7 +13,7 @@
 
 void readSegment(uint8_t *, uint32_t, uint32_t);
 
-void loadOS() {
+extern "C" void loadOS() {
   ELF32_header *elf = (ELF32_header *)0x10000;
 
   readSegment((uint8_t *)elf, PAGE_SIZE, 0);
@@ -40,7 +40,7 @@ void loadOS() {
 
   // Calculate the end of the kernel
   programHeader--;
-  uint32_t kernelEnd = (uint32_t)(physicalAddress + programHeader->memorySize);
+  uint32_t kernelEnd = (uintptr_t)(physicalAddress + programHeader->memorySize);
 
   initializePhysicalMemoryManager(kernelEnd);
   initializeVirtualMemoryManager();
