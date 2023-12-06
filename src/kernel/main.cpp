@@ -8,6 +8,7 @@
 #include "../include/c/stdlib.h"
 #include "../include/interrupts/pic.h"
 #include "../include/io/io.h"
+#include "test.h"
 
 /*
  * Entry point of the operating system, called from bootmain.c
@@ -35,6 +36,13 @@ extern "C" void OSStart() {
   enableIRQ(PIC_IRQ_TIMER);
   
   asm volatile("sti");
+
+  TestClass *counter = new TestClass();
+  counter->setCounter(10);
+
+  printf("\nCounter: %d", counter->getCounter());
+  counter->incrementCounter();
+  printf("\nCounter: %d", counter->getCounter());
 
   while(1);
 
