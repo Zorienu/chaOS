@@ -8,6 +8,7 @@
 #include "../include/c/stdlib.h"
 #include "../include/interrupts/pic.h"
 #include "../include/io/io.h"
+#include "../include/mem/MemoryManager.h"
 #include "test.h"
 
 /*
@@ -17,8 +18,6 @@
 extern "C" void OSStart() {
   initVideo();
   printMemoryMap();
-  printf("Holaaaa from CPP: %d", 123456789);
-  printf("Can this be real :o");
 
   initIDT();
 
@@ -43,6 +42,10 @@ extern "C" void OSStart() {
   printf("\nCounter: %d", counter->getCounter());
   counter->incrementCounter();
   printf("\nCounter: %d", counter->getCounter());
+
+  MemoryManager *mem = (MemoryManager *)0x30000; 
+
+  mem->print();
 
   while(1);
 
