@@ -39,13 +39,14 @@ SECTIONS
 
   .bss : {
     *(.bss)
+    
+    . = ALIGN(4K);
+    *(.kernel_heap)
   }
 
   .kernel_quickmap_page ALIGN(0x1000) : {
     *(.kernel_quickmap_page)
   }
-
-
 
   /* This symbol will let us know where in physical memory the kernel ends */
   PROVIDE(kernelEnd = .);
