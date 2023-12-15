@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include "PhysicalAddress.h"
 #include "VirtualAddress.h"
@@ -33,6 +35,7 @@ class MemoryManager {
 
   private: 
     // Bitmap for telling which pages are free or not from the entire RAM
+    // TODO: use malloc to initialize this dynamically
     uint32_t bitmap[MAX_BLOCKS_AMOUNT / 32];
     uint32_t availableBlocks;
 
