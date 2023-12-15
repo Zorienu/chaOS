@@ -10,6 +10,7 @@
 #include "../include/io/io.h"
 #include "../include/mem/MemoryManager.h"
 #include "test.h"
+#include "heap/kmalloc.h"
 
 /*
  * Entry point of the operating system, called from bootmain.c
@@ -36,6 +37,10 @@ extern "C" void OSStart() {
   
   asm volatile("sti");
 
+  pritnfKmallocInformation();
+  kmallocInit();
+  printf("\nFirst kmalloc: %lx", kmalloc(5));
+  printf("\nSecond kmalloc: %lx", kmalloc(10));
   TestClass *counter = new TestClass();
   counter->setCounter(10);
 
