@@ -44,7 +44,7 @@ void kmallocInit() {
 
 void *kmalloc(size_t size) {
     struct KmallocBlock *temp = kmallocHead;
-    while (temp && temp->size < size) temp = temp->next;
+    while (temp && (temp->size < size || !temp->free)) temp = temp->next;
 
     if (!temp) return NULL;
 
