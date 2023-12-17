@@ -70,9 +70,18 @@ void *operator new[](size_t size) {
 }
  
 void operator delete(void *p) {
-    kfree(p);
+    return kfree(p);
 }
  
 void operator delete[](void *p) {
-    kfree(p);
+    return kfree(p);
 }
+
+void operator delete(void* ptr, size_t) {
+    return kfree(ptr);
+}
+
+void operator delete[](void* ptr, size_t) {
+    return kfree(ptr);
+}
+
