@@ -26,6 +26,10 @@ void pritnfKmallocInformation() {
 
 }
 
+/*
+ * Split the given kmalloc block into two, leaving the first with the requested size and the other with 
+ * the remaining size
+ */
 void kmallocSplitBlock(size_t size, struct KmallocBlock *block) {
     struct KmallocBlock *newBlock = (struct KmallocBlock *)((uintptr_t)block + sizeof(KmallocBlock) + size);
 
@@ -62,7 +66,31 @@ void *kmalloc(size_t size) {
     return (void *)((uintptr_t)temp + sizeof(KmallocBlock));
 }
 
-void *kfree(void *ptr) {}
+/*
+ * Iterate over the kmalloc singly linked list and join the consecutive free blocks
+ */
+void kmallocJoinFreeBlocks() {
+    struct KmallocBlock *temp = kmallocHead;
+
+    while(temp) {
+        if (temp->free && temp->next && temp->next->free) {
+            temp->size += temp->next->size + sizeof(KmallocBlock);
+            temp->next = temp->next->next;
+        }
+
+        temp = temp->next;
+    }
+}
+
+void kfree(void *ptr) {
+    struct KmallocBlock *temp = kmallocHead;
+
+    for (; temp; temp = temp->next) {
+        printf("\nkfree: temp: %lx - %lx", temp, temp + 1);
+        if (temp + 1 == ptr) temp->free = true;
+        kmallocJoinFreeBlocks();
+    }
+}
 
 void *operator new(size_t size) {
     void *result = kmalloc(size);

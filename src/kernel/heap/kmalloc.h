@@ -14,3 +14,8 @@ void kmallocInit();
  * Malloc implementation for the kernel
  */
 void *kmalloc(size_t size);
+
+/*
+ * Free implementation for the kernel
+ */
+void kfree(void *ptr);
