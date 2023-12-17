@@ -19,6 +19,11 @@ void pritnfKmallocInformation() {
   printf("\nkmalloc: %ld", INITIAL_KMALLOC_MEMORY_SIZE);
   printf("\nkmalloc address: %lx", initialKmallocMemory);
   printf("\nKmallocBlock sizeof: %d", sizeof(KmallocBlock));
+  printf("\n=== Kmalloc blocks ===");
+
+  for (struct KmallocBlock *temp = kmallocHead; temp; temp = temp->next) 
+      printf("\nAddress: %lx - Size: %d - Free: %d - Next: %lx", temp, temp->size, temp->free, temp->next);
+
 }
 
 void kmallocSplitBlock(size_t size, struct KmallocBlock *block) {
