@@ -37,7 +37,7 @@ extern "C" void OSStart() {
   
   asm volatile("sti");
 
-  pritnfKmallocInformation();
+  // Call before using the "new" operator
   kmallocInit();
   printf("\nFirst kmalloc: %lx", kmalloc(5));
   printf("\nSecond kmalloc: %lx", kmalloc(10));
