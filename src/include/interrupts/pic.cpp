@@ -3,6 +3,8 @@
 #include "../io/io.h"
 #include "../c/stdio.h"
 
+namespace PIC {
+
 void initializePIC() {
   // Get and save current mask
   uint8_t masterPICMask = IO::inb(PIC_MASTER_IMR_REGISTER_PORT);
@@ -154,4 +156,6 @@ __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
   }
 
   sendPICEndOfInterrupt(PIC_IRQ_TIMER);
+}
+
 }

@@ -99,6 +99,8 @@
 #define PIT_COUNTER_2_PORT    0x42
 #define PIT_CONTROL_WORD_PORT 0x43
 
+namespace PIC {
+
 /*
  * Initialize the PIC (Programmable Interrupt Controller) 
  * by sending the appropiate ICW (Initialization Control Words)
@@ -135,3 +137,5 @@ __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame);
  * Handler for IRQ line 0 which corresponds to the PIT (Programmable Interrupt Timer)
  */
 __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame);
+
+}
