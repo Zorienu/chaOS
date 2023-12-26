@@ -34,7 +34,7 @@ extern "C" void loadOS() {
     // Fill remaining bytes with 0 in case the memory size of this section
     // is greater than the size in the ELF file
     if (programHeader->memorySize > programHeader->fileSize) {
-      stosb(physicalAddress + programHeader->fileSize, 0, programHeader->memorySize - programHeader->fileSize);
+      IO::stosb(physicalAddress + programHeader->fileSize, 0, programHeader->memorySize - programHeader->fileSize);
     }
   }
 
@@ -55,7 +55,7 @@ extern "C" void loadOS() {
  */
 void waitDisk(void) {
   // Wait for disk ready.
-  while((inb(DISK_PORT_BASE + 7) & 0xC0) != 0x40); // TODO: explain https://youtu.be/fZY1zr_nW6c?list=PLiUHDN3DAZZX_uTTp0l8QppxK3giZM2bC
+  while((IO::inb(DISK_PORT_BASE + 7) & 0xC0) != 0x40); // TODO: explain https://youtu.be/fZY1zr_nW6c?list=PLiUHDN3DAZZX_uTTp0l8QppxK3giZM2bC
 }
 
 /*
@@ -65,16 +65,16 @@ void readSector(uint8_t *destination, uint32_t sector) {
   waitDisk();
   
   // Issue command
-  outb(DISK_PORT_BASE + 2, 1); // count = 1 sector 
-  outb(DISK_PORT_BASE + 3, sector); // Take the 1st LSB
-  outb(DISK_PORT_BASE + 4, sector >> 8); // Take the 2nd LSB
-  outb(DISK_PORT_BASE + 5, sector >> 16); // Take the 3rd LSB
-  outb(DISK_PORT_BASE + 6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now), TODO: investigate the 0xE0
-  outb(DISK_PORT_BASE + 7, DISK_READ_CMD); // cmd 0x20 - read sectors
+  IO::outb(DISK_PORT_BASE + 2, 1); // count = 1 sector 
+  IO::outb(DISK_PORT_BASE + 3, sector); // Take the 1st LSB
+  IO::outb(DISK_PORT_BASE + 4, sector >> 8); // Take the 2nd LSB
+  IO::outb(DISK_PORT_BASE + 5, sector >> 16); // Take the 3rd LSB
+  IO::outb(DISK_PORT_BASE + 6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now), TODO: investigate the 0xE0
+  IO::outb(DISK_PORT_BASE + 7, DISK_READ_CMD); // cmd 0x20 - read sectors
 
   // Read data
   waitDisk();
-  insl(DISK_PORT_BASE, destination, SECTOR_SIZE / 4); // Read 4-bytes 128 times, getting the 512 bytes
+  IO::insl(DISK_PORT_BASE, destination, SECTOR_SIZE / 4); // Read 4-bytes 128 times, getting the 512 bytes
 }
 
 /*
