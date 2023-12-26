@@ -24,16 +24,16 @@ extern "C" void OSStart() {
 
   setIDTDescriptor(0x80, syscallDispatcher, INT_GATE_USER_FLAGS);
 
-  disablePIC();
-  initializePIC();
+  PIC::disablePIC();
+  PIC::initializePIC();
 
-  setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, pitIRQ0Handler, INT_GATE_FLAGS );
-  setIDTDescriptor(0x21, keyboardIRQ1Handler, INT_GATE_FLAGS);
+  setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, PIC::pitIRQ0Handler, INT_GATE_FLAGS );
+  setIDTDescriptor(0x21, PIC::keyboardIRQ1Handler, INT_GATE_FLAGS);
 
-  configurePIT(0, 2, 1193180 / 100);
+  PIC::configurePIT(0, 2, 1193180 / 100);
   
-  enableIRQ(PIC_IRQ_KEYBOARD);
-  enableIRQ(PIC_IRQ_TIMER);
+  PIC::enableIRQ(PIC_IRQ_KEYBOARD);
+  PIC::enableIRQ(PIC_IRQ_TIMER);
   
   asm volatile("sti");
 
