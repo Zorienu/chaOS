@@ -83,6 +83,22 @@ void enable(uint8_t irq) {
     IO::outb(port, value);
 }
 
+void disable(uint8_t irq) {
+    uint16_t port;
+    uint8_t value;
+
+    if (irq < 8) port = PIC_MASTER_DATA_REGISTER_PORT;
+    else {
+        irq -= 8;
+        port = PIC_SLAVE_DATA_REGISTER_PORT;
+    }
+
+    // Get current IMR value, set the IRQ bit to mask it, then write new value to IMR
+    // NOTE: Clearing IRQ2 will enable the 2nd PIC to raise IRQs due to 2nd PIC being mapped to IRQ2 in PIC1
+    value = IO::inb(port) | (1 << irq);
+    IO::outb(port, value);
+}
+
 void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter) {
   if (channel > 2) return;
 

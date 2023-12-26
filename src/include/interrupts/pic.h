@@ -124,6 +124,11 @@ void disableAll(void);
 void enable(uint8_t irq);
 
 /*
+ * Disable the given IRQ line by setting the corresponding bit in the master or slave PIC
+ */
+void disable(uint8_t irq);
+
+/*
  * Configure the PIT (Programmable Interrrupt Timer)
  */
 void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter);
