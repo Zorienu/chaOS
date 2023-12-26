@@ -7,6 +7,8 @@
 /* Commands */
 #define DISK_READ_CMD 0x20
 
+namespace IO {
+
 static inline uint8_t inb(uint16_t port) {
   uint8_t data;
 
@@ -50,8 +52,10 @@ static inline void stosb(void *address, int data, int count) {
 /*
  * Wait 1 I/O cycle for I/O operations to complete
  */
-static inline void ioWait(void) {
+static inline void wait(void) {
   // Port 0x80 is used for checkpoints during POST
   //  Linux uses this, so we "should" be OK to use it also
   asm volatile("outb %%al, $0x80" : : "a"(0) );
+}
+
 }
