@@ -60,15 +60,14 @@ void sendPICEndOfInterrupt(uint8_t irq) {
   IO::outb(PIC_MASTER_COMMAND_REGISTER_PORT, PIC_END_OF_INTERRUPT_COMMAND);
 }
 
-void disablePIC(void) {
+void disableAll(void) {
   // Disable all IRQ lines in master PIC
   IO::outb(PIC_SLAVE_IMR_REGISTER_PORT, 0xFF);
   // Disable all IRQ lines in slave PIC
   IO::outb(PIC_MASTER_IMR_REGISTER_PORT, 0xFF);
 }
 
-void enableIRQ(uint8_t irq)
-{
+void enable(uint8_t irq) {
     uint16_t port;
     uint8_t value;
 

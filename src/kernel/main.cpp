@@ -24,7 +24,7 @@ extern "C" void OSStart() {
 
   setIDTDescriptor(0x80, syscallDispatcher, INT_GATE_USER_FLAGS);
 
-  PIC::disablePIC();
+  PIC::disableAll();
   PIC::initializePIC();
 
   setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, PIC::pitIRQ0Handler, INT_GATE_FLAGS );
@@ -32,8 +32,8 @@ extern "C" void OSStart() {
 
   PIC::configurePIT(0, 2, 1193180 / 100);
   
-  PIC::enableIRQ(PIC_IRQ_KEYBOARD);
-  PIC::enableIRQ(PIC_IRQ_TIMER);
+  PIC::enable(PIC_IRQ_KEYBOARD);
+  PIC::enable(PIC_IRQ_TIMER);
   
   asm volatile("sti");
 
