@@ -54,7 +54,7 @@ void initializePIC() {
   IO::outb(PIC_SLAVE_DATA_REGISTER_PORT, slavePICMask);
 }
 
-void sendPICEndOfInterrupt(uint8_t irq) {
+void sendEOI(uint8_t irq) {
   if (irq >= 8) IO::outb(PIC_SLAVE_COMMAND_REGISTER_PORT, PIC_END_OF_INTERRUPT_COMMAND);
  
   IO::outb(PIC_MASTER_COMMAND_REGISTER_PORT, PIC_END_OF_INTERRUPT_COMMAND);
@@ -157,7 +157,7 @@ __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame) {
   if (key == 28) printf("\n");
   else if (key < 100) printf("%c", scancode_to_ascii[key]);
 
-  sendPICEndOfInterrupt(PIC_IRQ_KEYBOARD);
+  sendEOI(PIC_IRQ_KEYBOARD);
 }
 
 volatile uint16_t testt = 0;
@@ -170,7 +170,7 @@ __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
     testt=0;
   }
 
-  sendPICEndOfInterrupt(PIC_IRQ_TIMER);
+  sendEOI(PIC_IRQ_TIMER);
 }
 
 }
