@@ -134,6 +134,11 @@ void disable(uint8_t irq);
 void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter);
 
 /*
+ * Get the ISR that raised an interruption from the PIC
+ */
+uint16_t getISR();
+
+/*
  * Handler for IRQ line 1 which corresponds to the keyboard
  */
 __attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame);

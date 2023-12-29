@@ -173,4 +173,12 @@ __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
   sendEOI(PIC_IRQ_TIMER);
 }
 
+uint16_t getISR() {
+  IO::outb(PIC_MASTER_STATUS_REGISTER_PORT, 0x0b);
+  IO::outb(PIC_SLAVE_COMMAND_REGISTER_PORT, 0x0b);
+  uint8_t isr0 = IO::inb(PIC_MASTER_STATUS_REGISTER_PORT);
+  uint8_t isr1 = IO::inb(PIC_SLAVE_STATUS_REGISTER_PORT);
+  return (isr1 << 8) | isr0;
+}
+
 }
