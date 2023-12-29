@@ -164,9 +164,9 @@ volatile uint16_t testt = 0;
 volatile uint32_t test2 = 0;
 
 __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
-  if (testt++ == 2000)
+  if (testt++ == 100) // use 2000 with bochs
   {
-    // printf("\nTimer: %ld", test2++);
+    printf("\nTimer: %ld", test2++);
     testt=0;
   }
 
