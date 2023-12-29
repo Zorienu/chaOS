@@ -12,6 +12,10 @@
 #include "test.h"
 #include "heap/kmalloc.h"
 
+// https://stackoverflow.com/questions/329059/what-is-gxx-personality-v0-for
+void *__gxx_personality_v0;
+void *_Unwind_Resume;
+
 /*
  * Entry point of the operating system, called from bootmain.c
  * Add 'extern "C"' to avoid mangling
