@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "../../kernel/irqHandler.h"
 
 #define MAX_IDT_ENTRIES 256
 
@@ -46,6 +47,11 @@ typedef struct {
  * Set the given entry number within the IDT to use the given ISR
  */
 void setIDTDescriptor(uint8_t entryNumber, void (*isr)(IntFrame32 *), uint8_t flags);
+
+/*
+ * Register the handler for a hardware interrupt
+ */
+void registerIRQHandler(uint8_t irq, IRQHandler& handler);
 
 /*
  * Initialize the IDT by loading its register (using lidt)

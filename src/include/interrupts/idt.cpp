@@ -1,5 +1,8 @@
 #include "idt.h"
 #include <stdint.h>
+#include "pic.h"
+#include "../../kernel/irqHandler.h"
+#include "../c/stdio.h"
 
 /*
  * The IDT (Interrupt Descriptor Table)
@@ -10,6 +13,8 @@ IDTEntry32 idt32[MAX_IDT_ENTRIES];
  * Interrupt Descriptor Table Register instance
  */
 IDTR32 idtr32;
+
+IRQHandler* irqHandlers[16];
 
 void setIDTDescriptor(uint8_t entryNumber, void (*isr)(IntFrame32 *), uint8_t flags) {
   IDTEntry32 *descriptor = &idt32[entryNumber];
@@ -27,4 +32,35 @@ void initIDT(void) {
 
   // Load IDT to IDT register
   asm volatile("lidt %0" : : "memory"(idtr32));
+}
+
+__attribute__ ((interrupt)) void handleIRQWrapper(IntFrame32 *frame) {
+  uint16_t isr = PIC::getISR();
+
+  if (!isr) return;
+
+  uint8_t irq = 0;
+  for (uint8_t i = 0; i < 16; i++) {
+    if (i == 2)
+        continue;
+
+    if (isr & (1 << i)) {
+        irq = i;
+        break;
+    }
+  }
+
+
+  if (irqHandlers[irq]) {
+      irqHandlers[irq]->handleIRQ();
+      // Scheduler::stop_idling();
+  }
+ 
+  PIC::sendEOI(irq);
+}
+
+void registerIRQHandler(uint8_t irq, IRQHandler& handler) {
+  printf("\nRegistering irq number %d", irq);
+  irqHandlers[irq] = &handler;
+  setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY + irq, handleIRQWrapper, INT_GATE_FLAGS);
 }
