@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include "../include/c/string.h"
 #include "../include/c/stdio.h"
 #include "../include/mem/mem.h"
 #include "../include/mem/virtualMem.h"
@@ -9,6 +8,7 @@
 #include "../include/interrupts/pic.h"
 #include "../include/io/io.h"
 #include "../include/mem/MemoryManager.h"
+#include "devices/KeyboardDevice.h"
 #include "test.h"
 #include "heap/kmalloc.h"
 
@@ -31,20 +31,20 @@ extern "C" void OSStart() {
   PIC::disableAll();
   PIC::initializePIC();
 
-  setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, PIC::pitIRQ0Handler, INT_GATE_FLAGS );
-  setIDTDescriptor(0x21, PIC::keyboardIRQ1Handler, INT_GATE_FLAGS);
+  setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY, PIC::pitIRQ0Handler, INT_GATE_FLAGS);
 
   PIC::configurePIT(0, 2, 1193180 / 100);
   
-  PIC::enable(PIC_IRQ_KEYBOARD);
   PIC::enable(PIC_IRQ_TIMER);
   
-  asm volatile("sti");
-
   // Call before using the "new" operator
   kmallocInit();
-  printf("\nFirst kmalloc: %lx", kmalloc(5));
-  printf("\nSecond kmalloc: %lx", kmalloc(10));
+  pritnfKmallocInformation();
+
+  new KeyboardDevice();
+
+  asm volatile("sti");
+
   TestClass *counter = new TestClass();
   counter->setCounter(10);
 
