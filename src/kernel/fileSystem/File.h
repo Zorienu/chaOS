@@ -6,7 +6,7 @@ class FileDescription;
 
 class File {
   public:
-    virtual FileDescription* open(int options);
+    virtual FileDescription* open();
     virtual void close();
 
     virtual bool canRead (FileDescription&) const = 0;
