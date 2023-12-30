@@ -19,6 +19,8 @@ class FileDescription {
 
 
   private: 
-     File *_file;
+     explicit FileDescription(File&);
+
+     File& _file;
      int _currentOffset { 0 };
 };
