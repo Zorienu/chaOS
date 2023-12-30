@@ -1,3 +1,4 @@
+#pragma once
 #include "Device.h"
 
 class CharacterDevice : public Device {
@@ -5,4 +6,8 @@ class CharacterDevice : public Device {
     virtual bool isCharacterDevice() const { return true; }
 
   private: 
+    virtual bool isCharacterDevice() const final { return true; }
+
+  protected: 
+    CharacterDevice() : Device() {};
 };

@@ -1,3 +1,4 @@
+#pragma once
 #include <stddef.h>
 #include <stdint.h>
 
@@ -20,4 +21,7 @@ class File {
     virtual bool isTTY() const { return false; }
     virtual bool isMasterPty() const { return false; }
     virtual bool isCharacterDevice() const { return false; }
+
+  protected:
+    File() {};
 };
