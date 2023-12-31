@@ -12,8 +12,8 @@ class KeyboardDevice final : public IRQHandler, public CharacterDevice {
 
     // TODO: use ssize_t instead
     // TODO: implement
-    virtual size_t read(FileDescription&, uint8_t*, size_t) const override { return 0; }
-    virtual size_t write(FileDescription&, const uint8_t*, size_t) const override { return 1; }
+    virtual size_t read(FileDescription&, uint8_t*, size_t) override { return 0; }
+    virtual size_t write(FileDescription&, const uint8_t*, size_t) override { return 1; }
 
   private:
     virtual void handleIRQ() override;
