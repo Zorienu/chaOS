@@ -1,7 +1,7 @@
 #pragma once
 #include "stdint.h"
+#include <stddef.h>
 #include "../devices/CharacterDevice.h"
-#include <cstddef>
 
 class TTY : public CharacterDevice {
   public:
