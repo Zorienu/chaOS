@@ -23,7 +23,7 @@ enum Color {
 
 class VirtualConsole final : public TTY {
   public:
-    VirtualConsole();
+    VirtualConsole(unsigned int index);
     void static initialize();
 
     void clear();
@@ -33,6 +33,7 @@ class VirtualConsole final : public TTY {
 
   private: 
     void onChar(char c);
+    unsigned int _index;
 
     uint8_t _currentRow { 0 };
     uint8_t _currentColumn { 0 }; 

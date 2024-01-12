@@ -9,8 +9,9 @@ static uint8_t *vgaBuffer;
 static VirtualConsole *consoles[6];
 
 
-VirtualConsole::VirtualConsole() : TTY() {
+VirtualConsole::VirtualConsole(unsigned int index) : TTY(), _index(index) {
   setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
+  consoles[index] = this;
 }
 
 void VirtualConsole::initialize() {
