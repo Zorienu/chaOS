@@ -7,7 +7,7 @@
 
 static uint8_t *vgaBuffer;
 static VirtualConsole *consoles[6];
-
+static VirtualConsole *currentConsole;
 
 VirtualConsole::VirtualConsole(unsigned int index) : TTY(), _index(index) {
   setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
@@ -17,6 +17,7 @@ VirtualConsole::VirtualConsole(unsigned int index) : TTY(), _index(index) {
 void VirtualConsole::initialize() {
   vgaBuffer = (uint8_t *)VGA_BUFFER_ADDRESS;
   memset(consoles, 0x0, sizeof(consoles));
+  memset(currentConsole, 0x0, sizeof(VirtualConsole));
 }
 
 size_t VirtualConsole::onTTYWrite(const uint8_t *buffer, size_t size) {
@@ -27,11 +28,22 @@ size_t VirtualConsole::onTTYWrite(const uint8_t *buffer, size_t size) {
   return size;
 }
 
+void VirtualConsole::onChar(char ch) {
+  if (ch == '\n') {
+    _currentColumn = 0;
+    _currentRow++;
+  }
+  else {
+    putCharAt(_currentRow, _currentColumn, ch);
+    _currentColumn++;
+  }
 
+  if (_currentColumn == SCREEN_WIDTH) {
+    _currentColumn = 0;
+    _currentRow++;
+  }
 
-void VirtualConsole::onChar(char c) {
-  // TODO: implement "printf"
-  putCharAt(_currentRow, _currentColumn, c);
+  horizontalScroll();
 }
 
 void VirtualConsole::putCharAt(uint8_t row, uint8_t column, char c) {
@@ -81,4 +93,12 @@ void VirtualConsole::clear() {
 
   // Move hardware cursor
   // TODO: moveCsr();
+}
+
+void VirtualConsole::switchTo() {
+  if (this != currentConsole) currentConsole = this;
+}
+
+VirtualConsole* VirtualConsole::getCurrentConsole() {
+  return currentConsole;
 }
