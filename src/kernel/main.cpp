@@ -11,6 +11,8 @@
 #include "devices/KeyboardDevice.h"
 #include "test.h"
 #include "heap/kmalloc.h"
+#include "tty/VirtualConsole.h"
+#include "utils/kprintf.h"
 
 // https://stackoverflow.com/questions/329059/what-is-gxx-personality-v0-for
 void *__gxx_personality_v0;
@@ -52,9 +54,14 @@ extern "C" void OSStart() {
   counter->incrementCounter();
   printf("\nCounter: %d", counter->getCounter());
 
-  MemoryManager *mem = (MemoryManager *)0x30000; 
+  delete counter; 
 
-  mem->print();
+  VirtualConsole::initialize();
+  VirtualConsole *vc = new VirtualConsole(0);
+  vc->switchTo();
+  
+  kprintf("Potato");
+
 
   while(1);
 
