@@ -28,7 +28,8 @@ class VirtualConsole final : public TTY {
 
     void clear();
     void onChar(char c);
-    void switchTo();
+    static void switchTo(uint8_t consoleIndex);
+    void setActive(bool active);
 
     static VirtualConsole* getCurrentConsole();
 
@@ -36,8 +37,10 @@ class VirtualConsole final : public TTY {
     virtual size_t onTTYWrite(const uint8_t *buffer, size_t size) override;
 
   private: 
+    uint8_t *_buffer;
 
     unsigned int _index;
+    bool _active;
 
     uint8_t _currentRow { 0 };
     uint8_t _currentColumn { 0 }; 

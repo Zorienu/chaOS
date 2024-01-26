@@ -1,5 +1,6 @@
 #include "VirtualConsole.h"
 #include "../../include/c/string.h"
+#include "../heap/kmalloc.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
@@ -7,17 +8,18 @@
 
 static uint8_t *vgaBuffer;
 static VirtualConsole *consoles[6];
-static VirtualConsole *currentConsole;
+static int8_t currentConsoleIndex;
 
 VirtualConsole::VirtualConsole(unsigned int index) : TTY(), _index(index) {
   setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
   consoles[index] = this;
+  _buffer = (uint8_t *)kmalloc(rows() * columns() * 2);
 }
 
 void VirtualConsole::initialize() {
   vgaBuffer = (uint8_t *)VGA_BUFFER_ADDRESS;
   memset(consoles, 0x0, sizeof(consoles));
-  memset(currentConsole, 0x0, sizeof(VirtualConsole));
+  currentConsoleIndex = -1;
 }
 
 size_t VirtualConsole::onTTYWrite(const uint8_t *buffer, size_t size) {
@@ -95,10 +97,31 @@ void VirtualConsole::clear() {
   // TODO: moveCsr();
 }
 
-void VirtualConsole::switchTo() {
-  if (this != currentConsole) currentConsole = this;
+void VirtualConsole::switchTo(uint8_t consoleIndex) {
+  // There is a console selected right now, 
+  // store the VGA buffer inside the console buffer
+  if (currentConsoleIndex != -1) {
+    consoles[currentConsoleIndex]->setActive(false);
+  }
+
+  // Then we restore (if the buffer contains something) into the VGA buffer
+  currentConsoleIndex = consoleIndex;
+  consoles[currentConsoleIndex]->setActive(true);
+}
+
+void VirtualConsole::setActive(bool active) {
+  _active = active;
+
+  if (active) {
+    memcpy(vgaBuffer, _buffer, rows() * columns() * 2);
+  }
+  else {
+    memcpy(_buffer, vgaBuffer, rows() * columns() * 2);
+  }
 }
 
 VirtualConsole* VirtualConsole::getCurrentConsole() {
-  return currentConsole;
+  if (currentConsoleIndex == -1) return NULL;
+
+  return consoles[currentConsoleIndex];
 }

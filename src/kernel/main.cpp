@@ -58,10 +58,18 @@ extern "C" void OSStart() {
 
   VirtualConsole::initialize();
   VirtualConsole *vc = new VirtualConsole(0);
-  vc->switchTo();
+  VirtualConsole *vc2 = new VirtualConsole(1);
+  vc->switchTo(0);
   
-  kprintf("Potato");
+  kprintf("Potato\n");
 
+  vc->switchTo(1);
+
+  kprintf("Tomato\n");
+
+  vc->switchTo(0);
+
+  kprintf("Pinneapple\n");
 
   while(1);
 
