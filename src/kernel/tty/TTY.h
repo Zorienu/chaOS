@@ -16,6 +16,9 @@ class TTY : public CharacterDevice {
 
     void setSize(uint8_t rows, uint8_t columns);
 
+    uint8_t rows() { return _rows; }
+    uint8_t columns() { return _columns; }
+
   protected:
     // TODO: use ssize_t instead
     // Will be implemented by VirtualConsole
