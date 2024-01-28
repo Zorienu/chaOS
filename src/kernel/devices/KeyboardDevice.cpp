@@ -2,6 +2,8 @@
 #include "../../include/io/io.h"
 #include "../../include/c/stdio.h"
 #include "../../include/interrupts/pic.h"
+#include "../tty/VirtualConsole.h"
+#include "../utils/kprintf.h"
 
 #define IRQ_KEYBOARD 1
 
@@ -15,10 +17,12 @@ void KeyboardDevice::handleIRQ () {
 
   // printf("\nkey: %d %c", key, scancode_to_ascii[key]);
 
-  if (scancode_to_ascii[key] == '1') cls();
+  if (scancode_to_ascii[key] == '1') VirtualConsole::switchTo(0);
+  else if (scancode_to_ascii[key] == '2') VirtualConsole::switchTo(1);
+  else if (scancode_to_ascii[key] == '3') cls();
 
-  if (key == 28) printf("\n");
-  else if (key < 100) printf("%c", scancode_to_ascii[key]);
+  if (key == 28) kprintf("\n");
+  else if (key < 100) kprintf("%c", scancode_to_ascii[key]);
 }
 
 KeyboardDevice::KeyboardDevice() : IRQHandler(IRQ_KEYBOARD), CharacterDevice() {
