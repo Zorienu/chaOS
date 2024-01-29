@@ -114,9 +114,11 @@ void VirtualConsole::setActive(bool active) {
 
   if (active) {
     memcpy(vgaBuffer, _buffer, rows() * columns() * 2);
+    KeyboardDevice::the().setClient(this);
   }
   else {
     memcpy(_buffer, vgaBuffer, rows() * columns() * 2);
+    KeyboardDevice::the().setClient(NULL);
   }
 }
 
@@ -124,4 +126,8 @@ VirtualConsole* VirtualConsole::getCurrentConsole() {
   if (currentConsoleIndex == -1) return NULL;
 
   return consoles[currentConsoleIndex];
+}
+
+void VirtualConsole::onKeyPressed(char c) {
+  this->onChar(c);
 }

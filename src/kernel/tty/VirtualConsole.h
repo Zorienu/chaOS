@@ -1,5 +1,6 @@
 #pragma once
 #include "TTY.h"
+#include "../devices/KeyboardDevice.h"
 
 // Possible background and foreground colors in text-mode in text-mode
 enum Color {
@@ -21,7 +22,7 @@ enum Color {
   C_WHITE = 15,
 };
 
-class VirtualConsole final : public TTY {
+class VirtualConsole final : public TTY, KeyboardClient {
   public:
     VirtualConsole(unsigned int index);
     void static initialize();
@@ -32,6 +33,8 @@ class VirtualConsole final : public TTY {
     void setActive(bool active);
 
     static VirtualConsole* getCurrentConsole();
+
+    virtual void onKeyPressed(char c) override;
 
   protected: 
     virtual size_t onTTYWrite(const uint8_t *buffer, size_t size) override;
@@ -53,5 +56,4 @@ class VirtualConsole final : public TTY {
 
     void setBackgroundColor(Color color);
     void setForegroundColor(Color color);
-
 };
