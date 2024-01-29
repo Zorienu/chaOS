@@ -6,6 +6,8 @@ class KeyboardDevice final : public IRQHandler, public CharacterDevice {
   public: 
     KeyboardDevice();
 
+    static KeyboardDevice& the();
+
     // TODO: implement
     virtual bool canRead (FileDescription&) const override { return false; }
     virtual bool canWrite (FileDescription&) const override { return false; }

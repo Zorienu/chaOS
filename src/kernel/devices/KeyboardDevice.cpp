@@ -7,6 +7,9 @@
 
 #define IRQ_KEYBOARD 1
 
+// We can only have one instance of KeyboardDevice
+static KeyboardDevice *s_the;
+
 void KeyboardDevice::handleIRQ () {
   uint8_t key = IO::inb(0x60);
 
@@ -21,10 +24,17 @@ void KeyboardDevice::handleIRQ () {
   else if (scancode_to_ascii[key] == '2') VirtualConsole::switchTo(1);
   else if (scancode_to_ascii[key] == '3') cls();
 
-  if (key == 28) kprintf("\n");
-  else if (key < 100) kprintf("%c", scancode_to_ascii[key]);
+  // if (key == 28) kprintf("\n");
+  // else if (key < 100) kprintf("%c", scancode_to_ascii[key]);
+
+  if (_client && key<100) _client->onKeyPressed(scancode_to_ascii[key]);
 }
 
 KeyboardDevice::KeyboardDevice() : IRQHandler(IRQ_KEYBOARD), CharacterDevice() {
+  s_the = this;
   enableIRQ();
+}
+
+KeyboardDevice& KeyboardDevice::the() {
+  return *s_the;
 }
