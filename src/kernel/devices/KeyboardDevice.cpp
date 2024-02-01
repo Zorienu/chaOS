@@ -38,3 +38,8 @@ KeyboardDevice::KeyboardDevice() : IRQHandler(IRQ_KEYBOARD), CharacterDevice() {
 KeyboardDevice& KeyboardDevice::the() {
   return *s_the;
 }
+
+void KeyboardDevice::updateModifier(KeyModifiers modifier, bool pressed) {
+  if (pressed) _modifiers |= modifier;
+  else _modifiers &= ~modifier;
+}

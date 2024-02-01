@@ -1,6 +1,7 @@
 #pragma once
 #include "CharacterDevice.h"
 #include "../irqHandler.h"
+#include "../KeyCode.h"
 
 class KeyboardClient;
 
@@ -25,6 +26,10 @@ class KeyboardDevice final : public IRQHandler, public CharacterDevice {
     virtual void handleIRQ() override;
 
     KeyboardClient *_client { NULL };
+
+    void updateModifier(KeyModifiers modifier, bool pressed);
+    // Is Alt, Shift, Control or GUI pressed?
+    uint8_t _modifiers { 0 };
 };
 
 class KeyboardClient {
