@@ -4,8 +4,14 @@
 #include "../../include/interrupts/pic.h"
 #include "../tty/VirtualConsole.h"
 #include "../utils/kprintf.h"
+#include "../KeyCode.h"
 
 #define IRQ_KEYBOARD 1
+
+/*
+ * Scan code from which keys are no longer pressed but released
+ */
+#define BREAK_CODE_OFFSET 0x80
 
 // We can only have one instance of KeyboardDevice
 static KeyboardDevice *s_the;
