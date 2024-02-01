@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 /*
@@ -112,4 +113,15 @@ enum KeyCode : uint8_t {
     Key_GUI, // (Windows, Command key)
 
     Key_Shift = Key_LeftShift,
+};
+
+/*
+ * Key modifiers for the be used in "_modifiers" inside KeyboardDevice
+ */
+enum KeyModifiers : uint8_t {
+    Modifier_None    = 0,
+    Modifier_Shift   = 1 << 1,
+    Modifier_Control = 1 << 2,
+    Modifier_Alt     = 1 << 3,
+    Modifier_GUI     = 1 << 4,
 };
