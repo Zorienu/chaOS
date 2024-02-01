@@ -125,3 +125,18 @@ enum KeyModifiers : uint8_t {
     Modifier_Alt     = 1 << 3,
     Modifier_GUI     = 1 << 4,
 };
+
+/*
+ * Key event, will be sent to the current client of the KeyboardDevice
+ */
+struct KeyEvent {
+  bool pressed;
+  KeyCode code;
+  char character;
+  uint8_t modifiers;
+
+  bool shift() { return modifiers & Modifier_Shift; };
+  bool alt() { return modifiers & Modifier_Alt; };
+  bool control() { return modifiers & Modifier_Control; };
+  bool gui() { return modifiers & Modifier_GUI; };
+};
