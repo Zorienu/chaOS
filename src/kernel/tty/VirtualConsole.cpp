@@ -128,6 +128,6 @@ VirtualConsole* VirtualConsole::getCurrentConsole() {
   return consoles[currentConsoleIndex];
 }
 
-void VirtualConsole::onKeyPressed(char c) {
-  this->onChar(c);
+void VirtualConsole::onKeyPressed(KeyEvent event) {
+  if (event.pressed) this->onChar(event.character);
 }

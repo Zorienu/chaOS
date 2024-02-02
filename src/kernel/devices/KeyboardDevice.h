@@ -35,5 +35,5 @@ class KeyboardDevice final : public IRQHandler, public CharacterDevice {
 class KeyboardClient {
   public:
     // TODO: give event (with Ctrl, Alt, Shift, etc) instead of just the char
-    virtual void onKeyPressed(char c) = 0;
+    virtual void onKeyPressed(KeyEvent event) = 0;
 };

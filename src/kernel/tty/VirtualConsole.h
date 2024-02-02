@@ -34,7 +34,7 @@ class VirtualConsole final : public TTY, KeyboardClient {
 
     static VirtualConsole* getCurrentConsole();
 
-    virtual void onKeyPressed(char c) override;
+    virtual void onKeyPressed(KeyEvent event) override;
 
   protected: 
     virtual size_t onTTYWrite(const uint8_t *buffer, size_t size) override;
