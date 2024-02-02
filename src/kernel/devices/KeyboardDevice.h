@@ -30,6 +30,12 @@ class KeyboardDevice final : public IRQHandler, public CharacterDevice {
     void updateModifier(KeyModifiers modifier, bool pressed);
     // Is Alt, Shift, Control or GUI pressed?
     uint8_t _modifiers { 0 };
+
+    // Was the pressed key composite by two scan codes?
+    // starting with '0xE0' and another? 
+    // For example the GUI key scan codes when pressed are 0xE0 and 0x5B
+    // and 0xE0 and 0xDB when released
+    bool _isE0Preceded { 0 };
 };
 
 class KeyboardClient {
