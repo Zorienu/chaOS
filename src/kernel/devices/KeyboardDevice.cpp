@@ -213,6 +213,26 @@ static KeyCode scancodeToKeyCodeShifted[BREAK_CODE_OFFSET] = {
   Key_GUI, // 0x5B 
 };
 
+static char keyCodeToCharacter[BREAK_CODE_OFFSET] = {
+  // 0 
+  0, '\033', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0x08, '\t',
+  // 16 (0x0F)
+  'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n', 0,
+  // 30 (0x1E)
+  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\',
+  // 44 (0x2C)
+  'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',
+  // 54 (0x36)
+  0, '*', 0, ' ', 0, 0,
+  // 60 (0x3C)
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  // 70 (0x46)
+  0, 0, 0, 0, '-', 0, 0, 0, '+', 0,
+  // 80 (0x50)
+  0, 0, 0, 0, 0, 0, '\\', 0, 0, 0,
+};
+
+
 /*
  * Make codes: sent when a key is pressed or held down
  * Break codes: sent when a key is released
