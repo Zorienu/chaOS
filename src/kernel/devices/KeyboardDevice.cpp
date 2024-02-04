@@ -263,23 +263,54 @@ static char scanCodeToCharacterShifted[BREAK_CODE_OFFSET] = {
  * There is a unique make code and break code for each key on the keyboard
  */
 void KeyboardDevice::handleIRQ () {
-  uint8_t key = IO::inb(0x60);
+  uint8_t scancode = IO::inb(0x60);
 
-  // Scancode set 1 -> Ascii lookup table
-  const char scancode_to_ascii[] = "\x00\x1B" "1234567890-=" "\x08"
-  "\x00" "qwertyuiop[]" "\x0D\x1D" "asdfghjkl;'`" "\x00" "\\"
-  "zxcvbnm,./" "\x00\x00\x00" " ";
+  if (scancode == 0xE0) {
+    _isE0Preceded = true;
+    return;
+  }
 
-  // printf("\nkey: %d %c", key, scancode_to_ascii[key]);
+  // Take only the key code part from the make/break code by masking with 0x7F
+  KeyCode keyCode = scancodeToKeyCode[scancode & (BREAK_CODE_OFFSET - 1)];
+  bool pressed = !(scancode & BREAK_CODE_OFFSET);
+  char character = _modifiers & Modifier_Shift ? scanCodeToCharacterShifted[scancode] : scanCodeToCharacter[scancode];
 
-  if (scancode_to_ascii[key] == '1') VirtualConsole::switchTo(0);
-  else if (scancode_to_ascii[key] == '2') VirtualConsole::switchTo(1);
-  else if (scancode_to_ascii[key] == '3') cls();
+  if (_modifiers & Modifier_Alt) {
+    if (character == '1') return VirtualConsole::switchTo(0);
+    else if (character == '2') return VirtualConsole::switchTo(1);
+    else if (character == '3') return VirtualConsole::getCurrentConsole()->clear();
+  }
 
-  // if (key == 28) kprintf("\n");
-  // else if (key < 100) kprintf("%c", scancode_to_ascii[key]);
+  switch (keyCode) {
+    case Key_LeftShift:
+    case Key_RightShift: {
+      updateModifier(Modifier_Shift, pressed);
+      break;
+    };
+    case Key_Control: {
+      updateModifier(Modifier_Control, pressed);
+      break;
+    };
+    case Key_Alt: {
+      updateModifier(Modifier_Alt, pressed);
+      break;
+    };
+    case Key_GUI: {
+      updateModifier(Modifier_GUI, pressed);
+      break;
+    };
+    default: {
+      KeyEvent event;
+      event.pressed = pressed;
+      event.code = keyCode;
+      event.modifiers = _modifiers;
+      event.character = character;
 
-  if (_client && key<100) _client->onKeyPressed(scancode_to_ascii[key]);
+      if (_client) _client->onKeyPressed(event);
+    }
+  }
+
+  _isE0Preceded = false;
 }
 
 KeyboardDevice::KeyboardDevice() : IRQHandler(IRQ_KEYBOARD), CharacterDevice() {
