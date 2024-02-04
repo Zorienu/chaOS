@@ -213,7 +213,10 @@ static KeyCode scancodeToKeyCodeShifted[BREAK_CODE_OFFSET] = {
   Key_GUI, // 0x5B 
 };
 
-static char keyCodeToCharacter[BREAK_CODE_OFFSET] = {
+/*
+ * Map to convert from scancode to the actual character (While shift key is no pressed)
+ */
+static char scanCodeToCharacter[BREAK_CODE_OFFSET] = {
   // 0 
   0, '\033', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0x08, '\t',
   // 16 (0x0F)
@@ -232,6 +235,27 @@ static char keyCodeToCharacter[BREAK_CODE_OFFSET] = {
   0, 0, 0, 0, 0, 0, '\\', 0, 0, 0,
 };
 
+/*
+ * Map to convert from scancode to the actual character (While shift key is pressed)
+ */
+static char scanCodeToCharacterShifted[BREAK_CODE_OFFSET] = {
+  // 0 
+  0, '\033', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0x08, '\t',
+  // 16 (0x0F)
+  'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n', 0,
+  // 30 (0x1E)
+  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0, '|',
+  // 44 (0x2C)
+  'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',
+  // 54 (0x36)
+  0, '*', 0, ' ', 0, 0,
+  // 60 (0x3C)
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  // 70 (0x46)
+  0, 0, 0, 0, '-', 0, 0, 0, '+', 0,
+  // 80 (0x50)
+  0, 0, 0, 0, 0, 0, '|', 0, 0, 0,
+};
 
 /*
  * Make codes: sent when a key is pressed or held down
