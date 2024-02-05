@@ -35,6 +35,17 @@ void VirtualConsole::onChar(char ch) {
     _currentColumn = 0;
     _currentRow++;
   }
+  else if (ch == '\b') {
+    if (_currentColumn > 0) {
+      _currentColumn--;
+    }
+    else if (_currentRow > 0) { 
+      _currentColumn = SCREEN_WIDTH - 1;
+      _currentRow--;
+    }
+
+    putCharAt(_currentRow, _currentColumn, 0x0);
+  }
   else {
     putCharAt(_currentRow, _currentColumn, ch);
     _currentColumn++;
