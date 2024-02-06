@@ -1,3 +1,4 @@
+#pragma once
 #include <stddef.h>
 
 /*
@@ -19,3 +20,5 @@ void *kmalloc(size_t size);
  * Free implementation for the kernel
  */
 void kfree(void *ptr);
+
+void *operator new(size_t size, void *ptr);

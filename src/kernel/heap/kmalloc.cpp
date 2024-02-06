@@ -1,3 +1,4 @@
+#include "kmalloc.h"
 #include "../../include/mem/virtualMem.h"
 #include "../../include/c/stdio.h"
 #include "../../include/c/string.h"
@@ -100,6 +101,10 @@ void *operator new(size_t size) {
  
 void *operator new[](size_t size) {
     return kmalloc(size);
+}
+
+void *operator new(size_t size, void *ptr) {
+    return ptr;
 }
  
 void operator delete(void *p) {
