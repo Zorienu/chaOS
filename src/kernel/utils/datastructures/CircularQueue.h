@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 
 template<typename T, int capacity>
@@ -11,7 +12,8 @@ class CircularQueue {
       
       // Queue already full? we will lost the first element and must destroy them
       if (full()) {
-        ((T)_elements[idx]).~T();
+        T element = elements()[(front + m_size) % capacity];
+        element.~T();
       }
 
       // Save new item at the current index
@@ -57,6 +59,8 @@ class CircularQueue {
     }
 
   private: 
+    T* elements() { return (T*)_elements; }
+
     uint8_t _elements[sizeof(T) * capacity];
     int m_size;
     int front;
