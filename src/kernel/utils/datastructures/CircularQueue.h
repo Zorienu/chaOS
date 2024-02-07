@@ -1,40 +1,59 @@
 #pragma once
 #include <stdint.h>
+#include "../kprintf.h"
+#include "../Assertions.h"
 
 template<typename T, int capacity>
 class CircularQueue {
   public:
-    CircularQueue() {}
+    CircularQueue() { kprintf("Elements address: %lx", _elements); }
 
-    void enqueue(T value) {
+    // We only recieve rvalues to avoid the caller keep using the object
+    // Chat GPT says: When you pass an object by value or by value reference, 
+    // you provide a copy of the object to the function. 
+    // This means that any modifications made to the object within the function are local 
+    // to that function and do not affect the original object in the caller's scope.
+    // Here's a good explanation differentiating:
+    // void foo(Widget w);
+    // void foo(Widget& w);
+    // void foo(const Widget& w);
+    // void foo(Widget&& w); 
+    // https://stackoverflow.com/questions/37935393/pass-by-value-vs-pass-by-rvalue-reference
+    void enqueue(T&& value) {
       // if we exceed the capacity, we simply go back to 0 and lost the first element
-      uint32_t idx = ((front + m_size) % capacity) * sizeof(T);
+      uint32_t idx = ((front + _size) % capacity) * sizeof(T);
       
       // Queue already full? we will lost the first element and must destroy them
-      if (full()) {
-        T element = elements()[(front + m_size) % capacity];
-        element.~T();
-      }
+      if (full()) first().~T();
 
       // Save new item at the current index
       new (&_elements[idx]) T(value);
 
       // The queue is full now, then we should move the head to the next element
+      // (losing the previously "first" element)
       if (full()) front = (front + 1) % capacity;
       // Otherwise we simply say that the queue has 1 more element
-      else m_size++;
+      else _size++;
     };
 
+    // Overload to receive lvalues (constant, to avoid modifying it) 
+    // and create a copy of them
+    void enqueue(const T& value) {
+      enqueue(T(value));
+    }
+
     T dequeue() {
+      ASSERT(!empty());
+
       // Get the index of the first element in the queue
       uint32_t idx = front * sizeof(T);
       
       // Move the head to the next element
       front = (front + 1) % capacity;
       
-      if (!empty()) m_size--;
+      if (!empty()) _size--;
       
-      // Get the address of the "idx" element and cast it
+      // Get the address of the "idx" element 
       T *element = (T*)&_elements[idx];
       
       // Use "copy constructor" to copy the content of the element into the value to be returned
@@ -47,21 +66,25 @@ class CircularQueue {
     };
     
     bool full() {
-        return m_size == capacity;
+        return _size == capacity;
     }
     
     bool empty() {
-        return m_size == 0;
+        return _size == 0;
     }
     
     int size() {
-        return m_size;
+        return _size;
     }
 
   private: 
     T* elements() { return (T*)_elements; }
 
+    const T& at(int index) { return elements()[(front + index) % capacity]; };
+    const T& first() { return at(0); }
+    const T& last() { return at(size() - 1); }
+
     uint8_t _elements[sizeof(T) * capacity];
-    int m_size;
+    int _size;
     int front;
 };
