@@ -2,6 +2,7 @@
 #include "CharacterDevice.h"
 #include "../irqHandler.h"
 #include "../KeyCode.h"
+#include "../utils/datastructures/CircularQueue.h"
 
 class KeyboardClient;
 
@@ -23,6 +24,7 @@ class KeyboardDevice final : public IRQHandler, public CharacterDevice {
     void setClient(KeyboardClient *client) { _client = client; }
 
   private:
+    CircularQueue<KeyEvent, 16> _queue;
     virtual void handleIRQ() override;
 
     KeyboardClient *_client { NULL };

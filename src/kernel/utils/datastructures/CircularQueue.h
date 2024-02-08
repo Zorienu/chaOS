@@ -14,10 +14,10 @@ class CircularQueue {
     // This means that any modifications made to the object within the function are local 
     // to that function and do not affect the original object in the caller's scope.
     // Here's a good explanation differentiating:
-    // void foo(Widget w);
-    // void foo(Widget& w);
-    // void foo(const Widget& w);
-    // void foo(Widget&& w); 
+    // void foo(Widget w); lvalues and rvalues
+    // void foo(Widget& w); lvalues only
+    // void foo(const Widget& w); lvalues and "rvalues"
+    // void foo(Widget&& w);  rvalues only
     // https://stackoverflow.com/questions/37935393/pass-by-value-vs-pass-by-rvalue-reference
     void enqueue(T&& value) {
       // if we exceed the capacity, we simply go back to 0 and lost the first element

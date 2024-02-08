@@ -5,6 +5,7 @@
 #include "../tty/VirtualConsole.h"
 #include "../utils/kprintf.h"
 #include "../KeyCode.h"
+#include "../heap/kmalloc.h"
 
 #define IRQ_KEYBOARD 1
 
@@ -307,6 +308,7 @@ void KeyboardDevice::handleIRQ () {
       event.character = character;
 
       if (_client) _client->onKeyPressed(event);
+      _queue.enqueue(event);
     }
   }
 
