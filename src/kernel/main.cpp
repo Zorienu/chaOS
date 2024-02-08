@@ -9,10 +9,14 @@
 #include "../include/io/io.h"
 #include "../include/mem/MemoryManager.h"
 #include "devices/KeyboardDevice.h"
+#include "fileSystem/File.h"
 #include "test.h"
 #include "heap/kmalloc.h"
 #include "tty/VirtualConsole.h"
 #include "utils/kprintf.h"
+#include "utils/datastructures/CircularQueue.h"
+#include "filesystem/FileDescription.h"
+#include "../include/c/string.h"
 
 // https://stackoverflow.com/questions/329059/what-is-gxx-personality-v0-for
 void *__gxx_personality_v0;
@@ -47,29 +51,26 @@ extern "C" void OSStart() {
 
   asm volatile("sti");
 
-  TestClass *counter = new TestClass();
-  counter->setCounter(10);
-
-  printf("\nCounter: %d", counter->getCounter());
-  counter->incrementCounter();
-  printf("\nCounter: %d", counter->getCounter());
-
-  delete counter; 
-
   VirtualConsole::initialize();
   VirtualConsole *vc = new VirtualConsole(0);
   VirtualConsole *vc2 = new VirtualConsole(1);
   vc->switchTo(0);
   
-  kprintf("Potato\n");
+  FileDescription *fd = FileDescription::create(*vc);
+  char buffer[16];
+  int nRead = 0;
 
-  vc->switchTo(1);
-
-  kprintf("Tomato\n");
-
-  vc->switchTo(0);
-
-  kprintf("Pinneapple\n");
+  for(;;) {
+    nRead += vc->read(*fd, (uint8_t *)&buffer[nRead], sizeof(buffer));
+    for (int i = 0; i < nRead; i++) {
+      if (buffer[i] == '\n') { 
+        kprintf("\nRead buffer:%s \n", buffer);
+        memset(buffer, 0x0, sizeof(buffer));
+        nRead = 0;
+        break;
+      };
+    }
+  }
 
   while(1);
 
