@@ -140,5 +140,9 @@ VirtualConsole* VirtualConsole::getCurrentConsole() {
 }
 
 void VirtualConsole::onKeyPressed(KeyEvent event) {
-  if (event.pressed) this->onChar(event.character);
+  if (!event.pressed) return;
+
+  this->onChar(event.character);
+
+  emit(event.character);
 }
