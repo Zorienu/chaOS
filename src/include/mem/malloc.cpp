@@ -30,8 +30,8 @@ void mallocInit(uint32_t size) {
  */
 void mallocSplit(MallocBlockType *temp, uint32_t size) {
   MallocBlockType *newBlock = (MallocBlockType *)((VirtualAddress)temp + sizeof(MallocBlockType) + size);
-  printf("\n-->Temp address: %lx", temp);
-  printf("\n-->New block: %lx", newBlock);
+  // printf("\n-->Temp address: %lx", temp);
+  // printf("\n-->New block: %lx", newBlock);
 
   newBlock->free = true;
   newBlock->size = temp->size - size - sizeof(MallocBlockType);
@@ -41,8 +41,8 @@ void mallocSplit(MallocBlockType *temp, uint32_t size) {
   temp->free = false;
   temp->size = size;
 
-  printf("\n-->Old block size: %d", temp->size);
-  printf("\n-->New block size: %d", newBlock->size);
+  // printf("\n-->Old block size: %d", temp->size);
+  // printf("\n-->New block size: %d", newBlock->size);
 }
 
 void *mallocNextBlock(uint32_t size) {
@@ -54,22 +54,22 @@ void *mallocNextBlock(uint32_t size) {
 
   MallocBlockType *temp = mallocListHead;
 
-  printf("\n-->Next block: %lx", temp->next);
+  // printf("\n-->Next block: %lx", temp->next);
 
   // Find next big enough free block
   while (((temp->size < size) || !temp->free) && temp->next) {
-    printf("\nInside while: %lx", temp);
+    // printf("\nInside while: %lx", temp);
     temp = temp->next;
   }
 
-  printf("\nFree block: %lx", temp);
+  // printf("\nFree block: %lx", temp);
 
   if (size == temp->size && temp->free) {
     temp->free = false;
   }
   else if (temp->size > size + sizeof(MallocBlockType)) {
     mallocSplit(temp, size);
-    printf("\nAfter malloc split: temp.next: %lx", temp->next);
+    // printf("\nAfter malloc split: temp.next: %lx", temp->next);
   } else {
     uint32_t neededAdditionalBytes = size + sizeof(MallocBlockType) - temp->size;
     uint32_t neededAdditionalPages = neededAdditionalBytes / PAGE_SIZE;

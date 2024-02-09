@@ -64,6 +64,8 @@ void printMemoryMap() {
   printf("\n\nTotal memory in bytes: %x", SMAPEntry->baseAddress + SMAPEntry->length - 1);
   printf("\nAvailable blocks: %x", availableBlocks / PAGE_SIZE);
   printf("\nReserved blocks: %x", reservedBlocks / PAGE_SIZE);
+  printf("\nPhysicalMemory: %lx", physicalMemory);
+  printf("\nPhysicalMemory value: %lx %lb", &physicalMemory->bitmap[8], physicalMemory->bitmap[8]);
 }
 
 void initializeBlock(uint32_t address) {

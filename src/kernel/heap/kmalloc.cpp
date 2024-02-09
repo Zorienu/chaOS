@@ -1,8 +1,8 @@
 #include "kmalloc.h"
 #include "../../include/mem/virtualMem.h"
-#include "../../include/c/stdio.h"
 #include "../../include/c/string.h"
 #include <stddef.h>
+#include "../utils/kprintf.h"
 
 static constexpr size_t INITIAL_KMALLOC_MEMORY_SIZE = 2 * MB;
 
@@ -17,13 +17,13 @@ typedef struct KmallocBlock {
 struct KmallocBlock *kmallocHead;
 
 void pritnfKmallocInformation() {
-  printf("\nkmalloc: %ld", INITIAL_KMALLOC_MEMORY_SIZE);
-  printf("\nkmalloc address: %lx", initialKmallocMemory);
-  printf("\nKmallocBlock sizeof: %d", sizeof(KmallocBlock));
-  printf("\n=== Kmalloc blocks ===");
+  kprintf("\nkmalloc: %ld", INITIAL_KMALLOC_MEMORY_SIZE);
+  kprintf("\nkmalloc address: %lx", initialKmallocMemory);
+  kprintf("\nKmallocBlock sizeof: %d", sizeof(KmallocBlock));
+  kprintf("\n=== Kmalloc blocks ===");
 
   for (struct KmallocBlock *temp = kmallocHead; temp; temp = temp->next) 
-      printf("\nAddress: %lx - Size: %d - Free: %d - Next: %lx", temp, temp->size, temp->free, temp->next);
+      kprintf("\nAddress: %lx - Size: %d - Free: %d - Next: %lx", temp, temp->size, temp->free, temp->next);
 
 }
 
@@ -87,7 +87,7 @@ void kfree(void *ptr) {
     struct KmallocBlock *temp = kmallocHead;
 
     for (; temp; temp = temp->next) {
-        printf("\nkfree: temp: %lx - %lx", temp, temp + 1);
+        kprintf("\nkfree: temp: %lx - %lx", temp, temp + 1);
         if (temp + 1 == ptr) temp->free = true;
         kmallocJoinFreeBlocks();
     }
@@ -95,7 +95,6 @@ void kfree(void *ptr) {
 
 void *operator new(size_t size) {
     void *result = kmalloc(size);
-    printf("\nCalling kmalloc with size: %d - %lx", size, result);
     return result;
 }
  

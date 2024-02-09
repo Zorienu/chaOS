@@ -45,10 +45,8 @@ void MemoryManager::initialize(uint32_t kernelEnd) {
    * Virtual memory initialization
    */
   PageDirectory2 *pageDirectory = (PageDirectory2 *)allocateBlock();
-  //
   // Out of memory
   if (!pageDirectory) return;
-  // printf("\nPage directory: %lx", pageDirectory);
 
   memset(pageDirectory, 0, sizeof(PageDirectory2));
 
@@ -199,6 +197,6 @@ void MemoryManager::enablePagination2() {
 }
 
 void MemoryManager::print() {
-  printf("\nPhysicalMemory MemoryManager: %lx", &bitmap);
-  printf("\nPhysicalMemory MemoryManager: %lx %lb", &bitmap[8], bitmap[8]);
+  // printf("\nPhysicalMemory MemoryManager: %lx", &bitmap);
+  // printf("\nPhysicalMemory MemoryManager: %lx %lb", &bitmap[8], bitmap[8]);
 }

@@ -60,7 +60,7 @@ __attribute__ ((interrupt)) void handleIRQWrapper(IntFrame32 *frame) {
 }
 
 void registerIRQHandler(uint8_t irq, IRQHandler& handler) {
-  printf("\nRegistering irq number %d", irq);
+  // printf("\nRegistering irq number %d", irq);
   irqHandlers[irq] = &handler;
   setIDTDescriptor(PIC_IRQ_0_IDT_ENTRY + irq, handleIRQWrapper, INT_GATE_FLAGS);
 }
