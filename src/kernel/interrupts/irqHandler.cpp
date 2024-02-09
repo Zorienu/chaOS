@@ -1,6 +1,7 @@
+#pragma once
 #include "irqHandler.h"
-#include "interrupts/pic.h"
-#include "interrupts/idt.h"
+#include "pic.h"
+#include "idt.h"
 
 IRQHandler::IRQHandler(uint8_t irq) : _irq_number(irq) {
   registerIRQHandler(irq, *this);
