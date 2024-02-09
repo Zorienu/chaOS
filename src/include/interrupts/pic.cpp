@@ -142,31 +142,13 @@ void configurePIT(uint8_t channel, uint8_t operatingMode, uint16_t counter) {
   asm volatile("sti");
 }
 
-__attribute__ ((interrupt)) void keyboardIRQ1Handler(IntFrame32 *frame) {
-  uint8_t key = IO::inb(0x60);
-
-  // Scancode set 1 -> Ascii lookup table
-  const char scancode_to_ascii[] = "\x00\x1B" "1234567890-=" "\x08"
-  "\x00" "qwertyuiop[]" "\x0D\x1D" "asdfghjkl;'`" "\x00" "\\"
-  "zxcvbnm,./" "\x00\x00\x00" " ";
-
-  // printf("\nkey: %d %c", key, scancode_to_ascii[key]);
-
-  if (scancode_to_ascii[key] == '1') cls();
-
-  if (key == 28) printf("\n");
-  else if (key < 100) printf("%c", scancode_to_ascii[key]);
-
-  sendEOI(PIC_IRQ_KEYBOARD);
-}
-
 volatile uint16_t testt = 0;
 volatile uint32_t test2 = 0;
 
 __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
   if (testt++ == 100) // use 2000 with bochs
   {
-    printf("\nTimer: %ld", test2++);
+    // printf("\nTimer: %ld", test2++);
     testt=0;
   }
 
