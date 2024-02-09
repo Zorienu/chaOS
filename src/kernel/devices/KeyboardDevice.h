@@ -1,6 +1,6 @@
 #pragma once
 #include "CharacterDevice.h"
-#include "../interrupts/irqHandler.h"
+#include "../interrupts/IRQHandler.h"
 #include "../KeyCode.h"
 #include "../utils/datastructures/CircularQueue.h"
 

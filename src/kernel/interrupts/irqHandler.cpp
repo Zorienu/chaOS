@@ -1,5 +1,5 @@
 #pragma once
-#include "irqHandler.h"
+#include "IRQHandler.h"
 #include "pic.h"
 #include "idt.h"
 

@@ -1,7 +1,7 @@
 #include "idt.h"
 #include <stdint.h>
 #include "pic.h"
-#include "irqHandler.h"
+#include "IRQHandler.h"
 
 /*
  * The IDT (Interrupt Descriptor Table)
