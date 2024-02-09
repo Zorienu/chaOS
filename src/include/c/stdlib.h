@@ -9,4 +9,4 @@ void *malloc(int32_t size);
 /*
  * Free implementation
  */
-void *free(void *ptr);
+void free(void *ptr);

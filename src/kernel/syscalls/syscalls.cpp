@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "syscalls.h"
-#include "syscallNumbers.h"
-#include "../mem/malloc.h"
+#include "../../include/syscallNumbers.h"
+#include "../../include/mem/malloc.h"
 
 
 int32_t syscallTest(SyscallRegisters regs) {

@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "./syscallWrappers.h"
-#include "../syscalls/syscallNumbers.h"
+#include "../syscallNumbers.h"
 
 int32_t syscallTestWrapper() {
   int32_t result = -1;

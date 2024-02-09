@@ -1,6 +1,6 @@
 #include "irqHandler.h"
-#include "../include/interrupts/pic.h"
-#include "../include/interrupts/idt.h"
+#include "interrupts/pic.h"
+#include "interrupts/idt.h"
 
 IRQHandler::IRQHandler(uint8_t irq) : _irq_number(irq) {
   registerIRQHandler(irq, *this);

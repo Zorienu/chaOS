@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "pic.h"
-#include "../io/io.h"
-#include "../c/stdio.h"
+#include "../../include/io/io.h"
+#include "../utils/kprintf.h"
 
 namespace PIC {
 
@@ -148,7 +148,7 @@ volatile uint32_t test2 = 0;
 __attribute__ ((interrupt)) void pitIRQ0Handler(IntFrame32 *frame) {
   if (testt++ == 100) // use 2000 with bochs
   {
-    // printf("\nTimer: %ld", test2++);
+    // kprintf("\nTimer: %ld", test2++);
     testt=0;
   }
 

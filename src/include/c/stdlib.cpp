@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "../syscalls/syscallNumbers.h"
+#include "../syscallNumbers.h"
 
 void *malloc(int32_t size) {
   void *ptr = 0x0;
@@ -9,6 +9,6 @@ void *malloc(int32_t size) {
   return ptr;
 }
 
-void *free(void *ptr) {
+void free(void *ptr) {
   asm volatile("int $0x80" : : "a"(SYSCALL_FREE), "b"(ptr));
 }
