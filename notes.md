@@ -34,10 +34,44 @@ Small r/w pieces of memory
 ### C and C++
 - [What is the effect of extern "C" in C++?](https://stackoverflow.com/questions/1041866/what-is-the-effect-of-extern-c-in-c)
 - [Calling Global Constructors](https://wiki.osdev.org/Calling_Global_Constructors) Explanation for crti.asm and crtn.asm
+- [Pass by value vs pass by rvalue reference](https://stackoverflow.com/questions/37935393/pass-by-value-vs-pass-by-rvalue-reference)
 
 ### File I/O
 - [Overview: Serenety Kernel File I/O](https://www.youtube.com/watch?v=JJx7j4mR3CM)
 
 ### Git
 - [GitHub - Repository state at specified time](https://stackoverflow.com/questions/21345787/github-repository-state-at-specified-time)
+
+### Resources
+- [serenetyOS](https://github.dev/SerenityOS/serenity/tree/HEAD@%7B2019-10-30%7D)
 - [Linux device driver lecture 15 : Character driver](https://www.youtube.com/watch?v=R5qSTZA0PuY)
+
+#### Move, is just this (StdLibExtras.h)
+```
+T&& move(T& arg)
+{
+    return static_cast<T&&>(arg);
+}
+```
+
+## TODO
+[] Migrar memory managers a clases
+[x] Implementar keyboardDevice based on serenetyOS
+[x] Implementar TTY device based on serenetyOS
+[x] Implementar VirtualConsole -> ConsoleImplementation -> Console -> CharacterDevice (read, write, etc)
+[x] Implementar "K"printf usando printf_internal -> console_putch para apuntar a VirtualConsole (Console::the().set_implementation(s_consoles[s_active_console]))
+[x] File system
+[x] Implementar Backspace en VirtualConsole
+[] VGA
+[] Buscaminas
+[x] Implement CircularDeque for TTY
+[x] Replace all calls to printf with kprintf
+[] Implement file system
+[] Figure out how to move everything to that file system
+[] fix: debo incluir kmalloc.h para cuando quiero usar CircularQueue
+[] shell
+[] Implementar delete word from console, en Serenety borran del \_input\_buffer y hacen "echo" de un char especial para indicar
+a la shell que borre la palabra
+[] cowsay
+[x] Move interrupts and syscall folder from "include" to "kernel"
+[] Improve MakeFile, listing all files to compile
