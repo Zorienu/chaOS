@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "../kprintf.h"
 #include "../Assertions.h"
+#include "../utility.h"
 
 template<typename T, int capacity>
 class CircularQueue {
@@ -22,7 +23,7 @@ class CircularQueue {
     // https://stackoverflow.com/questions/37935393/pass-by-value-vs-pass-by-rvalue-reference
     void enqueue(T&& value) {
       // if we exceed the capacity, we simply go back to 0 and lost the first element
-      uint32_t idx = ((front + _size) % capacity) * sizeof(T);
+      uint32_t idx = ((_front + _size) % capacity) * sizeof(T);
       
       // Queue already full? we will lost the first element and must destroy them
       if (full()) first().~T();
@@ -32,7 +33,7 @@ class CircularQueue {
 
       // The queue is full now, then we should move the head to the next element
       // (losing the previously "first" element)
-      if (full()) front = (front + 1) % capacity;
+      if (full()) _front = (_front + 1) % capacity;
       // Otherwise we simply say that the queue has 1 more element
       else _size++;
     };
@@ -47,10 +48,10 @@ class CircularQueue {
       ASSERT(!empty());
 
       // Get the index of the first element in the queue
-      uint32_t idx = front * sizeof(T);
+      uint32_t idx = _front * sizeof(T);
       
       // Move the head to the next element
-      front = (front + 1) % capacity;
+      _front = (_front + 1) % capacity;
       
       if (!empty()) _size--;
       
@@ -58,7 +59,7 @@ class CircularQueue {
       T *element = (T*)&_elements[idx];
       
       // Use "copy constructor" to copy the content of the element into the value to be returned
-      T value = *element;
+      T value = move(*element);
       
       // Destroy the stored element (this won't affect "value")
       element->~T();
@@ -68,7 +69,7 @@ class CircularQueue {
 
     void clear() {
       while (!empty()) {
-        elements()[front++].~T();
+        elements()[_front++].~T();
         _size--;
       }
     }
@@ -88,11 +89,11 @@ class CircularQueue {
   private: 
     T* elements() { return (T*)_elements; }
 
-    const T& at(int index) { return elements()[(front + index) % capacity]; };
+    const T& at(int index) { return elements()[(_front + index) % capacity]; };
     const T& first() { return at(0); }
     const T& last() { return at(size() - 1); }
 
     uint8_t _elements[sizeof(T) * capacity];
     int _size;
-    int front;
+    int _front;
 };
