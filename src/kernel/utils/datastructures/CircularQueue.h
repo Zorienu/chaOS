@@ -7,6 +7,7 @@ template<typename T, int capacity>
 class CircularQueue {
   public:
     CircularQueue() { kprintf("Elements address: %lx", _elements); }
+    ~CircularQueue() { clear(); }
 
     // We only recieve rvalues to avoid the caller keep using the object
     // Chat GPT says: When you pass an object by value or by value reference, 
@@ -64,6 +65,13 @@ class CircularQueue {
       
       return value;
     };
+
+    void clear() {
+      while (!empty()) {
+        elements()[front++].~T();
+        _size--;
+      }
+    }
     
     bool full() {
         return _size == capacity;
