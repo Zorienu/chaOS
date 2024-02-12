@@ -29,7 +29,10 @@ class CircularQueue {
       if (full()) first().~T();
 
       // Save new item at the current index
-      new (&_elements[idx]) T(value);
+      // Using move since "value" is now considered an l-value
+      // instead of an r-value, then we need to tell to consider it
+      // as an r-value again to use the move constructor instead of the copy constructor
+      new (&_elements[idx]) T(move(value));
 
       // The queue is full now, then we should move the head to the next element
       // (losing the previously "first" element)
