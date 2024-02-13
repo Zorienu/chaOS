@@ -61,7 +61,7 @@ class CircularQueue {
       // Get the address of the "idx" element 
       T *element = (T*)&_elements[idx];
       
-      // Use "copy constructor" to copy the content of the element into the value to be returned
+      // Use "move constructor" to move the content of the element into the value to be returned
       T value = move(*element);
       
       // Destroy the stored element (this won't affect "value")
