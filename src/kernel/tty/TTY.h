@@ -2,7 +2,7 @@
 #include "stdint.h"
 #include <stddef.h>
 #include "../devices/CharacterDevice.h"
-#include "../utils/datastructures/CircularQueue.h"
+#include "../utils/datastructures/CircularDeque.h"
 
 class TTY : public CharacterDevice {
   public:
@@ -28,7 +28,7 @@ class TTY : public CharacterDevice {
     void emit(uint8_t ch);
 
   private:
-    CircularQueue<uint8_t, 1024> _input_buffer;
+    CircularDeque<uint8_t, 1024> _input_buffer;
     uint8_t _rows;
     uint8_t _columns;
 };
