@@ -53,6 +53,7 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
 
 img: clean link_bootloader link_kernel
+	# count: 10000 -> 10000 sectors of 512 bytes each -> 5120000 bytes
 	dd if=/dev/zero of=$(BUILD_DIR_IMG)/boot.img count=10000
 	dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
 	# seek=7  -> 0xE00 (0x200 * 7)

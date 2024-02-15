@@ -14,8 +14,10 @@
 void readSegment(uint8_t *, uint32_t, uint32_t);
 
 extern "C" void loadOS() {
+  // We will put the elf header in this address
   ELF32_header *elf = (ELF32_header *)0x10000;
 
+  // Load 4096 bytes from hard disk address KERNEL_ELF_DISK_OFFSET into 0x10_000
   readSegment((uint8_t *)elf, PAGE_SIZE, 0);
 
   uint32_t elfMagic = *(uint32_t *)elf->ident;

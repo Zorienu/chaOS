@@ -46,14 +46,6 @@ Small r/w pieces of memory
 - [serenetyOS](https://github.dev/SerenityOS/serenity/tree/HEAD@%7B2019-10-30%7D)
 - [Linux device driver lecture 15 : Character driver](https://www.youtube.com/watch?v=R5qSTZA0PuY)
 
-#### Move, is just this (StdLibExtras.h)
-```
-T&& move(T& arg)
-{
-    return static_cast<T&&>(arg);
-}
-```
-
 ## TODO
 [] Migrar memory managers a clases
 [x] Implementar keyboardDevice based on serenetyOS
@@ -62,16 +54,36 @@ T&& move(T& arg)
 [x] Implementar "K"printf usando printf_internal -> console_putch para apuntar a VirtualConsole (Console::the().set_implementation(s_consoles[s_active_console]))
 [x] File system
 [x] Implementar Backspace en VirtualConsole
-[] VGA
-[] Buscaminas
 [x] Implement CircularDeque for TTY
 [x] Replace all calls to printf with kprintf
-[] Implement file system
+[x] Move interrupts and syscall folder from "include" to "kernel"
+[] Implement file system - in progress
 [] Figure out how to move everything to that file system
-[] fix: debo incluir kmalloc.h para cuando quiero usar CircularQueue
 [] shell
+[] Process 
+[] VGA
+[] fix: debo incluir kmalloc.h para cuando quiero usar CircularQueue
+[] Improve MakeFile, listing all files to compile
 [] Implementar delete word from console, en Serenety borran del \_input\_buffer y hacen "echo" de un char especial para indicar
 a la shell que borre la palabra
+[] Buscaminas
 [] cowsay
-[x] Move interrupts and syscall folder from "include" to "kernel"
-[] Improve MakeFile, listing all files to compile
+
+# File system
+### Fundamental operations of a file system
+- Tracking the available storage space
+- Tracking which block or blocks of data belong to which files
+- Creating new files
+- Reading data from existing files into memory
+- Updating the data in the files
+- Deleting existing files
+Note that the last 4 points are CRUD
+
+### Additional features
+- Assigning human-readable names to files, and renaming files after creation
+- Allowing files to be divided among non-contiguous blocks in storage, and tracking the parts of files even when they are fragmented across the medium
+- Providing some form of hierarchical structure, allowing the files to be divided into directories or folders
+- Buffering reading and writing to reduce the number of actual operation on the physical medium
+- Caching frequently accessed files or parts of files to speed up access
+- Allowing files to be marked as 'read-only' to prevent unintentional corruption of critical data
+- Providing a mechanism for preventing unauthorized access to a user's files
