@@ -129,7 +129,7 @@ void putNumber (int number, int base) {
 
   if (number < 0) putc('-');
   puts(prefix);
-  number = abs(number);
+  number = Math::abs(number);
 
   if (number == 0) {
     putc('0');

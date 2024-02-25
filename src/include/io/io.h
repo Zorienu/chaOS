@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 /* Ports */
-#define DISK_PORT_BASE 0x1F0
+#define DISK_PORT_BASE 0x1F0 // For primary disk, 0x170 for secondary
 
 /* Commands */
 #define DISK_READ_CMD 0x20
