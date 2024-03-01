@@ -6,7 +6,7 @@
 
 static constexpr size_t INITIAL_KMALLOC_MEMORY_SIZE = 2 * MB;
 
-__attribute__((section(".kernel_heap"))) static uint8_t initialKmallocMemory[INITIAL_KMALLOC_MEMORY_SIZE];
+static uint8_t initialKmallocMemory[INITIAL_KMALLOC_MEMORY_SIZE];
 
 typedef struct KmallocBlock {
     uint32_t size;

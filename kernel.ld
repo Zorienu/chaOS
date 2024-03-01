@@ -39,9 +39,6 @@ SECTIONS
 
   .bss : {
     *(.bss)
-    
-    . = ALIGN(4K);
-    *(.kernel_heap)
   }
 
   .kernel_quickmap_page ALIGN(0x1000) : {
