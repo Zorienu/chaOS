@@ -1,4 +1,3 @@
-#pragma once
 #include "IRQHandler.h"
 #include "pic.h"
 #include "idt.h"
