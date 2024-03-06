@@ -8,7 +8,18 @@ SRC_DIR=src
 BUILD_DIR=build
 BUILD_DIR_IMG=$(BUILD_DIR)/bin
 
-CFLAGS=-mgeneral-regs-only -nostdlib -ffreestanding -fno-rtti -Wno-write-strings
+CFLAGS=-mgeneral-regs-only \
+			 -nostdlib -ffreestanding \
+			 -fno-rtti -Wno-write-strings \
+			 -I ./src/include/c \
+			 -I ./src/include/io \
+			 -I ./src/include/mem \
+			 -I ./src/include/elf \
+			 -I ./src/include/sys \
+			 -I ./src/kernel/devices \
+			 -I ./src/kernel/syscalls \
+			 -I ./src/kernel/heap \
+			 -I ./src/kernel \
 #-Wall -Wextra -Wno-pointer-sign -Wno-interrupt-service-routine
 
 # Get crtbegin.o and crtend.o paths
