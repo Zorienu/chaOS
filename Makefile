@@ -18,11 +18,18 @@ CRTEND_OBJ:=$(shell $(GPP) $(CFLAGS) -print-file-name=crtend.o)
 CRTI_OBJ=$(BUILD_DIR)/crti.o
 CRTN_OBJ=$(BUILD_DIR)/crtn.o
 
-ASM_OBJECTS = \
-	build/objects/kernel/crti.ao \
-	build/objects/kernel/crtn.ao \
-	build/objects/kernel/entry.ao \
-	build/objects/include/x86/x86.ao \
+LIBRARY_OBJECTS = \
+	build/objects/include/c/stdio.o \
+	build/objects/include/c/stdlib.o \
+	build/objects/include/c/string.o \
+	build/objects/include/elf/elf.o \
+	build/objects/include/mem/MemoryManager.o \
+	build/objects/include/mem/malloc.o \
+	build/objects/include/mem/mem.o \
+	build/objects/include/mem/virtualMem.o \
+	build/objects/include/mem/memLayout.o \
+	build/objects/include/sys/syscallWrappers.o \
+	build/objects/include/x86/x86.o \
 
 KERNEL_OBJECTS = \
 	build/objects/kernel/devices/CharacterDevice.o \
@@ -41,20 +48,17 @@ KERNEL_OBJECTS = \
 	build/objects/kernel/tty/VirtualConsole.o \
 	build/objects/kernel/utils/Assertions.o \
 	build/objects/kernel/utils/kprintf.o \
+	build/objects/kernel/crti.o \
+	build/objects/kernel/crtn.o \
+	build/objects/kernel/entry.o \
 
-LIBRARY_OBJECTS = \
-	build/objects/include/c/stdio.o \
-	build/objects/include/c/stdlib.o \
-	build/objects/include/c/string.o \
-	build/objects/include/elf/elf.o \
-	build/objects/include/mem/MemoryManager.o \
-	build/objects/include/mem/malloc.o \
-	build/objects/include/mem/mem.o \
-	build/objects/include/mem/virtualMem.o \
-	build/objects/include/mem/memLayout.o \
-	build/objects/include/sys/syscallWrappers.o \
+BOOTLOADER_OBJECTS = \
+	build/objects/bootloader/boot.o \
+  build/objects/bootloader/stage2.o \
+  build/objects/bootloader/bootmain.o \
+  build/objects/bootloader/crti.o \
+  build/objects/bootloader/crtn.o \
 
-ALL_OBJECTS = $(KERNEL_OBJECTS) $(LIBRARY_OBJECTS) $(ASM_OBJECTS)
 
 
 # Keep our make file cleaner by refering to varios modules 
