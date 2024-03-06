@@ -3,9 +3,9 @@
 #include "../include/mem/mem.h"
 #include "../include/mem/virtualMem.h"
 #include "../include/sys/syscallWrappers.h"
-#include "../include/syscalls/syscalls.h"
+#include "syscalls/syscalls.h"
 #include "../include/c/stdlib.h"
-#include "../include/interrupts/pic.h"
+#include "interrupts/pic.h"
 #include "../include/io/io.h"
 #include "../include/mem/MemoryManager.h"
 #include "devices/KeyboardDevice.h"
@@ -17,6 +17,7 @@
 #include "utils/datastructures/CircularQueue.h"
 #include "filesystem/FileDescription.h"
 #include "../include/c/string.h"
+#include "../include/c/math.h"
 
 // https://stackoverflow.com/questions/329059/what-is-gxx-personality-v0-for
 void *__gxx_personality_v0;
@@ -58,10 +59,19 @@ extern "C" void OSStart() {
   
   FileDescription *fd = FileDescription::create(*vc);
   char buffer[16];
+  memset(buffer, 0x0, sizeof(buffer));
   int nRead = 0;
 
+  kprintf("\n0 / 512 = %d", Math::ceilDiv(0, 512));
+  kprintf("\n1 / 512 = %d", Math::ceilDiv(1, 512));
+  kprintf("\n511 / 512 = %d", Math::ceilDiv(511, 512));
+  kprintf("\n512 / 512 = %d", Math::ceilDiv(512, 512));
+  kprintf("\n513 / 512 = %d", Math::ceilDiv(513, 512));
+
   for(;;) {
-    nRead += vc->read(*fd, (uint8_t *)&buffer[nRead], sizeof(buffer));
+    if (nRead < sizeof(buffer))
+      nRead += vc->read(*fd, (uint8_t *)&buffer[nRead], sizeof(buffer));
+
     for (int i = 0; i < nRead; i++) {
       if (buffer[i] == '\n') { 
         kprintf("\nRead buffer:%s \n", buffer);
@@ -72,27 +82,6 @@ extern "C" void OSStart() {
     }
   }
 
+
   while(1);
-
-  /*
-  int32_t result = syscallTestWrapper();
-  printf("\nTest syscall result: %d", result);
-  printf("\nSyscall dispatcher address: %lx", syscallDispatcher); 
-
-  void *ptr = malloc(5000);
-  printf("\nFirst malloc-ed block: %lx", ptr);
-  
-  uint32_t *ptr2 = malloc(10 * sizeof(uint32_t));
-  printf("\nSecond malloc-ed block: %lx", ptr2);
-
-  free(ptr2);
-
-  mapPage(0x7EE0000, 0x7ED0000);
-  uint8_t *test = (uint8_t *)0x7EE0000;
-  *test = 0xA2;
-
-  printf("\nMap far enough page: %x", *test);
-
-  printVirtualAddressInfo(0x7EE0000);
-  */
 }
