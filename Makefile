@@ -154,13 +154,56 @@ $(BUILD_DIR)/kernel: always
 # 
 # Always: this target will be used to create the build directory 
 # if it does not exist
+# NOTE: the "@" avoids the command being printed to the screen
 #
 always: 
-	mkdir -p $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR_IMG)
+	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR_IMG)
 
 #
 # Clean: this target cleans the build directory
 #
 clean: 
-	rm -rf $(BUILD_DIR)/*
+	@echo "Cleaning $(BUILD_DIR) directory...\n"
+	@rm -rf $(BUILD_DIR)/*
+
+#
+# Compile all cpp files
+#
+build/objects/%.o: src/%.cpp
+	@echo "Compiling $< --> $@"
+	@mkdir -p $(@D)
+	@$(GPP) $(CFLAGS) -o $@ -c $<
+
+#
+# Compile all asm files
+#
+build/objects/%.o: src/%.asm
+	@echo "Compiling $< --> $@"
+	@mkdir -p $(@D)
+	@$(ASM) $< -f elf32 -o $@
+
+#
+# Compile all files
+#
+compile: $(ALL_OBJECTS)
+
+#
+# Link kernel binary
+#
+$(BUILD_DIR_IMG)/kernel: link_kernel
+link_kernel: compile
+	@echo "Linking kernel..."
+	@# REVIEW: removing crtbegin and crtend does not affect?
+	@$(GPP) $(CFLAGS) $(CRTBEGIN_OBJ) $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(CRTEND_OBJ) -T kernel.ld -o $(BUILD_DIR_IMG)/kernel
+	@echo "Finished linking kernel..."
+
+#
+# Link bootloader binary
+#
+$(BUILD_DIR_IMG)/bootloader: link_bootloader
+link_bootloader: compile
+	@echo "Linking bootloader..."
+	@$(GPP) $(CFLAGS) $(BOOTLOADER_OBJECTS) $(LIBRARY_OBJECTS) -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
+	@echo "Finished linking bootloader..."
+
