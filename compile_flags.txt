@@ -1,0 +1,16 @@
+-xc++-header
+-Wno-write-strings
+-I./src/include
+-I./src/include/io
+-I./src/include/c
+-I./src/include/sys
+-I./src/include/mem
+-I./src/include/elf
+-I./src/include/x86
+-I./src/kernel/syscalls
+-I./src/kernel/heap
+-I./src/kernel/devices
+-I./src/kernel/interrupts
+-I./src/kernel/tty
+-I./src/kernel/utils
+-I./src
