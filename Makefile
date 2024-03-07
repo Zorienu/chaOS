@@ -172,3 +172,6 @@ link_bootloader: compile
 	@$(GPP) $(CFLAGS) $(BOOTLOADER_OBJECTS) $(LIBRARY_OBJECTS) -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
 	@echo "Finished linking bootloader..."
 
+run_make_img: 
+	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
+	gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
