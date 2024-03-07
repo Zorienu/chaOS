@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "../syscallNumbers.h"
+#include <syscallNumbers.h>
 
 void *malloc(int32_t size) {
   void *ptr = 0x0;

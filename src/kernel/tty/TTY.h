@@ -1,8 +1,8 @@
 #pragma once
-#include "stdint.h"
+#include <stdint.h>
 #include <stddef.h>
-#include "../devices/CharacterDevice.h"
-#include "../utils/datastructures/CircularDeque.h"
+#include <kernel/devices/CharacterDevice.h>
+#include <kernel/utils/datastructures/CircularDeque.h>
 
 class TTY : public CharacterDevice {
   public:

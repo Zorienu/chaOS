@@ -1,13 +1,13 @@
 #include <stdint.h>
-#include "../c/string.h"
-#include "../c/stdio.h"
-#include "MemoryManager.h"
-#include "PageDirectory.h"
-#include "PhysicalAddress.h"
-#include "PageTableEntry.h"
-#include "PageTable.h"
-#include "mmu.h"
-#include "memLayout.h"
+#include <string.h>
+#include <stdio.h>
+#include <MemoryManager.h>
+#include <PageDirectory.h>
+#include <PhysicalAddress.h>
+#include <PageTableEntry.h>
+#include <PageTable.h>
+#include <mmu.h>
+#include <memLayout.h>
 
 #define MEMORY_BITMAP_ADDRESS 0x30000
 

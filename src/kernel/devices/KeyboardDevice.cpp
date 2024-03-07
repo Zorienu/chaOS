@@ -1,11 +1,11 @@
-#include "KeyboardDevice.h"
-#include "../../include/io/io.h"
-#include "../../include/c/stdio.h"
-#include "../tty/VirtualConsole.h"
-#include "../utils/kprintf.h"
-#include "../KeyCode.h"
-#include "../heap/kmalloc.h"
-#include "../interrupts/pic.h"
+#include <io.h>
+#include <stdio.h>
+#include <kernel/devices/KeyboardDevice.h>
+#include <kernel/tty/VirtualConsole.h>
+#include <kernel/utils/kprintf.h>
+#include <kernel/KeyCode.h>
+#include <kernel/heap/kmalloc.h>
+#include <kernel/interrupts/pic.h>
 
 #define IRQ_KEYBOARD 1
 

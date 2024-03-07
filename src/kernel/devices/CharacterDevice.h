@@ -1,5 +1,5 @@
 #pragma once
-#include "Device.h"
+#include <kernel/devices/Device.h>
 
 class CharacterDevice : public Device {
   public:

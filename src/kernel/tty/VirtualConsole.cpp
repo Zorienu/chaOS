@@ -1,6 +1,6 @@
-#include "VirtualConsole.h"
-#include "../../include/c/string.h"
-#include "../heap/kmalloc.h"
+#include <kernel/tty/VirtualConsole.h>
+#include <string.h>
+#include <kernel/heap/kmalloc.h>
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25

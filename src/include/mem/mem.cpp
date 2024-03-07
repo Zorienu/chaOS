@@ -1,11 +1,11 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "memLayout.h"
-#include "mem.h"
-#include "virtualMem.h"
-#include "../c/stdio.h"
-#include "../c/string.h"
+#include <memLayout.h>
+#include <mem.h>
+#include <virtualMem.h>
+#include <stdio.h>
+#include <string.h>
 
 #define SMAP_NUM_ENTRIES_ADDRESS 0xA500;
 #define SMAP_ENTRIES_ADDRESS     0xA504;

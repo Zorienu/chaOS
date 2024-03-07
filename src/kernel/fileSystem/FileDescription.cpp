@@ -1,5 +1,5 @@
-#include "FileDescription.h"
-#include "File.h"
+#include <kernel/filesystem/FileDescription.h>
+#include <kernel/filesystem/File.h>
 
 FileDescription* FileDescription::create(File& file) {
   return new FileDescription(file);

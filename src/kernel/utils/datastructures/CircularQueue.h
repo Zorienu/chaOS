@@ -1,8 +1,8 @@
 #pragma once
 #include <stdint.h>
-#include "../kprintf.h"
-#include "../Assertions.h"
-#include "../utility.h"
+#include <kernel/utils/kprintf.h>
+#include <kernel/utils/Assertions.h>
+#include <kernel/utils/utility.h>
 
 template<typename T, int capacity>
 class CircularQueue {

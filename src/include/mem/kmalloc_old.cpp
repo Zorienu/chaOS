@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include "../c/stdlib.h"
+#include <stdlib.h>
 
 /*
  * TODO: compile and link only for user-space, 

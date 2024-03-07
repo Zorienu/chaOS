@@ -1,5 +1,5 @@
 #pragma once
-#include "kprintf.h"
+#include <kernel/utils/kprintf.h>
 
 void assertionFailed(const char* msg, const char* file, unsigned line, const char* func);
 

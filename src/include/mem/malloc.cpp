@@ -1,8 +1,8 @@
 #include <stdint.h>
-#include "malloc.h"
-#include "mem.h"
-#include "virtualMem.h"
-#include "../c/stdio.h"
+#include <malloc.h>
+#include <mem.h>
+#include <virtualMem.h>
+#include <stdio.h>
 
 MallocBlockType *mallocListHead = 0;
 VirtualAddress mallocVirtualAddress = 0;

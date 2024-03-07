@@ -1,9 +1,9 @@
 #include <stdint.h>
-#include "virtualMem.h"
-#include "mmu.h"
-#include "mem.h"
-#include "../c/string.h"
-#include "../c/stdio.h"
+#include <virtualMem.h>
+#include <mmu.h>
+#include <mem.h>
+#include <string.h>
+#include <stdio.h>
 
 /*
  * Used to map a predefined virtual address to any physical address 

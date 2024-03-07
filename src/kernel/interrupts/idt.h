@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "IRQHandler.h"
+#include <kernel/interrupts/IRQHandler.h>
 
 #define MAX_IDT_ENTRIES 256
 

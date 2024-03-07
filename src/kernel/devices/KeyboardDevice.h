@@ -1,8 +1,8 @@
 #pragma once
-#include "CharacterDevice.h"
-#include "../interrupts/IRQHandler.h"
-#include "../KeyCode.h"
-#include "../utils/datastructures/CircularQueue.h"
+#include <kernel/devices/CharacterDevice.h>
+#include <kernel/interrupts/IRQHandler.h>
+#include <kernel/KeyCode.h>
+#include <kernel/utils/datastructures/CircularQueue.h>
 
 class KeyboardClient;
 

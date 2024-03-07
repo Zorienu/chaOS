@@ -1,8 +1,8 @@
-#include "kmalloc.h"
-#include "../../include/mem/virtualMem.h"
-#include "../../include/c/string.h"
+#include <kernel/heap/kmalloc.h>
+#include <virtualMem.h>
+#include <string.h>
 #include <stddef.h>
-#include "../utils/kprintf.h"
+#include <kernel/utils/kprintf.h>
 
 static constexpr size_t INITIAL_KMALLOC_MEMORY_SIZE = 2 * MB;
 

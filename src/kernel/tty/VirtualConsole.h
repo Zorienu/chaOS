@@ -1,6 +1,6 @@
 #pragma once
-#include "TTY.h"
-#include "../devices/KeyboardDevice.h"
+#include <kernel/tty/TTY.h>
+#include <kernel/devices/KeyboardDevice.h>
 
 // Possible background and foreground colors in text-mode in text-mode
 enum Color {

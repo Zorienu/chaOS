@@ -1,5 +1,5 @@
-#include "TTY.h"
-#include "../heap/kmalloc.h"
+#include <kernel/tty/TTY.h>
+#include <kernel/heap/kmalloc.h>
 
 void TTY::setSize(uint8_t rows, uint8_t columns) {
   _rows = rows;

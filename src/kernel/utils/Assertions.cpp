@@ -1,4 +1,4 @@
-#include "Assertions.h"
+#include <kernel/utils/Assertions.h>
 
 void assertionFailed(const char* msg, const char* file, unsigned line, const char* func) {
     asm volatile("cli");

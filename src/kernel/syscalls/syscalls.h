@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "../interrupts/idt.h"
+#include <kernel/interrupts/idt.h>
 
 #define EXIT_SUCCESS 0
 

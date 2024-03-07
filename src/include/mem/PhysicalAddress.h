@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "virtualMem.h"
+#include <virtualMem.h>
 
 /* 
  * TODO: remove the "2" when removing the typedef

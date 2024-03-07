@@ -1,5 +1,5 @@
 #pragma once
-#include "CircularQueue.h"
+#include <kernel/utils/datastructures/CircularQueue.h>
 
 template<typename T, int capacity>
 class CircularDeque : public CircularQueue<T, capacity> {

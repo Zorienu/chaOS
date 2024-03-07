@@ -1,10 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-#include "PhysicalAddress.h"
-#include "VirtualAddress.h"
-#include "PageTable.h"
-#include "PageDirectory.h"
+#include <PhysicalAddress.h>
+#include <VirtualAddress.h>
+#include <PageTable.h>
+#include <PageDirectory.h>
 
 #define SMAP_NUM_ENTRIES_ADDRESS 0xA500;
 #define SMAP_ENTRIES_ADDRESS     0xA504;

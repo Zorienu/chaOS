@@ -1,5 +1,5 @@
 #pragma once
-#include "idt.h"
+#include <kernel/interrupts/idt.h>
 
 /*
  * The following devices used the PIC 1 (master PIC) to generate interrupts

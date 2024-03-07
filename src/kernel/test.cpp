@@ -1,4 +1,4 @@
-#include "test.h"
+#include <kernel/test.h>
 
 int TestClass::getCounter() {
   return this->counter;

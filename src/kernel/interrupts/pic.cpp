@@ -1,7 +1,7 @@
 #include <stdint.h>
-#include "pic.h"
-#include "../../include/io/io.h"
-#include "../utils/kprintf.h"
+#include <kernel/interrupts/pic.h>
+#include <io.h>
+#include <kernel/utils/kprintf.h>
 
 namespace PIC {
 

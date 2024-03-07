@@ -1,8 +1,8 @@
 #include <stdint.h>
-#include "../include/io/io.h"
-#include "../include/c/string.h"
-#include "../include/elf/elf.h"
-#include "../include/mem/mem.h"
+#include <io.h>
+#include <string.h>
+#include <elf.h>
+#include <mem.h>
 
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096

@@ -1,5 +1,5 @@
 #pragma once
-#include "../fileSystem/File.h"
+#include <kernel/fileSystem/File.h>
 
 class Device : public File {
   public:
