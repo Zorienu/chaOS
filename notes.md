@@ -26,6 +26,12 @@ Small r/w pieces of memory
 - Floating point unit registers
 - SIMD registers
 
+#### [How EAX register (or any general purpose register) is mapped](https://stackoverflow.com/questions/15191178/how-do-ax-ah-al-map-onto-eax)
+- EAX is the full 32-bit value
+- AX is the lower 16-bits
+- AL is the lower 8 bits
+- AH is the bits 8 through 15 (zero-based), the top half of AX
+
 ### The PIC (Programmable Interrupt Controller) and the PIT (Programmable Interrupt Timer)
 - http://www.brokenthorn.com/Resources/OSDev16.html
 - http://www.brokenthorn.com/Resources/OSDevPic.html
@@ -35,6 +41,7 @@ Small r/w pieces of memory
 - [What is the effect of extern "C" in C++?](https://stackoverflow.com/questions/1041866/what-is-the-effect-of-extern-c-in-c)
 - [Calling Global Constructors](https://wiki.osdev.org/Calling_Global_Constructors) Explanation for crti.asm and crtn.asm
 - [Pass by value vs pass by rvalue reference](https://stackoverflow.com/questions/37935393/pass-by-value-vs-pass-by-rvalue-reference)
+- [Treat h header files as C++ header files flag (-xc++-header)](https://stackoverflow.com/questions/75497627/clangd-lsp-shows-unknown-type-name-interface-in-dsound-h)
 
 ### File I/O
 - [Overview: Serenety Kernel File I/O](https://www.youtube.com/watch?v=JJx7j4mR3CM)

@@ -62,20 +62,6 @@ start:
 ; -----------------------------------------------------------------------------------------------
 ;
 ; Error handlers
-;
-;
-; Displays an error if failed reading sector from disk
-;
-floppy_error:
-  mov si, msg_error_reading_from_disk
-  call puts
-  jmp wait_key_and_reboot
-
-wait_key_and_reboot:
-  mov ah, 0
-  int 0x16 ; Wait for key press
-  jmp 0xFFFF ; Jump to beggining of the BIOS, should reboot
-
 global halt
 halt:
   cli
@@ -85,69 +71,18 @@ halt:
 ;
 ; -----------------------------------------------------------------------------------------------
 
-; -----------------------------------------------------------------------------------------------
-;
-; Disk routines
-; 
 
 ; 
-; LBA address to CHS conversion
-; Parameters: 
-;   - ax: LBA address
-; Returns:
-;   - cx [bits 0 - 5]: sector number
-;   - cx [bits 6 - 15]: cylinder number
-;   - dh: head
 ;
-bits 16
-numberOfSectorsPerTrack equ 18
-numberOfHeads equ 2
-lba_to_chs:
-  push ax
   push dx
 
-  xor dx, dx ; dx = 0
-  div word [numberOfSectorsPerTrack] ; ax = LBA / sectorsPerTrack
-                                             ; dx = LBA % sectorsPerTrack
 
-  inc dx ; dx = dx + 1 = LBA % sectorsPerTrack + 1 = sector number
-  mov cx, dx ; cx = sector number
-
-  xor dx, dx ; dx = 0
-  div word [numberOfHeads] ; ax = LBA / sectorsPerTrack / numberOfHeads = cylinder number
-                                 ; dx = LBA / sectorsPerTrack % numberOfHeads = head number (in dl actually)
-
-  mov dh, dl ; dh = head number
-
-  ; ax ---ah--- | ---al---
-  ;    xxxxxx98 | 76543210
-  ; because is little endian we have to end up with the cylinder number in cx like this
-  ; cx ---ch--- | ---cl---
-  ;    76543210 | 98--dx-- Where dx contains the sector number
-  shl ah, 6 ; ah << 6: xxxxxx98 => 98000000
-  or cl, ah ; Put upper 2 bits of the cylinder in cx: 98000000 OR sector number
-  mov ch, al ; Put lower 8 bits of the cylinder: ch = 76543210
-
-  pop ax ; Pop dx into ax
-  mov dl, al ; We put the head number in dh, so we restore dl only, 
-             ; since we cannot push 8 bit values to the stack, we pushed the hole register and get dl later
-  pop ax
 
   ret
 
 ; 
-; Read sectors from disk
 ; Parameters:
-;   - ax: LBA address
-;   - cl: number of sectors to read
-;   - dl: drive number
-;   - es:bx: Memory address where to store the read data
-; Returns:
-;   - cf: Set on error, clear if no error
-;   - ah: Return code
-;   - al: Actual sectors read count
 ;
-disk_read:
   ; Save register we will modify
   push ax 
   push bx
@@ -155,36 +90,8 @@ disk_read:
   push dx
   push di
 
-  push cx ; Temporarily save cl (number of sectors to read), since the lba_to_chs routine will write to it
 
-  call lba_to_chs ; Compute CHS values
 
-  pop ax ; al = number of sectors to read (pushed cl previously)
-  mov ah, 0x02 ; Read sectors from drive
-
-  mov di, 3 ; Initialize retries for reading from disk to 3
-
-.retry:
-  pusha ; Save all registers, since we don't know what BIOS modifies
-  stc ; Set carry flag, some BIOS'es don't set it
-
-  int 0x13 ; Call the interrupt, Carry flag (cf) is clear, then success, else error
-  jnc .done ; Jump near if not carry (cf = 0)
-
-  ; Read disk failed, reset disk controller
-  popa 
-  call disk_reset
-
-  dec di ; Consume 1 retry
-  test di, di ; Still have retries?
-  jnz .retry ; If attempts remaining, then retry
-
-.fail:
-  ; All attempts exhausted
-  jmp floppy_error
-
-.done:
-  popa
 
   ; Restore registers we modified
   pop di 
@@ -194,26 +101,6 @@ disk_read:
   pop ax
 
   ret
-
-;
-; Resets disk controller
-; Parameters:
-;  - dl: drive number
-;
-disk_reset:
-  pusha 
-
-  mov ah, 0
-  stc
-  int 0x13
-  jc floppy_error
-
-  popa
-  ret
-;
-; End of defining disk routines
-;
-; -----------------------------------------------------------------------------------------------
 
 ;
 ; Prints a string to the screen
@@ -265,13 +152,6 @@ main: ; Where our code begins
   ; Setup the SS (Stack Segment) and the stack pointer to the begin of our program
   mov ss, ax
   mov sp, bootloader ; Stack grows downwards from where we are loaded in memory
-
-  ; Load sector containing the C code
-  ; mov [ebr_drive_number], dl ; BIOS should set dl to drive number
-  mov ax, 1 ; LBA=1, second sector from disk, where our kernel is in the img
-  mov cl, 60 ; Number of sectors to read (increment this value if bootmain.c grows)
-  mov bx, 0x7E00 ; Put the read sector after the bootloader code
-  call disk_read
 
   mov si, msg_hello
   call puts
