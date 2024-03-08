@@ -173,8 +173,6 @@ disk_read:
 ; NOTE: this worked with cld; rep insw and cx holding the total amount of bytes to read / 2 (4 in case of insd)
 ; in bochs but not in qemu. So, we had to read sectors one by one adding a wait for disk
 .loop
-  call wait_disk
-
   ; How many times are we gonna read from the port?
   ; cx register will contain the counter...
   ; insd reads 32 bits at a time (4 bytes)
