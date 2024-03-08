@@ -71,7 +71,12 @@ void readSector(uint8_t *destination, uint32_t sector) {
   IO::outb(DISK_PORT_BASE + 3, sector); // Take the 1st LSB
   IO::outb(DISK_PORT_BASE + 4, sector >> 8); // Take the 2nd LSB
   IO::outb(DISK_PORT_BASE + 5, sector >> 16); // Take the 3rd LSB
-  IO::outb(DISK_PORT_BASE + 6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now), TODO: investigate the 0xE0
+  IO::outb(DISK_PORT_BASE + 6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now)
+                                                       // 0xE0 -> 0b1110_0000
+                                                       // bit 4: drive number (0 in our case)
+                                                       // bit 5: always set
+                                                       // bit 6: set for LBA
+                                                       // bit 7: always set
   IO::outb(DISK_PORT_BASE + 7, DISK_READ_CMD); // cmd 0x20 - read sectors
 
   // Read data
