@@ -74,6 +74,7 @@ halt:
 ;
 wait_disk:
   push dx
+  push ax
 
 .loop:
   mov dx, DISK_PORT_BASE + 7 
@@ -83,6 +84,7 @@ wait_disk:
   jne .loop
 
 .done: 
+  pop ax
   pop dx
 
   ret
@@ -92,7 +94,7 @@ wait_disk:
 ; Parameters:
 ;   - bx: Sector number to read
 ;   - di: Memory address where to store the read data
-;   - cx: Amount of sectors to read
+;   - cx: Amount of bytes to read
 ;
 disk_read:
   ; Save register we will modify
@@ -101,6 +103,9 @@ disk_read:
   push cx
   push dx
   push di
+
+  ; Wait for the disk
+  call wait_disk
 
   ; Save sector number to read
   push bx
@@ -115,6 +120,9 @@ disk_read:
 
   ; Restore sector number to read
   pop bx
+
+  ; Save amount of sectors to read... for later
+  push ax
 
   ; Define number of sectors to read
   mov dx, DISK_PORT_BASE + 2
@@ -150,25 +158,43 @@ disk_read:
   ; Wait for the disk
   call wait_disk
 
-
-  ; How many times are we gonna read from the port?
-  ; cx register will contain the counter...
-  ; insd reads 32 bits at a time (4 bytes)
-  ; so, we have to divide the amount of bytes to read by 4
-  mov ax, cx
-  mov cx, 4
-  cwd
-  div cx
-  mov cx, ax ; the result of the division will be stored in ax, so, we have to move it to cx
-  ;mov cx, 512/4
-
   ; The division puts the remainder in the edx register, so
   ; we have to tell the disk port after the division
   mov dx, DISK_PORT_BASE ; Port to read
 
-  cld
-  rep insd ; Reading DWORDS (32 bits) repeatedly until cx (number of times we have to read) reaches 0
+  ; cld
+  ; ; rep insd ; Reading DWORDS (32 bits) repeatedly until cx (number of times we have to read) reaches 0
+  ; rep insw ; Reading WORDS (16 bits) repeatedly until cx (number of times we have to read) reaches 0
 
+  ; Restore previously saved "amount of sectors to read" into bx
+  pop bx
+
+; Loop for every sector we're gonna read
+; NOTE: this worked with cld; rep insw and cx holding the total amount of bytes to read / 2 (4 in case of insd)
+; in bochs but not in qemu. So, we had to read sectors one by one adding a wait for disk
+.loop
+  call wait_disk
+
+  ; How many times are we gonna read from the port?
+  ; cx register will contain the counter...
+  ; insd reads 32 bits at a time (4 bytes)
+  ; insw reads 16 bits at a time (2 bytes)
+  ; so, we have to divide the amount of bytes to read by 4 or 2 depending of the used command
+  mov cx, SECTOR_SIZE / 2
+
+  cld
+  ; rep insd ; Reading DWORDS (32 bits) repeatedly until cx (number of times we have to read) reaches 0
+  rep insw ; Reading WORDS (16 bits) repeatedly until cx (number of times we have to read) reaches 0
+
+  call wait_disk
+
+  ; Have we read all the sectors?
+  cmp bl, 0
+  je .done
+
+  ; We read 1 sector, then, decrement the counter
+  dec bx
+  jmp .loop
 
 .done:
   ; Restore registers we modified
