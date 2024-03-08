@@ -59,30 +59,42 @@ bootloader:
 start: 
   jmp main
 
-; -----------------------------------------------------------------------------------------------
-;
-; Error handlers
 global halt
 halt:
   cli
   hlt
-;
-; End of defining error handlers
-;
-; -----------------------------------------------------------------------------------------------
 
+
+%define DISK_PORT_BASE 0x1F0
+%define SECTOR_SIZE 512
+%define DISK_READ_CMD 0x20
 
 ; 
+; Wait for the hard disk to be ready
 ;
+wait_disk:
   push dx
 
+.loop:
+  mov dx, DISK_PORT_BASE + 7 
+  in al, dx
+  and al, 0xC0
+  cmp al, 0x40
+  jne .loop
 
+.done: 
+  pop dx
 
   ret
 
 ; 
+; Read sectors from disk using IO
 ; Parameters:
+;   - bx: Sector number to read
+;   - di: Memory address where to store the read data
+;   - cx: Amount of sectors to read
 ;
+disk_read:
   ; Save register we will modify
   push ax 
   push bx
@@ -90,9 +102,75 @@ halt:
   push dx
   push di
 
+  ; Save sector number to read
+  push bx
+
+  ; Convert number of bytes to number of sectors to read
+  ; Number of sectors to read will be in ax and remainder in dx
+  mov ax, cx
+  mov bx, SECTOR_SIZE
+  cwd ; prepare the DX:AX register pair for division -> dx will be set to 0
+      ;  setting dx to 0 manually will work too
+  div bx
+
+  ; Restore sector number to read
+  pop bx
+
+  ; Define number of sectors to read
+  mov dx, DISK_PORT_BASE + 2
+  out dx, al
+
+  ; Define sector to read
+  mov dx, DISK_PORT_BASE + 3
+  mov al, bl ; LSB of bx
+  out dx, al
+
+  mov dx, DISK_PORT_BASE + 4
+  mov al, bh ; MSB of bx
+  out dx, al
+
+  mov dx, DISK_PORT_BASE + 5
+  mov al, 0 ; sector 0
+  out dx, al
+
+  mov dx, DISK_PORT_BASE + 6
+  mov al, 0xE0 ; 0xE0 -> 0b1110_0000
+               ; bit 4: drive number (0 in our case)
+               ; bit 5: always set
+               ; bit 6: set for LBA
+               ; bit 7: always set
+  or al, 0 ; sector 0
+  out dx, al
+
+  ; Send read command
+  mov dx, DISK_PORT_BASE + 7
+  mov al, DISK_READ_CMD
+  out dx, al
+
+  ; Wait for the disk
+  call wait_disk
 
 
+  ; How many times are we gonna read from the port?
+  ; cx register will contain the counter...
+  ; insd reads 32 bits at a time (4 bytes)
+  ; so, we have to divide the amount of bytes to read by 4
+  mov ax, cx
+  mov cx, 4
+  cwd
+  div cx
+  mov cx, ax ; the result of the division will be stored in ax, so, we have to move it to cx
+  ;mov cx, 512/4
 
+  ; The division puts the remainder in the edx register, so
+  ; we have to tell the disk port after the division
+  mov dx, DISK_PORT_BASE ; Port to read
+
+  cld
+  rep insd ; Reading DWORDS (32 bits) repeatedly until cx (number of times we have to read) reaches 0
+
+
+.done:
   ; Restore registers we modified
   pop di 
   pop dx
@@ -101,6 +179,7 @@ halt:
   pop ax
 
   ret
+  
 
 ;
 ; Prints a string to the screen
@@ -155,6 +234,11 @@ main: ; Where our code begins
 
   mov si, msg_hello
   call puts
+
+  mov di, 0x7E00 ; di will contain the destination address of the read sectors
+  mov cx, 60 * 512 ; cx will contain the number of bytes to read (60 sectors)
+  mov bx, 1 ; from which sector we want to read?
+  call disk_read
   
   call stage2
 
