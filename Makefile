@@ -174,6 +174,14 @@ link_bootloader: compile
 	@$(GPP) $(CFLAGS) $(BOOTLOADER_OBJECTS) $(LIBRARY_OBJECTS) -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
 	@echo "Finished linking bootloader..."
 
+#
+# Link bootsector binary
+#
+$(BUILD_DIR_IMG)/bootsector: link_bootsector
+link_bootsector: compile
+	@echo "Linking bootsector..."
+	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T src/bootloader/bootsector.ld -o $(BUILD_DIR_IMG)/bootsector
+
 run_make_img: 
 	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
 	gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
