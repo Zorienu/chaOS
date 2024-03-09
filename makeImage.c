@@ -8,7 +8,6 @@
 
 // #define PRINT_HEX
 
-//TODO
 int main() {
   printf("Creating chaOS image\n");
 
@@ -21,6 +20,15 @@ int main() {
   printf("Bootloader FD: %d\n", bootloaderFD);
   printf("Kernel FD: %d\n", kernelFD);
   printf("Image FD: %d\n", imgFD);
+
+  int bootloaderSize = lseek(bootloaderFD, 0, SEEK_END);
+  int kernelSize = lseek(kernelFD, 0, SEEK_END);
+
+  printf("Bootloader size in bytes: %d\n", bootloaderSize);
+  printf("Kernel size in bytes: %d\n", kernelSize);
+
+  lseek(bootloaderFD, 0, SEEK_SET);
+  lseek(kernelFD, 0, SEEK_SET);
 
   char buffer[512];
   memset(buffer, 0x0, sizeof(buffer));

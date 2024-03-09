@@ -260,7 +260,7 @@ main: ; Where our code begins
   call puts
 
   mov di, 0x7E00 ; di will contain the destination address of the read sectors
-  mov cx, 60 * 512 ; cx will contain the number of bytes to read (60 sectors)
+  mov cx, 60 * SECTOR_SIZE ; cx will contain the number of bytes to read (60 sectors)
   mov bx, 1 ; from which sector we want to read?
   call disk_read
   

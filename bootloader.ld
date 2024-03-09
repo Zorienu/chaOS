@@ -3,7 +3,7 @@ OUTPUT_FORMAT("binary")
 ENTRY(loadOS) 
 
 /* Pointer to physical memory address 0x7C00,
- * which is where the BIOS loads our bootloader to and run at */
+ * which is where the BIOS loads our bootloader to (in RAM) and run at */
 bootPhys = 0x7C00;
 
 SECTIONS
