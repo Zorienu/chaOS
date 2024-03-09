@@ -8,9 +8,16 @@
 
 bits 16
 
+;
+; We do this to avoid overlapping with the memory map addresses
+; when loading the code into RAM (memmap_entries 0xA500)
+;
 section .stage2
 jmp stage2
 
+; 
+; Text section will be put in 0xB000 to avoid memory map addresses
+;
 section .text
 halt:
   cli
