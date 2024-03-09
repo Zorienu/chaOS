@@ -62,13 +62,15 @@ KERNEL_OBJECTS = \
 	build/objects/kernel/entry.o \
 
 BOOTLOADER_OBJECTS = \
-	build/objects/bootloader/boot.o \
   build/objects/bootloader/stage2.o \
   build/objects/bootloader/bootmain.o \
   build/objects/bootloader/crti.o \
   build/objects/bootloader/crtn.o \
 
-ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(BOOTLOADER_OBJECTS)
+BOOTSECTOR_OBJECT = \
+	build/objects/bootloader/boot.o \
+
+ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(BOOTLOADER_OBJECTS) $(BOOTSECTOR_OBJECT)
 
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names

@@ -172,7 +172,7 @@ disk_read:
 ; Loop for every sector we're gonna read
 ; NOTE: this worked with cld; rep insw and cx holding the total amount of bytes to read / 2 (4 in case of insd)
 ; in bochs but not in qemu. So, we had to read sectors one by one adding a wait for disk
-.loop
+.loop:
   ; How many times are we gonna read from the port?
   ; cx register will contain the counter...
   ; insd reads 32 bits at a time (4 bytes)
@@ -244,7 +244,7 @@ puts:
 
 
 bits 16
-extern stage2 ; include stage2 from stage2.asm
+%define STAGE_2_ADDRESS 0x7E00
 main: ; Where our code begins
   ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized
   ; Since we can't write a constant directly to registers, we have to use an intermediary register (ax)
@@ -259,12 +259,12 @@ main: ; Where our code begins
   mov si, msg_hello
   call puts
 
-  mov di, 0x7E00 ; di will contain the destination address of the read sectors
+  mov di, STAGE_2_ADDRESS ; di will contain the destination address of the read sectors
   mov cx, 60 * SECTOR_SIZE ; cx will contain the number of bytes to read (60 sectors)
   mov bx, 1 ; from which sector we want to read?
   call disk_read
   
-  call stage2
+  call STAGE_2_ADDRESS
 
   call halt
 
