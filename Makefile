@@ -107,11 +107,16 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	# "::kernel.bin": specifies the destination path within the disk img, in this case in /kernel.bin (root dir)
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
 
-img: clean always $(BUILD_DIR_IMG)/kernel $(BUILD_DIR_IMG)/bootloader
+binary_files: $(BUILD_DIR_IMG)/bootsector $(BUILD_DIR_IMG)/bootloader $(BUILD_DIR_IMG)/kernel 
+img: clean always binary_files
 	@echo "Creating boot img at $(BUILD_DIR_IMG)/boot.img..."
-	@# count: 10000 -> 10000 sectors of 512 bytes each -> 5120000 bytes
+	@# Count: 10000 -> 10000 sectors of 512 bytes each -> 5120000 bytes
 	@dd if=/dev/zero of=$(BUILD_DIR_IMG)/boot.img count=10000
-	@dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
+	@# Add the bootsector first
+	@dd if=$(BUILD_DIR_IMG)/bootsector of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
+	@# Add the bootlaoder just after the bootsector
+	@dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=1 
+	@# Now add the kernel
 	@# seek=7  -> 0xE00 (0x200 * 7)
 	@# seek=50 -> 0x6400 (0x200 * 50)
 	@# seek=100 -> 0xC800 (0x200 * 100)
