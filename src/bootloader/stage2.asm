@@ -6,8 +6,15 @@
 ; - call loadOS at src/bootloader/bootmain.c
 ;
 
-extern halt
 bits 16
+
+section .stage2
+jmp stage2
+
+section .text
+halt:
+  cli
+  hlt
 
 ; -----------------------------------------------------------------------------------------------
 ; 
@@ -120,7 +127,6 @@ enterProtectedMode:
 ; Already in protected mode
 ;
 bits 32
-extern bootloader
 PModeMain:
   ; Setup segments register to 16 (0x10) which is the offset within the GDT to use the kernel mode data segment
   mov ax, GDT_KERNEL_MODE_DATA_SEGMENT_ENTRY 
@@ -130,7 +136,12 @@ PModeMain:
   mov gs, ax
   mov ss, ax
 
-  mov esp, bootloader ; Set the stack at 0x7C00
+  ;
+  ; Bootloader starts at address 0x7C00, we will use this for setting the stack
+  ; since we don't need the content before this physical address 
+  ; remember: the stack grows downwards
+  ;
+  mov esp, 0x7C00
 
   call OSEntry
 ;
@@ -280,7 +291,6 @@ getMemoryMap:
 ;
 ; -----------------------------------------------------------------------------------------------
 
-global stage2
 stage2: 
   call getMemorySize
   call getMemoryMap

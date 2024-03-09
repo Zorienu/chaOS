@@ -47,19 +47,12 @@ section .boot
 ; NASM macro
 %define ENDL 0x0D, 0x0A
 
-;
-; Bootloader starts at address 0x7C00, we will use this for setting the stack
-; since we don't need the content before this physical address 
-; remember: the stack grows downwards
-;
-global bootloader
 bootloader:
 
 ; Put here to avoid getting error "short jump is out of range"
 start: 
   jmp main
 
-global halt
 halt:
   cli
   hlt
