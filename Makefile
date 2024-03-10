@@ -63,7 +63,7 @@ KERNEL_OBJECTS = \
 
 PREKERNEL_OBJECTS = \
   build/objects/prekernel/stage2.o \
-  build/objects/prekernel/bootmain.o \
+  build/objects/prekernel/prekernel.o \
   build/objects/prekernel/crti.o \
   build/objects/prekernel/crtn.o \
 
