@@ -61,16 +61,16 @@ KERNEL_OBJECTS = \
 	build/objects/kernel/crtn.o \
 	build/objects/kernel/entry.o \
 
-BOOTLOADER_OBJECTS = \
-  build/objects/bootloader/stage2.o \
-  build/objects/bootloader/bootmain.o \
-  build/objects/bootloader/crti.o \
-  build/objects/bootloader/crtn.o \
+PREKERNEL_OBJECTS = \
+  build/objects/prekernel/stage2.o \
+  build/objects/prekernel/bootmain.o \
+  build/objects/prekernel/crti.o \
+  build/objects/prekernel/crtn.o \
 
 BOOTSECTOR_OBJECT = \
 	build/objects/bootloader/boot.o \
 
-ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(BOOTLOADER_OBJECTS) $(BOOTSECTOR_OBJECT)
+ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(PREKERNEL_OBJECTS) $(BOOTSECTOR_OBJECT)
 
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names
@@ -107,7 +107,7 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	# "::kernel.bin": specifies the destination path within the disk img, in this case in /kernel.bin (root dir)
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
 
-binary_files: $(BUILD_DIR_IMG)/bootsector $(BUILD_DIR_IMG)/bootloader $(BUILD_DIR_IMG)/kernel 
+binary_files: $(BUILD_DIR_IMG)/bootsector $(BUILD_DIR_IMG)/prekernel $(BUILD_DIR_IMG)/kernel 
 img: clean always binary_files
 	@echo "Creating boot img at $(BUILD_DIR_IMG)/boot.img..."
 	@# Count: 10000 -> 10000 sectors of 512 bytes each -> 5120000 bytes
@@ -115,7 +115,7 @@ img: clean always binary_files
 	@# Add the bootsector first
 	@dd if=$(BUILD_DIR_IMG)/bootsector of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
 	@# Add the bootlaoder just after the bootsector
-	@dd if=$(BUILD_DIR_IMG)/bootloader of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=1 
+	@dd if=$(BUILD_DIR_IMG)/prekernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=1 
 	@# Now add the kernel
 	@# seek=7  -> 0xE00 (0x200 * 7)
 	@# seek=50 -> 0x6400 (0x200 * 50)
@@ -171,13 +171,13 @@ link_kernel: compile
 	@echo "Finished linking kernel..."
 
 #
-# Link bootloader binary
+# Link prekernel binary
 #
-$(BUILD_DIR_IMG)/bootloader: link_bootloader
-link_bootloader: compile
-	@echo "Linking bootloader..."
-	@$(GPP) $(CFLAGS) $(BOOTLOADER_OBJECTS) $(LIBRARY_OBJECTS) -T bootloader.ld -o $(BUILD_DIR_IMG)/bootloader
-	@echo "Finished linking bootloader..."
+$(BUILD_DIR_IMG)/prekernel: link_prekernel
+link_prekernel: compile
+	@echo "Linking prekernel..."
+	@$(GPP) $(CFLAGS) $(PREKERNEL_OBJECTS) $(LIBRARY_OBJECTS) -T prekernel.ld -o $(BUILD_DIR_IMG)/prekernel
+	@echo "Finished linking prekernel..."
 
 #
 # Link bootsector binary
@@ -189,4 +189,4 @@ link_bootsector: compile
 
 run_make_img: 
 	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
-	gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
+	gcc makeImage.c -o makeImage && ./makeImage
