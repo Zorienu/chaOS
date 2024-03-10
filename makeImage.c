@@ -6,53 +6,72 @@
 #include <stdint.h>
 #include <errno.h>
 
+#define SECTOR_SIZE 512
 // #define PRINT_HEX
+
+void writeBinaryToImg(int imgFD, int binaryFD) {
+  int nread = 0;
+  char buffer[SECTOR_SIZE];
+
+  while ((nread = read(binaryFD, buffer, sizeof(buffer))) > 0) {
+    int nwrite = write(imgFD, buffer, sizeof(buffer));
+
+    // Clear buffer
+    memset(buffer, 0x0, sizeof(buffer));
+
+    if (nwrite < nread) {
+      printf("Error writing buffer to image, error: %s", strerror(errno));
+    }
+  } 
+}
 
 int main() {
   printf("Creating chaOS image\n");
 
-  int bootloaderFD = open("build/bin/bootloader", O_RDONLY);
+  int bootsectorFD = open("build/bin/bootsector", O_RDONLY);
+  int prekernelFD = open("build/bin/prekernel", O_RDONLY);
   int kernelFD = open("build/bin/kernel", O_RDONLY);
   int imgFD = open("build/bin/image.img", O_WRONLY | O_CREAT | O_TRUNC, 0777);
 
   if (imgFD < 0) { printf("Error creating image.img, error: %s\n", strerror(errno)); return 1; }
 
-  printf("Bootloader FD: %d\n", bootloaderFD);
+  printf("Bootsector FD: %d\n", bootsectorFD);
+  printf("Prekernel FD: %d\n", prekernelFD);
   printf("Kernel FD: %d\n", kernelFD);
   printf("Image FD: %d\n", imgFD);
 
-  int bootloaderSize = lseek(bootloaderFD, 0, SEEK_END);
+  int bootsectorSize = lseek(bootsectorFD, 0, SEEK_END);
+  int prekernelSize = lseek(prekernelFD, 0, SEEK_END);
   int kernelSize = lseek(kernelFD, 0, SEEK_END);
 
-  printf("Bootloader size in bytes: %d\n", bootloaderSize);
+  printf("\nBinaries size:\n");
+  printf("Bootsector size in bytes: %d\n", bootsectorSize);
+  printf("Prekernel size in bytes: %d\n", prekernelSize);
   printf("Kernel size in bytes: %d\n", kernelSize);
 
-  lseek(bootloaderFD, 0, SEEK_SET);
+  lseek(bootsectorFD, 0, SEEK_SET);
+  lseek(prekernelFD, 0, SEEK_SET);
   lseek(kernelFD, 0, SEEK_SET);
 
   char buffer[512];
   memset(buffer, 0x0, sizeof(buffer));
-  int nread = read(bootloaderFD, buffer, sizeof(buffer));
+  int nread = 0;
 
-  for (int i = 0; i < sizeof(buffer); i++) {
-#ifdef PRINT_HEX
-    printf("%x ", buffer[i] & 0xFF);
+  printf("Writing bootsector to img...\n");
+  writeBinaryToImg(imgFD, bootsectorFD);
+  printf("Writing prekernel to img...\n");
+  writeBinaryToImg(imgFD, prekernelFD);
 
-    if (i % 16 == 0) printf("\n");
-#endif
-     
-    int nwrite = write(imgFD, &buffer[i], sizeof(buffer[i]));
-    if (nwrite != sizeof(buffer[i])) {
-      printf("Error writing buffer[i]: %x to image, error: %s", buffer[i], strerror(errno));
-      return 1;
-    }
-  }
-  printf("\n");
+  lseek(imgFD, 0x200 * 100, SEEK_SET);
+  printf("Writing kernel to img...\n");
+  writeBinaryToImg(imgFD, kernelFD);
 
-
-  close(bootloaderFD);
+  close(bootsectorFD);
+  close(prekernelFD);
   close(kernelFD);
   close(imgFD);
+
+  printf("Finished creating img...\n");
 
   return 0;
 }
