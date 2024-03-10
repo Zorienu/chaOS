@@ -68,7 +68,7 @@ PREKERNEL_OBJECTS = \
   build/objects/prekernel/crtn.o \
 
 BOOTSECTOR_OBJECT = \
-	build/objects/bootloader/boot.o \
+	build/objects/bootsector/boot.o \
 
 ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(PREKERNEL_OBJECTS) $(BOOTSECTOR_OBJECT)
 
@@ -185,7 +185,7 @@ link_prekernel: compile
 $(BUILD_DIR_IMG)/bootsector: link_bootsector
 link_bootsector: compile
 	@echo "Linking bootsector..."
-	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T src/bootloader/bootsector.ld -o $(BUILD_DIR_IMG)/bootsector
+	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T src/bootsector/bootsector.ld -o $(BUILD_DIR_IMG)/bootsector
 
 run_make_img: 
 	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
