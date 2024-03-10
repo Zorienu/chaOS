@@ -8,6 +8,11 @@ SRC_DIR=src
 BUILD_DIR=build
 BUILD_DIR_IMG=$(BUILD_DIR)/bin
 
+# Linker scripts
+BOOTSECTOR_LINKER_SCRIPT=src/bootsector/bootsector.ld
+PREKERNEL_LINKER_SCRIPT=src/prekernel/prekernel.ld
+KERNEL_LINKER_SCRIPT=src/kernel/kernel.ld
+
 CFLAGS=-mgeneral-regs-only \
 			 -nostdlib -ffreestanding \
 			 -fno-rtti -Wno-write-strings \
@@ -167,7 +172,7 @@ $(BUILD_DIR_IMG)/kernel: link_kernel
 link_kernel: compile
 	@echo "Linking kernel..."
 	@# REVIEW: removing crtbegin and crtend does not affect?
-	@$(GPP) $(CFLAGS) $(CRTBEGIN_OBJ) $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(CRTEND_OBJ) -T kernel.ld -o $(BUILD_DIR_IMG)/kernel
+	@$(GPP) $(CFLAGS) $(CRTBEGIN_OBJ) $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(CRTEND_OBJ) -T $(KERNEL_LINKER_SCRIPT) -o $(BUILD_DIR_IMG)/kernel
 	@echo "Finished linking kernel..."
 
 #
@@ -176,7 +181,7 @@ link_kernel: compile
 $(BUILD_DIR_IMG)/prekernel: link_prekernel
 link_prekernel: compile
 	@echo "Linking prekernel..."
-	@$(GPP) $(CFLAGS) $(PREKERNEL_OBJECTS) $(LIBRARY_OBJECTS) -T prekernel.ld -o $(BUILD_DIR_IMG)/prekernel
+	@$(GPP) $(CFLAGS) $(PREKERNEL_OBJECTS) $(LIBRARY_OBJECTS) -T $(PREKERNEL_LINKER_SCRIPT) -o $(BUILD_DIR_IMG)/prekernel
 	@echo "Finished linking prekernel..."
 
 #
@@ -185,7 +190,7 @@ link_prekernel: compile
 $(BUILD_DIR_IMG)/bootsector: link_bootsector
 link_bootsector: compile
 	@echo "Linking bootsector..."
-	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T src/bootsector/bootsector.ld -o $(BUILD_DIR_IMG)/bootsector
+	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T $(BOOTSECTOR_LINKER_SCRIPT) -o $(BUILD_DIR_IMG)/bootsector
 
 run_make_img: 
 	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
