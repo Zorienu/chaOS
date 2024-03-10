@@ -114,19 +114,9 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 
 binary_files: $(BUILD_DIR_IMG)/bootsector $(BUILD_DIR_IMG)/prekernel $(BUILD_DIR_IMG)/kernel 
 img: clean always binary_files
-	@echo "Creating boot img at $(BUILD_DIR_IMG)/boot.img..."
-	@# Count: 10000 -> 10000 sectors of 512 bytes each -> 5120000 bytes
-	@dd if=/dev/zero of=$(BUILD_DIR_IMG)/boot.img count=10000
-	@# Add the bootsector first
-	@dd if=$(BUILD_DIR_IMG)/bootsector of=$(BUILD_DIR_IMG)/boot.img conv=notrunc
-	@# Add the bootlaoder just after the bootsector
-	@dd if=$(BUILD_DIR_IMG)/prekernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=1 
-	@# Now add the kernel
-	@# seek=7  -> 0xE00 (0x200 * 7)
-	@# seek=50 -> 0x6400 (0x200 * 50)
-	@# seek=100 -> 0xC800 (0x200 * 100)
-	@dd if=$(BUILD_DIR_IMG)/kernel of=$(BUILD_DIR_IMG)/boot.img conv=notrunc seek=100
-	@echo "Boot img created succesfully..."
+	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
+	gcc makeImage.c -o makeImage
+	./makeImage
 
 # 
 # Always: this target will be used to create the build directory 
@@ -191,7 +181,3 @@ $(BUILD_DIR_IMG)/bootsector: link_bootsector
 link_bootsector: compile
 	@echo "Linking bootsector..."
 	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T $(BOOTSECTOR_LINKER_SCRIPT) -o $(BUILD_DIR_IMG)/bootsector
-
-run_make_img: 
-	@#gcc -D PRINT_HEX makeImage.c -o makeImage && ./makeImage
-	gcc makeImage.c -o makeImage && ./makeImage
