@@ -6,15 +6,90 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include "./src/kernel/fileSystem/fs.h"
+
 #define SECTOR_SIZE 512
 // #define PRINT_HEX
+//
+enum BinaryFiles : uint8_t {
+  BINARY_FILE_BOOTSECTOR = 0,
+  BINARY_FILE_PREKERNEL = 1,
+  BINARY_FILE_KERNEL = 2,
+};
 
-void writeBinaryToImg(int imgFD, int binaryFD) {
+struct file {
+  char name[60];
+  uint8_t fd;
+  uint32_t size;
+};
+
+struct file outputImage = { "build/bin/image.img", 0, 0 };
+
+struct file files[] = {
+  { "build/bin/bootsector", 0, 0 },
+  { "build/bin/prekernel", 0, 0 },
+  { "build/bin/kernel", 0, 0 },
+};
+
+uint32_t numFiles = sizeof(files) / sizeof(struct file);
+
+void openFiles() {
+  for (int i = 0; i < numFiles; i++) 
+    files[i].fd = open(files[i].name, O_RDONLY);
+
+  outputImage.fd = open(outputImage.name, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+}
+
+void calculateFilesSize() {
+  for (int i = 0; i < numFiles; i++) {
+    files[i].size = lseek(files[i].fd, 0, SEEK_END);
+    lseek(files[i].fd, 0, SEEK_SET);
+  }
+}
+
+void closeFiles() {
+  for (int i = 0; i < numFiles; i++) 
+    close(files[i].fd);
+
+  close(outputImage.fd);
+}
+
+void writeInodes() {
+  // We'll have numFiles + 1 (the root directory) inodes
+  struct inode inodes[numFiles + 1];
+  memset(inodes, 0x0, sizeof(inodes));
+
+  // First we need to create the root directory
+  inodes[0] = (struct inode) {
+    .number = 1,
+    .referenceCounter = 1,
+    .directDataBlocks = { 0 },
+    .type = FILETYPE_DIRECTORY,
+    // By now we have 3 files (bootsector.bin, prekernel.bin and kernel.bin)
+    .sizeInBytes = (uint32_t)(numFiles * sizeof(struct directoryEntry)), 
+    .sizeInSectors = 1,
+  };
+
+  uint32_t nexInodeNumber = 2;
+
+  for (int i = 0; i < numFiles; i++) {
+    inodes[i] = (struct inode) {
+      .number = nexInodeNumber++,
+      .referenceCounter = 1,
+      .directDataBlocks = { 0 },
+      .type = FILETYPE_FILE,
+      .sizeInBytes = files[i].size,
+      .sizeInSectors = files[i].size / SECTOR_SIZE,
+    };
+  }
+}
+
+void writeBinaryToImg(enum BinaryFiles file) {
   int nread = 0;
   char buffer[SECTOR_SIZE];
 
-  while ((nread = read(binaryFD, buffer, sizeof(buffer))) > 0) {
-    int nwrite = write(imgFD, buffer, sizeof(buffer));
+  while ((nread = read(files[file].fd, buffer, sizeof(buffer))) > 0) {
+    int nwrite = write(outputImage.fd, buffer, sizeof(buffer));
 
     // Clear buffer
     memset(buffer, 0x0, sizeof(buffer));
@@ -28,50 +103,42 @@ void writeBinaryToImg(int imgFD, int binaryFD) {
 int main() {
   printf("Creating chaOS image\n");
 
-  int bootsectorFD = open("build/bin/bootsector", O_RDONLY);
-  int prekernelFD = open("build/bin/prekernel", O_RDONLY);
-  int kernelFD = open("build/bin/kernel", O_RDONLY);
-  int imgFD = open("build/bin/image.img", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+  openFiles();
 
-  if (imgFD < 0) { printf("Error creating image.img, error: %s\n", strerror(errno)); return 1; }
+  if (outputImage.fd < 0) { printf("Error creating image.img, error: %s\n", strerror(errno)); return 1; }
 
-  printf("Bootsector FD: %d\n", bootsectorFD);
-  printf("Prekernel FD: %d\n", prekernelFD);
-  printf("Kernel FD: %d\n", kernelFD);
-  printf("Image FD: %d\n", imgFD);
+  printf("Bootsector FD: %d\n", files[BINARY_FILE_BOOTSECTOR].fd);
+  printf("Prekernel FD: %d\n", files[BINARY_FILE_PREKERNEL].fd);
+  printf("Kernel FD: %d\n", files[BINARY_FILE_KERNEL].fd);
+  printf("Image FD: %d\n", outputImage.fd);
 
-  int bootsectorSize = lseek(bootsectorFD, 0, SEEK_END);
-  int prekernelSize = lseek(prekernelFD, 0, SEEK_END);
-  int kernelSize = lseek(kernelFD, 0, SEEK_END);
+  calculateFilesSize();
 
   printf("\nBinaries size:\n");
-  printf("Bootsector size in bytes: %d\n", bootsectorSize);
-  printf("Prekernel size in bytes: %d\n", prekernelSize);
-  printf("Kernel size in bytes: %d\n", kernelSize);
-
-  lseek(bootsectorFD, 0, SEEK_SET);
-  lseek(prekernelFD, 0, SEEK_SET);
-  lseek(kernelFD, 0, SEEK_SET);
+  printf("Bootsector size in bytes: %d\n", files[BINARY_FILE_BOOTSECTOR].size);
+  printf("Prekernel size in bytes: %d\n", files[BINARY_FILE_PREKERNEL].size);
+  printf("Kernel size in bytes: %d\n", files[BINARY_FILE_KERNEL].size);
 
   char buffer[512];
   memset(buffer, 0x0, sizeof(buffer));
   int nread = 0;
 
   printf("Writing bootsector to img...\n");
-  writeBinaryToImg(imgFD, bootsectorFD);
+  writeBinaryToImg(BINARY_FILE_BOOTSECTOR);
   printf("Writing prekernel to img...\n");
-  writeBinaryToImg(imgFD, prekernelFD);
+  writeBinaryToImg(BINARY_FILE_PREKERNEL);
 
-  lseek(imgFD, 0x200 * 100, SEEK_SET);
+  lseek(outputImage.fd, 0x200 * 100, SEEK_SET);
   printf("Writing kernel to img...\n");
-  writeBinaryToImg(imgFD, kernelFD);
+  writeBinaryToImg(BINARY_FILE_KERNEL);
 
-  close(bootsectorFD);
-  close(prekernelFD);
-  close(kernelFD);
-  close(imgFD);
+  closeFiles();
 
+  printf("Size of INode: %lu bytes\n", sizeof(struct inode));
+  printf("Size of Superblock: %lu bytes\n", sizeof(struct superBlock));
   printf("Finished creating img...\n");
+
+  writeInodes();
 
   return 0;
 }
