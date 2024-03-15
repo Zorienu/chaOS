@@ -33,6 +33,10 @@ struct file files[] = {
 
 uint32_t numFiles = sizeof(files) / sizeof(struct file);
 
+int min(int a, int b) {
+  return a < b ? a : b;
+}
+
 void openFiles() {
   for (int i = 0; i < numFiles; i++) 
     files[i].fd = open(files[i].name, O_RDONLY);
@@ -52,6 +56,16 @@ void closeFiles() {
     close(files[i].fd);
 
   close(outputImage.fd);
+}
+
+void fillRemainingBytes(int remainingBytes) {
+  uint8_t zero[SECTOR_SIZE];
+  memset(zero, 0xFF, SECTOR_SIZE);
+
+  while(remainingBytes > 0) {
+    write(outputImage.fd, zero, min(SECTOR_SIZE, remainingBytes));
+    remainingBytes -= SECTOR_SIZE;
+  }
 }
 
 void writeInodes() {
