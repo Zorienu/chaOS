@@ -90,6 +90,28 @@ void fillRemainingBytes(int remainingBytes) {
   }
 }
 
+void writeSuperBlock() {
+  superBlock.blockSizeInBytes = BLOCK_SIZE;
+  superBlock.maxFileSize = 0xFFFFFFFF;
+
+  superBlock.inodeSizeInBytes = sizeof(struct inode);
+  superBlock.totalNumberOfInodes = numberOfInodes;
+  superBlock.firstInodesBitmapBlock = 2; // 0 -> bootsector, 1 -> superblock
+  superBlock.inodesBitmapBlocks = ceilDiv(numberOfInodes, BLOCK_SIZE * 8); // * 8: each byte holds 8 inodes
+
+  superBlock.totalNumberOfDataBlocks = TOTAL_NUMBER_OF_DATA_BLOCKS;
+  superBlock.firstDataBlocksBitmapBlock = superBlock.firstInodesBitmapBlock + superBlock.inodesBitmapBlocks;
+  superBlock.dataBlocksBitmapBlocks = ceilDiv(superBlock.totalNumberOfDataBlocks, BLOCK_SIZE * 8); // * 8: each byte holds 8 inodes
+
+  superBlock.firstInodeBlock = superBlock.firstDataBlocksBitmapBlock + superBlock.dataBlocksBitmapBlocks;
+  superBlock.inodesBlocks = ceilDiv(numberOfInodes * sizeof(struct inode), BLOCK_SIZE);
+
+  superBlock.firstDataBlock = superBlock.firstInodeBlock + superBlock.inodesBlocks;
+
+  write(outputImage.fd, &superBlock, sizeof(struct superBlock));
+  int remainingBytes = BLOCK_SIZE - (sizeof(superBlock) % BLOCK_SIZE);
+  fillRemainingBytes(remainingBytes);
+}
 void writeInodes() {
   // We'll have numFiles + 1 (the root directory) inodes
   struct inode inodes[numFiles + 1];
