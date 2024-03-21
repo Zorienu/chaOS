@@ -130,6 +130,42 @@ void writeInodesBitmap() {
   write(outputImage.fd, inodesBitmap, inodesBitmapBytes);
 }
 
+void writeDataBlocksBitmap() {
+  int dataBlocksBitmapBlocks = ceilDiv(TOTAL_NUMBER_OF_DATA_BLOCKS, BLOCK_SIZE * 8); // * 8: each byte holds 8 inodes
+  int dataBlocksBitmapBytes = dataBlocksBitmapBlocks * BLOCK_SIZE;
+  uint8_t *dataBlocksBitmap= (uint8_t *)malloc(dataBlocksBitmapBytes);
+  memset(dataBlocksBitmap, 0x0, dataBlocksBitmapBytes);
+
+  // Data block 0 -> bootsector
+  // Data block 1 -> superblock
+  // Data block 2 -> inodes bitmap
+  // Data block 3 -> data blocks bitmap
+  // Data block 4 -> inodes (see superblock to get the amount of blocks for inodes)
+  int reservedDataBlocks = superBlock.firstDataBlock;
+  int rootDirectoryBlocks = ceilDiv(numberOfFiles * sizeof(struct directoryEntry), BLOCK_SIZE);
+
+  int filesBlocks = 0;
+  // Starting from 1 for ignoring bootsector (already taken into account)
+  for (int i = 1; i < numberOfFiles; i++) {
+    filesBlocks += bytesToBlocks(files[i].size);
+  }
+
+  int totalUsedDataBlocks = reservedDataBlocks + rootDirectoryBlocks + filesBlocks;
+  printf("Reserved data blocks: %d\n", reservedDataBlocks);
+  printf("Root directory data blocks: %d\n", rootDirectoryBlocks);
+  printf("Files data blocks: %d\n", filesBlocks);
+  printf("Total data blocks: %d\n", totalUsedDataBlocks);
+
+  int byte = 0;
+  for (int i = 0; i < totalUsedDataBlocks; i++) {
+    if (i != 0) byte += i % 8 == 0 ? 1 : 0;
+     
+    dataBlocksBitmap[byte] |= 1 << (i % 8);
+  }
+
+  write(outputImage.fd, dataBlocksBitmap, dataBlocksBitmapBytes);
+}
+
 void writeInodes() {
   // We'll have numFiles + 1 (the root directory) inodes
   struct inode inodes[numFiles + 1];
