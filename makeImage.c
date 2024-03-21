@@ -33,7 +33,14 @@ struct file files[] = {
   { "build/bin/kernel", 0, 0 },
 };
 
-uint32_t numFiles = sizeof(files) / sizeof(struct file);
+uint32_t numberOfFiles = sizeof(files) / sizeof(struct file);
+
+// We'll have numberOfFiles + 2 inodes
+// inode 0 will be invalid
+// inode 1 will be the root directory
+uint32_t numberOfInodes;
+
+static struct superBlock superBlock;
 
 int min(int a, int b) {
   return a < b ? a : b;
