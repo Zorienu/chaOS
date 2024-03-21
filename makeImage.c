@@ -9,8 +9,10 @@
 #include "./src/kernel/fileSystem/fs.h"
 
 #define SECTOR_SIZE 512
+#define TOTAL_IMAGE_SIZE 1.44 * 1000 * 1000 // Lets try with a floppy disk size
+#define TOTAL_NUMBER_OF_DATA_BLOCKS TOTAL_IMAGE_SIZE / BLOCK_SIZE
 // #define PRINT_HEX
-//
+
 enum BinaryFiles : uint8_t {
   BINARY_FILE_BOOTSECTOR = 0,
   BINARY_FILE_PREKERNEL = 1,
