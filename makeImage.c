@@ -112,6 +112,24 @@ void writeSuperBlock() {
   int remainingBytes = BLOCK_SIZE - (sizeof(superBlock) % BLOCK_SIZE);
   fillRemainingBytes(remainingBytes);
 }
+
+void writeInodesBitmap() {
+  int inodesBitmapBlocks = ceilDiv(numberOfInodes, BLOCK_SIZE * 8); // * 8: each byte holds 8 inodes
+  int inodesBitmapBytes = inodesBitmapBlocks * BLOCK_SIZE;
+  uint8_t *inodesBitmap = (uint8_t *)malloc(inodesBitmapBytes);
+  memset(inodesBitmap, 0x0, inodesBitmapBytes);
+
+  int byte = 0;
+  for (int i = 0; i < numberOfInodes; i++) {
+    inodesBitmap[byte] |= 1 << i;
+
+    if (i == 0) continue;
+    byte += i % 8 == 0 ? 1 : 0;
+  }
+
+  write(outputImage.fd, inodesBitmap, inodesBitmapBytes);
+}
+
 void writeInodes() {
   // We'll have numFiles + 1 (the root directory) inodes
   struct inode inodes[numFiles + 1];
