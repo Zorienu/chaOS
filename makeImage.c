@@ -167,33 +167,62 @@ void writeDataBlocksBitmap() {
 }
 
 void writeInodes() {
-  // We'll have numFiles + 1 (the root directory) inodes
-  struct inode inodes[numFiles + 1];
+  // We'll have numFiles + 2 (the root directory) inodes
+  // inode 0 will be invalid
+  // inode 1 will be the root directory
+  struct inode inodes[numberOfFiles + 2];
   memset(inodes, 0x0, sizeof(inodes));
 
   // First we need to create the root directory
-  inodes[0] = (struct inode) {
+  inodes[1] = (struct inode) {
     .number = 1,
     .referenceCounter = 1,
     .directDataBlocks = { 0 },
     .type = FILETYPE_DIRECTORY,
     // By now we have 3 files (bootsector.bin, prekernel.bin and kernel.bin)
-    .sizeInBytes = (uint32_t)(numFiles * sizeof(struct directoryEntry)), 
-    .sizeInSectors = 1,
+    .sizeInBytes = (uint32_t)(numberOfFiles * sizeof(struct directoryEntry)), 
+    .sizeInSectors = (uint32_t)ceilDiv(numberOfFiles * sizeof(struct directoryEntry), SECTOR_SIZE),
   };
 
-  uint32_t nexInodeNumber = 2;
+  // Point inode to the data blocks
+  int nextDataBlock = superBlock.firstDataBlock;
+  for (int i = 0; i < bytesToBlocks(inodes[1].sizeInBytes); nextDataBlock++, i++) {
+    inodes[1].directDataBlocks[i] = nextDataBlock;
+  }
 
-  for (int i = 0; i < numFiles; i++) {
-    inodes[i] = (struct inode) {
-      .number = nexInodeNumber++,
+  // inode 0 -> invalid
+  // inode 1 -> root directory
+  uint32_t nextInodeNumber = 2;
+
+  for (int i = 0; i < numberOfFiles; i++) {
+    inodes[nextInodeNumber] = (struct inode) {
+      .number = nextInodeNumber,
       .referenceCounter = 1,
       .directDataBlocks = { 0 },
       .type = FILETYPE_FILE,
       .sizeInBytes = files[i].size,
-      .sizeInSectors = files[i].size / SECTOR_SIZE,
+      .sizeInSectors = (uint32_t)ceilDiv(files[i].size, SECTOR_SIZE),
     };
+
+    // Set the datablocks used for each file
+    // Ignore bootsector file since it is in block 0
+    if (i != 0) 
+      for (int j = 0; j < bytesToBlocks(inodes[nextInodeNumber].sizeInBytes); nextDataBlock++, j++) {
+        inodes[nextInodeNumber].directDataBlocks[j] = nextDataBlock;
+      }
+
+    nextInodeNumber++;
   }
+
+  write(outputImage.fd, inodes, sizeof(inodes));
+
+  // Fill remaining block with zeros
+  int remainingBytes = BLOCK_SIZE - (sizeof(inodes) % BLOCK_SIZE);
+  fillRemainingBytes(remainingBytes);
+}
+
+void writeDataBlocks() {
+
 }
 
 void writeBinaryToImg(enum BinaryFiles file) {
@@ -210,10 +239,18 @@ void writeBinaryToImg(enum BinaryFiles file) {
       printf("Error writing buffer to image, error: %s", strerror(errno));
     }
   } 
+
+  fillRemainingBytes(BLOCK_SIZE - (files[file].size % BLOCK_SIZE));
+}
+
+void printCurrentImgPosition() {
+  printf("Current position on file: %llx\n", lseek(outputImage.fd, 0x0, SEEK_CUR));
 }
 
 int main() {
   printf("Creating chaOS image\n");
+
+  numberOfInodes = numberOfFiles + 2;
 
   openFiles();
 
@@ -227,27 +264,38 @@ int main() {
   calculateFilesSize();
 
   printf("\nBinaries size:\n");
-  printf("Bootsector size in bytes: %d\n", files[BINARY_FILE_BOOTSECTOR].size);
-  printf("Prekernel size in bytes: %d\n", files[BINARY_FILE_PREKERNEL].size);
-  printf("Kernel size in bytes: %d\n", files[BINARY_FILE_KERNEL].size);
-
-  char buffer[512];
-  memset(buffer, 0x0, sizeof(buffer));
-  int nread = 0;
+  printf("Bootsector size in bytes: %d, blocks: %d, sectors: %d\n", files[BINARY_FILE_BOOTSECTOR].size, bytesToBlocks(files[BINARY_FILE_BOOTSECTOR].size), ceilDiv(files[BINARY_FILE_BOOTSECTOR].size, SECTOR_SIZE));
+  printf("Prekernel size in bytes: %d, blocks: %d, sectors: %d\n", files[BINARY_FILE_PREKERNEL].size, bytesToBlocks(files[BINARY_FILE_PREKERNEL].size), ceilDiv(files[BINARY_FILE_PREKERNEL].size, SECTOR_SIZE));
+  printf("Kernel size in bytes: %d, blocks: %d, sectors: %d\n", files[BINARY_FILE_KERNEL].size, bytesToBlocks(files[BINARY_FILE_KERNEL].size), ceilDiv(files[BINARY_FILE_KERNEL].size, SECTOR_SIZE));
 
   printf("Writing bootsector to img...\n");
-  writeBinaryToImg(BINARY_FILE_BOOTSECTOR);
-  printf("Writing prekernel to img...\n");
-  writeBinaryToImg(BINARY_FILE_PREKERNEL);
+  writeBinaryToImg(BINARY_FILE_BOOTSECTOR); 
+  printCurrentImgPosition();
 
-  lseek(outputImage.fd, 0x200 * 100, SEEK_SET);
-  printf("Writing kernel to img...\n");
-  writeBinaryToImg(BINARY_FILE_KERNEL);
+  printf("Writing superblock to img...\n");
+  writeSuperBlock();
+  printCurrentImgPosition();
+  
+  printf("Writing inodes bitmap to img...\n");
+  writeInodesBitmap();
+  printCurrentImgPosition();
+
+  printf("Writing datablocks bitmap to img...\n");
+  writeDataBlocksBitmap();
+  printCurrentImgPosition();
+
+  printf("Writing inodes to img...\n");
+  writeInodes();
+  printCurrentImgPosition();
+
+  printf("Writing data blocks to img...\n");
+  writeDataBlocks();
 
   closeFiles();
 
   printf("Size of INode: %lu bytes\n", sizeof(struct inode));
   printf("Size of Superblock: %lu bytes\n", sizeof(struct superBlock));
+  printf("Size of DirectoryEntry: %lu bytes\n", sizeof(struct directoryEntry));
   printf("Finished creating img...\n");
 
   writeInodes();
