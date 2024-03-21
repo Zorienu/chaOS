@@ -46,22 +46,35 @@ int min(int a, int b) {
   return a < b ? a : b;
 }
 
+int ceilDiv(int a, int b) {
+  int result = a / b;
+
+  if ((a % b) != 0) result++;
+
+  return result;
+}
+
+int bytesToBlocks(int bytes) {
+  return ceilDiv(bytes, BLOCK_SIZE);
+}
+
+
 void openFiles() {
-  for (int i = 0; i < numFiles; i++) 
+  for (int i = 0; i < numberOfFiles; i++) 
     files[i].fd = open(files[i].name, O_RDONLY);
 
   outputImage.fd = open(outputImage.name, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 }
 
 void calculateFilesSize() {
-  for (int i = 0; i < numFiles; i++) {
+  for (int i = 0; i < numberOfFiles; i++) {
     files[i].size = lseek(files[i].fd, 0, SEEK_END);
     lseek(files[i].fd, 0, SEEK_SET);
   }
 }
 
 void closeFiles() {
-  for (int i = 0; i < numFiles; i++) 
+  for (int i = 0; i < numberOfFiles; i++) 
     close(files[i].fd);
 
   close(outputImage.fd);
