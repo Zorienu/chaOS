@@ -58,6 +58,14 @@ int bytesToBlocks(int bytes) {
   return ceilDiv(bytes, BLOCK_SIZE);
 }
 
+int bytesToSectors(int bytes) {
+  return ceilDiv(bytes, SECTOR_SIZE);
+}
+
+int sectorsToBytes(int sectors) {
+  return sectors * SECTOR_SIZE;
+}
+
 
 void openFiles() {
   for (int i = 0; i < numberOfFiles; i++) 
