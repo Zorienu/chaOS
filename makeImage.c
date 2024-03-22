@@ -89,6 +89,8 @@ void closeFiles() {
 }
 
 void fillRemainingBytes(int remainingBytes) {
+  if (remainingBytes == 0) return;
+
   uint8_t zero[SECTOR_SIZE];
   memset(zero, 0xFF, SECTOR_SIZE);
 
@@ -229,15 +231,11 @@ void writeInodes() {
   fillRemainingBytes(remainingBytes);
 }
 
-void writeDataBlocks() {
-
-}
-
-void writeBinaryToImg(enum BinaryFiles file) {
+void writeBinaryToImg(struct file file) {
   int nread = 0;
   char buffer[SECTOR_SIZE];
 
-  while ((nread = read(files[file].fd, buffer, sizeof(buffer))) > 0) {
+  while ((nread = read(file.fd, buffer, sizeof(buffer))) > 0) {
     int nwrite = write(outputImage.fd, buffer, sizeof(buffer));
 
     // Clear buffer
@@ -248,7 +246,12 @@ void writeBinaryToImg(enum BinaryFiles file) {
     }
   } 
 
-  fillRemainingBytes(BLOCK_SIZE - (files[file].size % BLOCK_SIZE));
+  // We use sectors instead of "size" because we may ended up writing more than "size" (we write by sectors)
+  int writtenSectors = bytesToSectors(file.size);
+  int remainingBytes = BLOCK_SIZE - (sectorsToBytes(writtenSectors) % BLOCK_SIZE);
+  printf("Filling remaining bytes %d for file %s\n", remainingBytes, file.name);
+  fillRemainingBytes(remainingBytes);
+}
 }
 
 void printCurrentImgPosition() {
