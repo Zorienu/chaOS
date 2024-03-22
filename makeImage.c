@@ -252,6 +252,25 @@ void writeBinaryToImg(struct file file) {
   printf("Filling remaining bytes %d for file %s\n", remainingBytes, file.name);
   fillRemainingBytes(remainingBytes);
 }
+
+void writeDataBlocks() {
+  int nextDataBlock = superBlock.firstDataBlock; 
+
+  // Write the root directory data
+  struct directoryEntry entries[] = {
+    { "bootsector", 0 },
+    { "prekernel", 0 },
+    { "kernel", 0 },
+  };
+  printf("Size of root directory: %lu\n", sizeof(entries));
+  write(outputImage.fd, entries, sizeof(entries));
+  int remainingBytes = BLOCK_SIZE - (sizeof(entries) % BLOCK_SIZE);
+  fillRemainingBytes(remainingBytes);
+
+  // Ignore bootsector, since it's already in the img
+  for (int i = 1; i < numberOfFiles; i++)
+    writeBinaryToImg(files[i]);
+
 }
 
 void printCurrentImgPosition() {
@@ -280,7 +299,7 @@ int main() {
   printf("Kernel size in bytes: %d, blocks: %d, sectors: %d\n", files[BINARY_FILE_KERNEL].size, bytesToBlocks(files[BINARY_FILE_KERNEL].size), ceilDiv(files[BINARY_FILE_KERNEL].size, SECTOR_SIZE));
 
   printf("Writing bootsector to img...\n");
-  writeBinaryToImg(BINARY_FILE_BOOTSECTOR); 
+  writeBinaryToImg(files[BINARY_FILE_BOOTSECTOR]); 
   printCurrentImgPosition();
 
   printf("Writing superblock to img...\n");
