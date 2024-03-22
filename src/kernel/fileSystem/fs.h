@@ -36,11 +36,13 @@ struct superBlock {
 struct inode {
   uint32_t number; // INode number (The low level name of a file)
   uint32_t referenceCounter; // Reference counter
-  uint32_t directDataBlocks[12]; // Direct data blocks (12 * 4096 = 49152 bytes)
-  enum FileType type; // Wheter is a file or a directory (by now)
+  uint32_t directDataBlocks[25]; // Direct data blocks (25 * 4096 = 49152 bytes), TODO: improve this
+  uint8_t type; // Wheter is a file or a directory (by now)
   uint32_t sizeInBytes; 
   uint32_t sizeInSectors;
-};
+
+  uint8_t padding[11]; // unused, to reach sizeof(struct inode) = 128
+} __attribute__((packed));
 
 struct directoryEntry {
   char name[60];
