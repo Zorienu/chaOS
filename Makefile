@@ -67,15 +67,15 @@ KERNEL_OBJECTS = \
 	build/objects/kernel/entry.o \
 
 PREKERNEL_OBJECTS = \
-  build/objects/prekernel/stage2.o \
   build/objects/prekernel/prekernel.o \
   build/objects/prekernel/crti.o \
   build/objects/prekernel/crtn.o \
 
-BOOTSECTOR_OBJECT = \
+BOOTSECTOR_OBJECTS = \
 	build/objects/bootsector/boot.o \
+  build/objects/bootsector/stage2.o \
 
-ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(PREKERNEL_OBJECTS) $(BOOTSECTOR_OBJECT)
+ALL_OBJECTS = $(LIBRARY_OBJECTS) $(KERNEL_OBJECTS) $(PREKERNEL_OBJECTS) $(BOOTSECTOR_OBJECTS)
 
 # Keep our make file cleaner by refering to varios modules 
 # using their names rather than their output file names
@@ -180,4 +180,4 @@ link_prekernel: compile
 $(BUILD_DIR_IMG)/bootsector: link_bootsector
 link_bootsector: compile
 	@echo "Linking bootsector..."
-	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECT) -T $(BOOTSECTOR_LINKER_SCRIPT) -o $(BUILD_DIR_IMG)/bootsector
+	@$(GPP) $(CFLAGS) $(BOOTSECTOR_OBJECTS) -T $(BOOTSECTOR_LINKER_SCRIPT) -o $(BUILD_DIR_IMG)/bootsector
