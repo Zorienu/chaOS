@@ -53,7 +53,9 @@ bootloader:
 start: 
   jmp main
 
+; NOTE: use just int 16 bits code blocks
 halt:
+  mov bx, 0xDEAD ; Just to ensure we ended up here (use 'info registers' qemu cmd to confirm)
   cli
   hlt
 
@@ -87,7 +89,7 @@ wait_disk:
 ; Parameters:
 ;   - bx: Sector number to read
 ;   - di: Memory address where to store the read data
-;   - cx: Amount of bytes to read
+;   - cx: Amount of sectors to read
 ;
 disk_read:
   ; Save register we will modify
@@ -100,25 +102,12 @@ disk_read:
   ; Wait for the disk
   call wait_disk
 
-  ; Save sector number to read
-  push bx
-
-  ; Convert number of bytes to number of sectors to read
-  ; Number of sectors to read will be in ax and remainder in dx
-  mov ax, cx
-  mov bx, SECTOR_SIZE
-  cwd ; prepare the DX:AX register pair for division -> dx will be set to 0
-      ;  setting dx to 0 manually will work too
-  div bx
-
-  ; Restore sector number to read
-  pop bx
-
   ; Save amount of sectors to read... for later
-  push ax
+  push cx
 
   ; Define number of sectors to read
   mov dx, DISK_PORT_BASE + 2
+  mov ax, cx
   out dx, al
 
   ; Define sector to read
