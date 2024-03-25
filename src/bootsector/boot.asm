@@ -227,6 +227,7 @@ puts:
 
 
 bits 16
+; One sector after the bootsector code loaded in RAM by the BIOS
 %define STAGE_2_ADDRESS 0x7E00
 main: ; Where our code begins
   ; We don't know if the DS (Data Segment) or the ES (Extra Segment) registers are properly initialized

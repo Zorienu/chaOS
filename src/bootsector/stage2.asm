@@ -270,7 +270,18 @@ disk_read:
 ;
 ; Already in protected mode
 ;
+%define SECTORS_PER_BLOCK 8
+%define BLOCK_SIZE 4096
+%define SUPERBLOCK_DISK_BLOCK 1
 %define PREKERNEL_MEMORY_ADDRESS 0x50000
+%define SUPERBLOCK_MEMORY_ADDRESS 0x8E00
+%define INODES_MEMORY_ADDRESS SUPERBLOCK_MEMORY_ADDRESS + BLOCK_SIZE
+%define FIRST_INODE_DISKBLOCK_ADDRESS SUPERBLOCK_MEMORY_ADDRESS + 24 ; Offset of "firstInodeBlock" within superBlock struct
+%define PREKERNEL_INODE 3
+%define INODE_STRUCT_SIZE 128
+%define INODE_FIRST_DIRECT_DATA_BLOCK_OFFSET 8 ; Offset of "directDataBlocks" within inode struct
+%define INODE_SIZE_IN_SECTORS_OFFSET 113 ; Offset of "sizeInSectors" within inode struct
+%define PREKERNEL_MEMORY_ADDRESS INODES_MEMORY_ADDRESS + BLOCK_SIZE
 bits 32
 PModeMain:
   ; Setup segments register to 16 (0x10) which is the offset within the GDT to use the kernel mode data segment
@@ -287,6 +298,31 @@ PModeMain:
   ; remember: the stack grows downwards
   ;
   mov esp, 0x7C00
+
+  ; Load superblock to memory
+  mov di, SUPERBLOCK_MEMORY_ADDRESS
+  mov cx, SECTORS_PER_BLOCK ; Convert disk block to sector number (each block is 8 sectors)
+  mov bx, SUPERBLOCK_DISK_BLOCK * SECTORS_PER_BLOCK ; Convert disk block to sector number (each block is 8 sectors)
+  call disk_read
+
+  ; Get the block where the first inode is located from the superblock
+  ; and load it into memory
+  mov di, INODES_MEMORY_ADDRESS
+  mov cx, SECTORS_PER_BLOCK; BLOCK_SIZE 
+  mov bx, [FIRST_INODE_DISKBLOCK_ADDRESS]
+  imul bx, SECTORS_PER_BLOCK
+  ; call disk_read
+
+  mov di, PREKERNEL_MEMORY_ADDRESS
+  ; Get the first disk block of the prekernel
+  mov bx, [INODES_MEMORY_ADDRESS + PREKERNEL_INODE * INODE_STRUCT_SIZE + INODE_FIRST_DIRECT_DATA_BLOCK_OFFSET]
+  imul bx, SECTORS_PER_BLOCK
+  ; Get the size in sectors of the prekernel
+  mov cx, [INODES_MEMORY_ADDRESS + PREKERNEL_INODE * INODE_STRUCT_SIZE + INODE_SIZE_IN_SECTORS_OFFSET]
+  ; imul cx, SECTOR_SIZE
+  mov cx, 50 
+  ; call disk_read
+  
 
   mov edi, PREKERNEL_MEMORY_ADDRESS ; di will contain the destination address of the read sectors
   mov cx, 50 ;* SECTOR_SIZE ; cx will contain the number of bytes to read (60 sectors)
@@ -517,4 +553,4 @@ GDTDescriptor:
 .GDTSize:    dw GDTEnd - GDTStart
 .GDTAddress: dd GDTStart
 
-times 512 - ($ - $$) db 0
+times 1024 - ($ - $$) db 0
