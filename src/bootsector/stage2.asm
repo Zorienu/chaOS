@@ -276,7 +276,7 @@ bits 32
 %define SUPERBLOCK_DISK_BLOCK 1
 %define PREKERNEL_MEMORY_ADDRESS 0x50000
 %define SUPERBLOCK_MEMORY_ADDRESS 0x8E00
-%define INODES_MEMORY_ADDRESS SUPERBLOCK_MEMORY_ADDRESS + BLOCK_SIZE
+%define INODES_MEMORY_ADDRESS 0xB000
 %define FIRST_INODE_DISKBLOCK_ADDRESS SUPERBLOCK_MEMORY_ADDRESS + 24 ; Offset of "firstInodeBlock" within superBlock struct
 %define PREKERNEL_INODE 3
 %define INODE_STRUCT_SIZE 128
@@ -298,7 +298,11 @@ PModeMain:
   ;
   mov esp, 0x7C00
 
-  ; Load superblock to memory
+  ; 0x7C00 - 0x8C00-1 -> bootloader
+  ; 0x8C00 - 0x9C00-1 -> superblock
+  ; 0xB000 - 0xC000-1 -> inodes (skipping memory map addresses)
+
+  ; Load superblock to memory at 0x8E00
   mov di, SUPERBLOCK_MEMORY_ADDRESS
   mov cx, SECTORS_PER_BLOCK ; Convert disk block to sector number (each block is 8 sectors)
   mov bx, SUPERBLOCK_DISK_BLOCK * SECTORS_PER_BLOCK ; Convert disk block to sector number (each block is 8 sectors)
