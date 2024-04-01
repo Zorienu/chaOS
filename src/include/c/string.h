@@ -12,6 +12,11 @@
 unsigned long strlen (char *string);
 
 /*
+ * Compare strings, returns true if both strings are equal
+ */
+bool strcmp(char *value, const char* target);
+
+/*
  * Set the given number of bytes from source to destination
  */
 void memcpy(void *_destination, void *_source, size_t count);
