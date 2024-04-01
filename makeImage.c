@@ -258,9 +258,9 @@ void writeDataBlocks() {
 
   // Write the root directory data
   struct directoryEntry entries[] = {
-    { "bootsector", 0 },
-    { "prekernel", 0 },
-    { "kernel", 0 },
+    { "bootsector", 2 },
+    { "prekernel", 3 },
+    { "kernel", 4 },
   };
   printf("Size of root directory: %lu\n", sizeof(entries));
   write(outputImage.fd, entries, sizeof(entries));
