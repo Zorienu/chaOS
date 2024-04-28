@@ -3,19 +3,96 @@
 #include <string.h>
 #include <elf.h>
 #include <mem.h>
+#include <stdio.h>
+#include <kernel/fileSystem/fs.h>
 
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096
 
 // Should be equal to the "seek" in MakeFile for kernel
 #define KERNEL_SEEK 100
-#define KERNEL_ELF_DISK_OFFSET (0x200 * KERNEL_SEEK) - 0x200;
+#define KERNEL_ELF_DISK_OFFSET 0xD000;
+
+static uint32_t kernelELFDiskOffset;
 
 void readSegment(uint8_t *, uint32_t, uint32_t);
+void readSector(uint8_t *destination, uint32_t sector);
 
-extern "C" void loadOS() {
+__attribute__ ((section ("prekernel_entry"))) void loadOS() {
   // We will put the elf header in this address
   ELF32_header *elf = (ELF32_header *)0x10000;
+
+  initVideo();
+  setForegroundColor(WHITE);
+  setBackgroundColor(BLUE);
+  // TODO: use inodes to locate kernel binary
+  printf("\n\nKernel ELF header address: %lx\n", elf);
+
+  uint8_t tmp[SECTOR_SIZE];
+  struct superBlock superblock;// = (struct superBlock*)tmp;
+
+  // Read the first sector of the super block, right after the boot block
+  readSector(tmp, 1 * 8);
+  memcpy(&superblock, tmp, sizeof(struct superBlock));
+
+  printf("SuperBlock Info:\n");
+  printf("SuperBlock address: %lx\n", superblock);
+  printf("totalNumberOfInodes: %d\n", superblock.totalNumberOfInodes);
+  printf("firstInodeBlock: %d\n", superblock.firstInodeBlock);
+  printf("inodesBlocks: %d\n", superblock.inodesBlocks);
+  printf("firstDataBlock: %d\n", superblock.firstDataBlock);
+
+  struct inode inodes[4];
+
+  readSector(tmp, superblock.firstInodeBlock * 8);
+  memcpy(&inodes, tmp, sizeof(struct inode) * 4);
+
+  struct inode rootDirectoryInode = inodes[1];
+
+  printf("Root directory inode info: \n");
+  printf("number: %d\n", rootDirectoryInode.number);
+  printf("first direct dataBlock: %d\n", rootDirectoryInode.directDataBlocks[0]);
+  printf("type: %s\n", rootDirectoryInode.type ? "directory" : "file");
+  printf("sizeInBytes: %d\n", rootDirectoryInode.sizeInBytes);
+  printf("sizeInSectors: %d\n", rootDirectoryInode.sizeInSectors);
+
+  struct directoryEntry rootDirectoryEntries[4];
+
+  readSector(tmp, rootDirectoryInode.directDataBlocks[0] * 8);
+  memcpy(&rootDirectoryEntries, tmp, sizeof(rootDirectoryEntries));
+
+  printf("\nRoot directory content: \n");
+  for (int i = 0; i < 3; i++) {
+    printf("Name: %s, inode: %d\n", rootDirectoryEntries[i].name, rootDirectoryEntries[i].inodeNumber);
+  }
+
+  struct directoryEntry *kernelDirectoryEntry = &rootDirectoryEntries[0];
+  while (!strcmp(kernelDirectoryEntry->name, "kernel")) kernelDirectoryEntry++;
+
+
+  printf("\nKernel\n");
+  printf("Name: %s, inode: %d\n", kernelDirectoryEntry->name, kernelDirectoryEntry->inodeNumber);
+
+  // Load the sector containing the kernel inode (struct)
+  int inodesPerSector = SECTOR_SIZE / sizeof(struct inode); // 4 
+  // 4 is the first inode block, 8 is the number of sectors by block
+  int sectorToLoad = kernelDirectoryEntry->inodeNumber / inodesPerSector + (4 * 8);
+
+  printf("Kernel inode sector to Load: %d\n", sectorToLoad);
+
+
+  struct inode kernelInode;
+  readSector(tmp, sectorToLoad);
+  memcpy(&kernelInode, tmp, sizeof(struct inode));
+
+  printf("\nKernel inode\n");
+  printf("number: %d\n", kernelInode.number);
+  printf("first direct dataBlock: %d\n", kernelInode.directDataBlocks[0]);
+  printf("type: %s\n", kernelInode.type ? "directory" : "file");
+  printf("sizeInBytes: %d\n", kernelInode.sizeInBytes);
+  printf("sizeInSectors: %d\n", kernelInode.sizeInSectors);
+
+  kernelELFDiskOffset = kernelInode.directDataBlocks[0] * PAGE_SIZE;
 
   // Load 4096 bytes from hard disk address KERNEL_ELF_DISK_OFFSET into 0x10_000
   readSegment((uint8_t *)elf, PAGE_SIZE, 0);
@@ -40,12 +117,15 @@ extern "C" void loadOS() {
     }
   }
 
+
   // Calculate the end of the kernel
   programHeader--;
   uint32_t kernelEnd = (uintptr_t)(physicalAddress + programHeader->memorySize);
 
+
   initializePhysicalMemoryManager(kernelEnd);
   initializeVirtualMemoryManager();
+
 
   // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
   void (*entry)(void) = (void(*)(void))(elf->entry);
@@ -89,7 +169,7 @@ void readSector(uint8_t *destination, uint32_t sector) {
  */
 void readSegment(uint8_t *destination, uint32_t bytes, uint32_t address) {
   // Take the kenel ELF offset in disk into consideration (stored in sector 4)
-  address += KERNEL_ELF_DISK_OFFSET;
+  address += kernelELFDiskOffset;
 
   // Calculate the final address
   uint8_t *endDestination = destination + bytes;
@@ -97,7 +177,7 @@ void readSegment(uint8_t *destination, uint32_t bytes, uint32_t address) {
   // Calculate the sector to read
   // kernel starts at sector 4 (address 0x600 - 1536 bytes)
   // + 1 because LBAs start at 1
-  int sector = (address / SECTOR_SIZE) + 1; 
+  int sector = address / SECTOR_SIZE; 
 
   // This is needed becauses we read from disk in sectors
   // and if we want data at an address that is not SECTOR_SIZE align 
