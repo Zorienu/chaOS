@@ -5,6 +5,7 @@
 #include <mem.h>
 #include <stdio.h>
 #include <kernel/fileSystem/fs.h>
+#include <kernel/fileSystem/VirtualFileSystem.h>
 
 #define SECTOR_SIZE 512
 #define PAGE_SIZE 4096
@@ -16,7 +17,6 @@
 static uint32_t kernelELFDiskOffset;
 
 void readSegment(uint8_t *, uint32_t, uint32_t);
-void readSector(uint8_t *destination, uint32_t sector);
 
 __attribute__ ((section ("prekernel_entry"))) void loadOS() {
   // We will put the elf header in this address
@@ -32,7 +32,7 @@ __attribute__ ((section ("prekernel_entry"))) void loadOS() {
   struct superBlock superblock;// = (struct superBlock*)tmp;
 
   // Read the first sector of the super block, right after the boot block
-  readSector(tmp, 1 * 8);
+  VirtualFileSystem::readSector(tmp, 1 * 8);
   memcpy(&superblock, tmp, sizeof(struct superBlock));
 
   printf("SuperBlock Info:\n");
@@ -44,7 +44,7 @@ __attribute__ ((section ("prekernel_entry"))) void loadOS() {
 
   struct inode inodes[4];
 
-  readSector(tmp, superblock.firstInodeBlock * 8);
+  VirtualFileSystem::readSector(tmp, superblock.firstInodeBlock * 8);
   memcpy(&inodes, tmp, sizeof(struct inode) * 4);
 
   struct inode rootDirectoryInode = inodes[1];
@@ -58,7 +58,7 @@ __attribute__ ((section ("prekernel_entry"))) void loadOS() {
 
   struct directoryEntry rootDirectoryEntries[4];
 
-  readSector(tmp, rootDirectoryInode.directDataBlocks[0] * 8);
+  VirtualFileSystem::readSector(tmp, rootDirectoryInode.directDataBlocks[0] * 8);
   memcpy(&rootDirectoryEntries, tmp, sizeof(rootDirectoryEntries));
 
   printf("\nRoot directory content: \n");
@@ -82,7 +82,7 @@ __attribute__ ((section ("prekernel_entry"))) void loadOS() {
 
 
   struct inode kernelInode;
-  readSector(tmp, sectorToLoad);
+  VirtualFileSystem::readSector(tmp, sectorToLoad);
   memcpy(&kernelInode, tmp, sizeof(struct inode));
 
   printf("\nKernel inode\n");
@@ -129,39 +129,8 @@ __attribute__ ((section ("prekernel_entry"))) void loadOS() {
 
   // Call the entry point of the kernel (src/kernel/main.c -> OSStart)
   void (*entry)(void) = (void(*)(void))(elf->entry);
+  // while(1);
   entry();
-}
-
-/*
- * Since we haven't enable interrupts, we need to wait until the disk answers
- */
-void waitDisk(void) {
-  // Wait for disk ready.
-  while((IO::inb(DISK_PORT_BASE + 7) & 0xC0) != 0x40); // TODO: explain https://youtu.be/fZY1zr_nW6c?list=PLiUHDN3DAZZX_uTTp0l8QppxK3giZM2bC
-}
-
-/*
- * Read from the specified 'sector' and put in 'destination'
- */
-void readSector(uint8_t *destination, uint32_t sector) {
-  waitDisk();
-  
-  // Issue command
-  IO::outb(DISK_PORT_BASE + 2, 1); // count = 1 sector 
-  IO::outb(DISK_PORT_BASE + 3, sector); // Take the 1st LSB
-  IO::outb(DISK_PORT_BASE + 4, sector >> 8); // Take the 2nd LSB
-  IO::outb(DISK_PORT_BASE + 5, sector >> 16); // Take the 3rd LSB
-  IO::outb(DISK_PORT_BASE + 6, (sector >> 24) | 0xE0); // Take the 4th LSB (the MSB now)
-                                                       // 0xE0 -> 0b1110_0000
-                                                       // bit 4: drive number (0 in our case)
-                                                       // bit 5: always set
-                                                       // bit 6: set for LBA
-                                                       // bit 7: always set
-  IO::outb(DISK_PORT_BASE + 7, DISK_READ_CMD); // cmd 0x20 - read sectors
-
-  // Read data
-  waitDisk();
-  IO::insl(DISK_PORT_BASE, destination, SECTOR_SIZE / 4); // Read 4-bytes 128 times, getting the 512 bytes
 }
 
 /*
@@ -193,5 +162,5 @@ void readSegment(uint8_t *destination, uint32_t bytes, uint32_t address) {
   
   // Read sectors until filling the requested bytes amount
   for (; destination < endDestination; destination += SECTOR_SIZE, sector++)
-    readSector(destination, sector);
+    VirtualFileSystem::readSector(destination, sector);
 }

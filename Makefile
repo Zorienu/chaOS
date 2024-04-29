@@ -51,6 +51,7 @@ KERNEL_OBJECTS = \
 	build/objects/kernel/devices/KeyboardDevice.o \
 	build/objects/kernel/fileSystem/File.o \
 	build/objects/kernel/fileSystem/FileDescription.o \
+	build/objects/kernel/fileSystem/VirtualFileSystem.o \
 	build/objects/kernel/heap/kmalloc.o \
 	build/objects/kernel/interrupts/IRQHandler.o \
 	build/objects/kernel/interrupts/idt.o \
@@ -67,6 +68,7 @@ KERNEL_OBJECTS = \
 	build/objects/kernel/entry.o \
 
 PREKERNEL_OBJECTS = \
+	build/objects/kernel/fileSystem/VirtualFileSystem.o \
   build/objects/prekernel/prekernel.o \
   build/objects/prekernel/crti.o \
   build/objects/prekernel/crtn.o \

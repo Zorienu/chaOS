@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+#define SECTOR_SIZE 512
 #define BLOCK_SIZE 4096
 
 #define ROOT_DIRECTORY_INODE 1
