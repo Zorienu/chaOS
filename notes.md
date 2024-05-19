@@ -53,6 +53,17 @@ Small r/w pieces of memory
 - [serenetyOS](https://github.dev/SerenityOS/serenity/tree/HEAD@%7B2019-10-30%7D)
 - [Linux device driver lecture 15 : Character driver](https://www.youtube.com/watch?v=R5qSTZA0PuY)
 
+### TODO memory manager
+Tener en cuenta el area de "Supervisor physical pages", las puedo usar para alocar cosas del kernel, como el lugar donde llegará lo del disco
+    // Basic memory map:
+    // 0      -> 512 kB         Kernel code. Root page directory & PDE 0.
+    // (last page before 1MB)   Used by quickmap_page().
+    // 1 MB   -> 3 MB           kmalloc_eternal() space.
+    // 3 MB   -> 4 MB           kmalloc() space.
+    // 4 MB   -> 5 MB           Supervisor physical pages (available for allocation!)
+    // 5 MB   -> 0xc0000000     Userspace physical pages (available for allocation!)
+    // 0xc0000000-0xffffffff    Kernel-only virtual address space
+
 ## TODO
 [] Migrar memory managers a clases
 [x] Implementar keyboardDevice based on serenetyOS
@@ -65,6 +76,7 @@ Small r/w pieces of memory
 [x] Replace all calls to printf with kprintf
 [x] Move interrupts and syscall folder from "include" to "kernel"
 [] Implement file system - in progress
+[] See how osakaOS uses <> to include files in C++
 [] Figure out how to move everything to that file system
 [] shell
 [] Process 
@@ -94,3 +106,5 @@ Note that the last 4 points are CRUD
 - Caching frequently accessed files or parts of files to speed up access
 - Allowing files to be marked as 'read-only' to prevent unintentional corruption of critical data
 - Providing a mechanism for preventing unauthorized access to a user's files
+
+

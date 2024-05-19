@@ -1,8 +1,22 @@
 #include "VirtualFileSystem.h"
+#include <kernel/utils/kprintf.h>
 #include <io.h>
+#include <string.h>
+
+static VirtualFileSystem *_instance;
+
+VirtualFileSystem::VirtualFileSystem() {
+  _instance = this;
+  this->test = 42;
+}
+ 
+VirtualFileSystem& VirtualFileSystem::instance() {
+  return *_instance;
+}
 
 void VirtualFileSystem::loadSuperBlock() {
-
+  VirtualFileSystem::readSector(_instance->tempSector, 1 * 8);
+  memcpy(&_superBlock, tempSector, sizeof(struct superBlock));
 }
 
 /*

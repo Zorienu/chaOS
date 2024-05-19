@@ -29,7 +29,7 @@ __attribute__ ((section ("prekernel_entry"))) void loadOS() {
   printf("\n\nKernel ELF header address: %lx\n", elf);
 
   uint8_t tmp[SECTOR_SIZE];
-  struct superBlock superblock;// = (struct superBlock*)tmp;
+  struct superBlock superblock;
 
   // Read the first sector of the super block, right after the boot block
   VirtualFileSystem::readSector(tmp, 1 * 8);
